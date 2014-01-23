@@ -1,6 +1,6 @@
 # integral
 
-`integral` is a C++ library for generating lua bindings. It is **not** a binding-code generator. It utilizes C++ template meta programming to expose C/C++ functions and classes to lua, directly from C++ code.
+`integral` is a C++ library for generating lua bindings. It is **not** a binding-code generator. It utilizes template meta programming to expose C/C++ functions and classes to lua, directly from C++ code.
 
 
 # Source
@@ -33,7 +33,8 @@ and cloned with:
 
 ## Automatic type management
 
-* bound C/C++ types are not needed to be given a name.
+* bound C/C++ types are not needed to be given a name;
+* inheritance support.
 
 ## Memory safety
 
@@ -72,7 +73,6 @@ int main(int argc, char * argv[]) {
     lua_State *luaState = luaL_newstate();
     integral::core::pushClassMetatable<Object>(luaState);
     integral::core::setConstructor<Object, const char *>(luaState, "new");
-    // lua function name need not be the same as the C++ function name
     integral::core::setFunction(luaState, "print", &Object::printMessage);
     // setting functions and constructors does not change the stack (like Lua API)
     lua_setglobal(luaState, "Object");
