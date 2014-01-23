@@ -8,8 +8,8 @@ INTEGRAL_SHARED_LIB_NAME:=libintegral.so
 CPPFLAGS:=-std=c++11 -O3 -I/usr/local/include -I/usr/include/lua5.2
 LDFLAGS:=-L/usr/local/lib -L/usr/lib/x86_64-linux-gnu/ -L/usr/lib
 
-#LIB_LUA_FLAG:=-llua
-LIB_LUA_FLAG:=-llua5.2
+LIB_LUA_FLAG:=-llua
+#LIB_LUA_FLAG:=-llua5.2
 
 SHARED_LIB_FLAGS:=-shared
 
