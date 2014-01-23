@@ -66,6 +66,6 @@ print("Wrong function parameter: ", message)
 local _, message = pcall(function() showcase.Derived.getString(baseObject) end)
 print("Incompatible userdata (class) function parameter: ", message)
 local _, message = pcall(function() showcase.Derived.getNumberAndString(nil) end)
-print("Safe lua function argument with integral::get<T>: ", message)
+print("Safe lua function argument with integral::core::get<T>: ", message)
 
 print("\nEnd of showcase")
