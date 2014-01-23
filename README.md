@@ -31,7 +31,7 @@ and cloned with:
 * it does not polute the lua state environment, allowing integration with other bound libraries (using `integral` or not);
 * the library is thread safe (as per lua state).
 
-## Automatic type management:
+## Automatic type management
 
 * bound C/C++ types are not needed to be given a name.
 
@@ -52,27 +52,33 @@ and cloned with:
 
 ```cpp
 #include <iostream>
+#include <string>
 #include <lua.hpp>
 #include "integral.h"
 
 class Object {
 public:
-    void printMessage() const {
-        std::cout << "Object " << this << " message!" << std::endl;
+    Object(const char * name) : name_(name) {}
+
+    void printMessage(const std::string &message) const {
+        std::cout << "Message of Object '" << name_ << "': " << message << std::endl;
     }
+
+private:
+    const std::string name_;
 };
 
 int main(int argc, char * argv[]) {
     lua_State *luaState = luaL_newstate();
     integral::core::pushClassMetatable<Object>(luaState);
-    integral::core::setConstructor<Object>(luaState, "new");
+    integral::core::setConstructor<Object, const char *>(luaState, "new");
     // lua function name need not be the same as the C++ function name
     integral::core::setFunction(luaState, "print", &Object::printMessage);
     // setting functions and constructors does not change the stack (like Lua API)
     lua_setglobal(luaState, "Object");
-    luaL_dostring(luaState, "local object = Object.new()\n"
-                            "object:print()");
-    // prints: Object "object address" message!
+    luaL_dostring(luaState, "local object = Object.new(\"MEPHI\")\n"
+                            "object:print(\"destroy the Green Wall!\")");
+    // prints: Message of Object 'MEPHI': destroy the Green Wall!
     lua_close(luaState);
     return 0;
 }
