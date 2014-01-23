@@ -60,7 +60,6 @@ extern "C" {
 
             lua_pushstring(luaState, "Base");
             // stack: table (module table); string (Base class metatable field name on module table)
-            // the field name could be any other name. There is no assumption on class name in integral
 
             integral::core::pushClassMetatable<Base>(luaState);
             // stack: table (module table); string (Base class metatable field name on module table) | metatable (Base class metatable)
@@ -81,7 +80,6 @@ extern "C" {
 
             lua_pushstring(luaState, "Derived");
             // stack: table (module table); string (Derived class metatable field name on module table)
-            // The field name could be any other name. There is no assumption on class name in integral
 
             integral::core::pushClassMetatable<Derived>(luaState);
             // stack: table (module table); string (Derived class metatable field name on module table) | metatable (Derived class metatable)
@@ -99,7 +97,7 @@ extern "C" {
                 return std::to_string(derived.number_) + " | " + derived.string_;
             }));
 
-            // Lua functions can be registered. Similarly to luaL_setfuncs (lua_CFunction). But, in integral, they can also be functors and can handle exceptions graciously
+            // Lua functions can be registered. Similarly to luaL_setfuncs (lua_CFunction). But, in integral, they can also be functors, can handle exceptions and invalid arguments (with integral::core::get) graciously
             integral::core::setLuaFunction(luaState, "getNumberAndString", [](lua_State * luaState) -> int {
                 Derived &derived = integral::core::get<Derived>(luaState, 1);
                 integral::core::push<double>(luaState, derived.number_);
