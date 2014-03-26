@@ -2,7 +2,7 @@
 //  TemplateSequence.h
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -25,8 +25,10 @@
 #define integral_TemplateSequence_h
 
 namespace integral {
-    template<unsigned ...>
-    class TemplateSequence {};
+    namespace detail {
+        template<unsigned ...>
+        class TemplateSequence {};
+    }
 }
 
 #endif

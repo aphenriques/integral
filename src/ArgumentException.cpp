@@ -2,7 +2,7 @@
 //  ArgumentException.cpp
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -27,70 +27,72 @@
 #include <lua.hpp>
 
 namespace integral {
-    ArgumentException ArgumentException::createTypeErrorException(lua_State *luaState, unsigned index, const std::string &userDataName) {
-        return ArgumentException(luaState, index, std::string(userDataName) + " expected, got " + std::string(luaL_typename(luaState, index)));
-    }
-    
-    ArgumentException::ArgumentException(lua_State *luaState, unsigned index, const std::string &extraMessage) {
-        lua_Debug debugInfo;
-        if (lua_getstack(luaState, 0, &debugInfo) == 0) {
-            std::stringstream messageStream;
-            messageStream << "bad argument #" << index << " (" << extraMessage << ")";
-            message_ = messageStream.str();
-            return;
+    namespace detail {
+        ArgumentException ArgumentException::createTypeErrorException(lua_State *luaState, unsigned index, const std::string &userDataName) {
+            return ArgumentException(luaState, index, std::string(userDataName) + " expected, got " + std::string(luaL_typename(luaState, index)));
         }
-        lua_getinfo(luaState, "n", &debugInfo);
-        if (std::strcmp(debugInfo.namewhat, "method") == 0) {
-            --index;
-            if (index == 0) {
+        
+        ArgumentException::ArgumentException(lua_State *luaState, unsigned index, const std::string &extraMessage) {
+            lua_Debug debugInfo;
+            if (lua_getstack(luaState, 0, &debugInfo) == 0) {
                 std::stringstream messageStream;
-                messageStream << "calling '" << debugInfo.name << "' on bad self (" << extraMessage << ")";
+                messageStream << "bad argument #" << index << " (" << extraMessage << ")";
                 message_ = messageStream.str();
                 return;
             }
-        }
-        if (debugInfo.name == NULL) { 
-            debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
-        }
-        std::stringstream messageStream;
-        messageStream << "bad argument #" << index << " to '" <<  debugInfo.name << "' (" << extraMessage << ")";
-        message_ = messageStream.str();
-    }
-    
-    bool ArgumentException::findField(lua_State *luaState, int index, int level) {
-        if (level == 0 || lua_istable(luaState, -1) == 0) {
-            return false;
-        }
-        lua_pushnil(luaState);
-        while (lua_next(luaState, -2) != 0) {
-            if (lua_type(luaState, -2) == LUA_TSTRING) {
-                if (lua_rawequal(luaState, index, -1) != 0) {
-                    lua_pop(luaState, 1);
-                    return true;
-                } else if (findField(luaState, index, level - 1) == true) {
-                    lua_remove(luaState, -2);
-                    lua_pushliteral(luaState, ".");
-                    lua_insert(luaState, -2);
-                    lua_concat(luaState, 3);
-                    return true;
+            lua_getinfo(luaState, "n", &debugInfo);
+            if (std::strcmp(debugInfo.namewhat, "method") == 0) {
+                --index;
+                if (index == 0) {
+                    std::stringstream messageStream;
+                    messageStream << "calling '" << debugInfo.name << "' on bad self (" << extraMessage << ")";
+                    message_ = messageStream.str();
+                    return;
                 }
             }
-            lua_pop(luaState, 1);
+            if (debugInfo.name == NULL) { 
+                debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
+            }
+            std::stringstream messageStream;
+            messageStream << "bad argument #" << index << " to '" <<  debugInfo.name << "' (" << extraMessage << ")";
+            message_ = messageStream.str();
         }
-        return false;
-    }
-    
-    bool ArgumentException::pushGlobalFunctionName(lua_State *luaState, lua_Debug *debugInfo) {
-        const int top = lua_gettop(luaState);
-        lua_getinfo(luaState, "f", debugInfo);
-        lua_pushglobaltable(luaState);
-        if (findField(luaState, top + 1, 2) == true) {
-            lua_copy(luaState, -1, top + 1);
-            lua_pop(luaState, 2);
-            return true;
-        } else {
-            lua_settop(luaState, top);
+        
+        bool ArgumentException::findField(lua_State *luaState, int index, int level) {
+            if (level == 0 || lua_istable(luaState, -1) == 0) {
+                return false;
+            }
+            lua_pushnil(luaState);
+            while (lua_next(luaState, -2) != 0) {
+                if (lua_type(luaState, -2) == LUA_TSTRING) {
+                    if (lua_rawequal(luaState, index, -1) != 0) {
+                        lua_pop(luaState, 1);
+                        return true;
+                    } else if (findField(luaState, index, level - 1) == true) {
+                        lua_remove(luaState, -2);
+                        lua_pushliteral(luaState, ".");
+                        lua_insert(luaState, -2);
+                        lua_concat(luaState, 3);
+                        return true;
+                    }
+                }
+                lua_pop(luaState, 1);
+            }
             return false;
+        }
+        
+        bool ArgumentException::pushGlobalFunctionName(lua_State *luaState, lua_Debug *debugInfo) {
+            const int top = lua_gettop(luaState);
+            lua_getinfo(luaState, "f", debugInfo);
+            lua_pushglobaltable(luaState);
+            if (findField(luaState, top + 1, 2) == true) {
+                lua_copy(luaState, -1, top + 1);
+                lua_pop(luaState, 2);
+                return true;
+            } else {
+                lua_settop(luaState, top);
+                return false;
+            }
         }
     }
 }

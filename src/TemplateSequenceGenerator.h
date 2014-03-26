@@ -2,7 +2,7 @@
 //  TemplateSequenceGenerator.h
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -27,15 +27,16 @@
 #include "TemplateSequence.h"
 
 namespace integral {
-    template<unsigned N, unsigned ...S>
-    class TemplateSequenceGenerator : public TemplateSequenceGenerator<N - 1, N - 1, S...> {};
-    
-    template<unsigned ...S>
-    class TemplateSequenceGenerator<0, S...> {
-    public:
-        using TemplateSequenceType = TemplateSequence<S...>;
-    };
+    namespace detail {
+        template<unsigned N, unsigned ...S>
+        class TemplateSequenceGenerator : public TemplateSequenceGenerator<N - 1, N - 1, S...> {};
+        
+        template<unsigned ...S>
+        class TemplateSequenceGenerator<0, S...> {
+        public:
+            using TemplateSequenceType = TemplateSequence<S...>;
+        };
+    }
 }
-
 
 #endif

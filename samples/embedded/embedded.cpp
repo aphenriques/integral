@@ -2,7 +2,7 @@
 //  embedded.cpp
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -38,10 +38,10 @@ int main(int argc, char * argv[]) {
     try {
         luaState = luaL_newstate();
 
-        integral::core::pushClassMetatable<Object>(luaState);
-        integral::core::setConstructor<Object>(luaState, "new");
+        integral::pushClassMetatable<Object>(luaState);
+        integral::setConstructor<Object>(luaState, "new");
         // lua function name need not be the same as the C++ function name
-        integral::core::setFunction(luaState, "print", &Object::printMessage);
+        integral::setFunction(luaState, "print", &Object::printMessage);
         lua_setglobal(luaState, "Object");
 
         luaL_dostring(luaState, "local object = Object.new()\n"

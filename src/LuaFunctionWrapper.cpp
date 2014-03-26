@@ -2,7 +2,7 @@
 //  LuaFunctionWrapper.cpp
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -29,27 +29,29 @@
 #include "basic.h"
 
 namespace integral {
-    const char * const LuaFunctionWrapper::kMetatableName_ = "integral_LuaFunctionWrapperMetatableName";
-    
-    void LuaFunctionWrapper::setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction, int nUpValues) {
-        basic::pushUserData<LuaFunctionWrapper>(luaState, luaFunction);
-        basic::pushClassMetatable<LuaFunctionWrapper>(luaState, kMetatableName_);
-        lua_setmetatable(luaState, -2);
-        basic::setLuaFunction(luaState, name, [](lua_State *luaState) {
-            try {
-                LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(luaL_testudata(luaState,lua_upvalueindex(1), kMetatableName_));
-                if (luaFunctionWrapper != nullptr) {
-                    return luaFunctionWrapper->call(luaState);
-                } else {
-                    throw std::runtime_error("corrupted LuaFunctionWrapper");
+    namespace detail {
+        const char * const LuaFunctionWrapper::kMetatableName_ = "integral_LuaFunctionWrapperMetatableName";
+        
+        void LuaFunctionWrapper::setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction, int nUpValues) {
+            basic::pushUserData<LuaFunctionWrapper>(luaState, luaFunction);
+            basic::pushClassMetatable<LuaFunctionWrapper>(luaState, kMetatableName_);
+            lua_setmetatable(luaState, -2);
+            basic::setLuaFunction(luaState, name, [](lua_State *luaState) {
+                try {
+                    LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(luaL_testudata(luaState,lua_upvalueindex(1), kMetatableName_));
+                    if (luaFunctionWrapper != nullptr) {
+                        return luaFunctionWrapper->call(luaState);
+                    } else {
+                        throw std::runtime_error("corrupted LuaFunctionWrapper");
+                    }
+                } catch (const std::exception &exception) {
+                    lua_pushstring(luaState, (std::string("[integral] ") + exception.what()).c_str());
+                } catch (...) {
+                    lua_pushstring(luaState, basic::gkUnknownExceptionMessage);
                 }
-            } catch (const std::exception &exception) {
-                lua_pushstring(luaState, (std::string("[integral] ") + exception.what()).c_str());
-            } catch (...) {
-                lua_pushstring(luaState, basic::gkUnknownExceptionMessage);
-            }
-            // error return outside catch scope so that the exception destructor can be called
-            return lua_error(luaState);
-        }, 1 + nUpValues);
+                // error return outside catch scope so that the exception destructor can be called
+                return lua_error(luaState);
+            }, 1 + nUpValues);
+        }
     }
 }

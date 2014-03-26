@@ -2,7 +2,7 @@
 //  FunctionCaller.h
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -30,34 +30,36 @@
 #include "exchanger.h"
 
 namespace integral {
-    template<typename R, typename ...A>
-    class FunctionCaller {
-    public:        
-        template<unsigned ...S>
-        static unsigned call(lua_State *luaState, const std::function<R(A...)> &function, TemplateSequence<S...>);
-    };
-    
-    template<typename ...A>
-    class FunctionCaller<void, A...> {
-    public:        
-        template<unsigned ...S>
-        static unsigned call(lua_State *luaState, const std::function<void(A...)> &function, TemplateSequence<S...>);
-    };
-    
-    //--
+    namespace detail {
+        template<typename R, typename ...A>
+        class FunctionCaller {
+        public:        
+            template<unsigned ...S>
+            static unsigned call(lua_State *luaState, const std::function<R(A...)> &function, TemplateSequence<S...>);
+        };
+        
+        template<typename ...A>
+        class FunctionCaller<void, A...> {
+        public:        
+            template<unsigned ...S>
+            static unsigned call(lua_State *luaState, const std::function<void(A...)> &function, TemplateSequence<S...>);
+        };
+        
+        //--
 
-    template<typename R, typename ...A>
-    template<unsigned ...S>
-    unsigned FunctionCaller<R, A...>::call(lua_State *luaState, const std::function<R(A...)> &function, TemplateSequence<S...>) {
-        exchanger::push<R>(luaState, function(exchanger::get<A>(luaState, S + 1)...));
-        return 1;
-    }
-    
-    template<typename ...A>
-    template<unsigned ...S>
-    unsigned FunctionCaller<void, A...>::call(lua_State *luaState, const std::function<void(A...)> &function, TemplateSequence<S...>) {
-        function(exchanger::get<A>(luaState, S + 1)...);
-        return 0;
+        template<typename R, typename ...A>
+        template<unsigned ...S>
+        unsigned FunctionCaller<R, A...>::call(lua_State *luaState, const std::function<R(A...)> &function, TemplateSequence<S...>) {
+            exchanger::push<R>(luaState, function(exchanger::get<A>(luaState, S + 1)...));
+            return 1;
+        }
+        
+        template<typename ...A>
+        template<unsigned ...S>
+        unsigned FunctionCaller<void, A...>::call(lua_State *luaState, const std::function<void(A...)> &function, TemplateSequence<S...>) {
+            function(exchanger::get<A>(luaState, S + 1)...);
+            return 0;
+        }
     }
 }
 

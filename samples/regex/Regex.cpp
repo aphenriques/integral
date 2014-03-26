@@ -2,7 +2,7 @@
 //  Regex.cpp
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -35,19 +35,19 @@ extern "C" {
             using Regex = std::regex;
 
             // Match class
-            integral::core::pushClassMetatable<Match>(luaState);
+            integral::pushClassMetatable<Match>(luaState);
             // Methods
-            integral::core::setFunction(luaState, "__tostring", std::function<std::string(const Match &)>(std::bind(&Match::str, std::placeholders::_1, 0)));
-            integral::core::setFunction(luaState, "getSize", &Match::size);
-            integral::core::setFunction(luaState, "__call", &Match::getSubMatch);
+            integral::setFunction(luaState, "__tostring", std::function<std::string(const Match &)>(std::bind(&Match::str, std::placeholders::_1, 0)));
+            integral::setFunction(luaState, "getSize", &Match::size);
+            integral::setFunction(luaState, "__call", &Match::getSubMatch);
             // Everything registered
             lua_pop(luaState, 1);
             // Match class could be pushed back again to register other functions with all its functions already registered (nothing is lost)
 
             // SubMatch class
-            integral::core::pushClassMetatable<SubMatch>(luaState);
+            integral::pushClassMetatable<SubMatch>(luaState);
             // Methods
-            integral::core::setFunction(luaState, "__tostring", &SubMatch::str);
+            integral::setFunction(luaState, "__tostring", &SubMatch::str);
             // Everything registered
             lua_pop(luaState, 1);
             // SubMatch class could be pushed back again to register other functions with all its functions already registered (nothing is lost)
@@ -55,24 +55,24 @@ extern "C" {
             // Attention! There is NO requirement for the order in which the classes and its functons are registered
 
             // Regex class
-            integral::core::pushClassMetatable<Regex>(luaState);
+            integral::pushClassMetatable<Regex>(luaState);
             // Constructor
-            integral::core::setConstructor<Regex, std::string>(luaState, "new");
+            integral::setConstructor<Regex, std::string>(luaState, "new");
 
             const std::pair<const char *, Match::Mode> namesAndModes[] = {{"match" , Match::Mode::EXACT  },
                                                                           {"search", Match::Mode::PARTIAL}};
             for (auto &nameAndMode : namesAndModes) {
                 Match::Mode mode = nameAndMode.second;
                 // Lua functions can be registered. Just like luaL_setfuncs (lua_CFunction). But they can also be functors and can handle exceptions graciously
-                integral::core::setLuaFunction(luaState, nameAndMode.first, [mode](lua_State *luaState) -> int {
+                integral::setLuaFunction(luaState, nameAndMode.first, [mode](lua_State *luaState) -> int {
                     // Get fisrt lua function argument
-                    Regex pattern = integral::core::get<Regex>(luaState, 1);
+                    Regex pattern = integral::get<Regex>(luaState, 1);
                     // Get second lua function argument
-                    const char * string = integral::core::get<const char *>(luaState, 2);
+                    const char * string = integral::get<const char *>(luaState, 2);
                     Match match(string, pattern, mode);
                     if (match.empty() == false) {
                         // Push return value
-                        integral::core::push<Match>(luaState, match);
+                        integral::push<Match>(luaState, match);
                     } else {
                         // Push return value
                         lua_pushnil(luaState);

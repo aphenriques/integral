@@ -2,6 +2,7 @@
 
 `integral` is a C++ library for generating lua bindings. It is **not** a binding-code generator. It utilizes template meta programming to expose C/C++ functions and classes to lua, directly from C++ code.
 
+![Lua logo](http://www.lua.org/images/lua-logo.gif)
 
 # Source
 
@@ -28,7 +29,8 @@ and cloned with:
 
 ## Small intrusion on the lua state
 
-* it does not polute the lua state environment, allowing integration with other bound libraries (using `integral` or not);
+* `integral` has a few reserved names (see **integral reserved names in Lua** ahead);
+* the library allows integration with other bound libraries (wether using `integral` or not)
 * the library is thread safe (as per lua state).
 
 ## Automatic type management
@@ -46,7 +48,7 @@ and cloned with:
 * `integral` will not crash the lua state;
 * thrown exceptions are converted to lua errors;
 * wrong parameter types turn into lua errors;
-* functions returning pointers (except char * - string) and references are regarded as unsafe, therefore not supported. Trying to register these functions will cause compilation error. Storing a reference to an object or to a value that has already been garbage collected would lead to undefined behaviour.
+* functions returning pointers (except char * - string) and references are regarded as unsafe, therefore not supported. Trying to register these functions will cause compilation error.
 
 
 # Example
@@ -71,9 +73,9 @@ private:
 
 int main(int argc, char * argv[]) {
     lua_State *luaState = luaL_newstate();
-    integral::core::pushClassMetatable<Object>(luaState);
-    integral::core::setConstructor<Object, const char *>(luaState, "new");
-    integral::core::setFunction(luaState, "print", &Object::printMessage);
+    integral::pushClassMetatable<Object>(luaState);
+    integral::setConstructor<Object, const char *>(luaState, "new");
+    integral::setFunction(luaState, "print", &Object::printMessage);
     // setting functions and constructors does not change the stack (like Lua API)
     lua_setglobal(luaState, "Object");
     luaL_dostring(luaState, "local object = Object.new(\"MEPHI\")\n"
@@ -126,7 +128,7 @@ Include integral headers in your project search path and link to `integral` libr
     compiler flag: `-I/usr/local/integral`
     linker flags: `-L/usr/local/lib -lintegral`
 
-The library is comprised of the functions in `core.h` (`namespace integral::core`), which has a brief description for each of them.
+The library interface is comprised of the functions in `integral.h` (`namespace integral`), which has a brief description for each of them.
 
 Check the `samples` directory for examples.
 
@@ -152,14 +154,19 @@ For `embedded`, run the compiled executable `embedded`
 
 * `integral_LuaFunctionWrapperMetatableName`;
 * `integral_TypeIndexMetatableName`;
-* `integral_TypeManagerRegistryKey`.
+* `integral_TypeManagerRegistryKey`;
+* `integral_InheritanceIndexMetatable`.
 
 The library also makes use of the following field names for its generated class metatables:
 
+* `__index`;
 * `__gc`;
 * `integral_TypeFunctionsKey`;
-* `integral_TypeIndexKey`.
-
+* `integral_TypeIndexKey`;
+* `integral_InheritanceKey`;
+* `integral_UserDataWrapperBaseTableKey`;
+* `integral_UnderlyingTypeFunctionKey`;
+* `integral_InheritanceSearchTagKey`.
 
 # Author
 
@@ -168,10 +175,10 @@ The library also makes use of the following field names for its generated class 
 
 # License
 
-Copyright (C) 2013  André Pereira Henriques.
+Copyright (C) 2013, 2014  André Pereira Henriques.
 
 integral is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
 integral is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-See file `COPYING` included with this distribution for license information or check <http://www.gnu.org/licenses/>.
+See file `COPYING` included with this distribution or check <http://www.gnu.org/licenses/> for license information.

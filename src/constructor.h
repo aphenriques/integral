@@ -2,7 +2,7 @@
 //  constructor.h
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -30,24 +30,26 @@
 #include "exchanger.h"
 
 namespace integral {
-    namespace constructor {
-        template<typename T, typename ...A>
-        inline int callConstructor(lua_State *luaState);
-        
-        template<typename T, typename ...A, unsigned ...S>
-        void callConstructor(lua_State *luaState, TemplateSequence<S...>);
-        
-        //--
-        
-        template<typename T, typename ...A>
-        inline int callConstructor(lua_State *luaState) {
-            callConstructor<T, A...>(luaState, typename TemplateSequenceGenerator<sizeof...(A)>::TemplateSequenceType());
-            return 1;
-        }
-        
-        template<typename T, typename ...A, unsigned ...S>
-        void callConstructor(lua_State *luaState, TemplateSequence<S...>) {
-            exchanger::push<T>(luaState, exchanger::get<A>(luaState, S + 1)...);
+    namespace detail {
+        namespace constructor {
+            template<typename T, typename ...A>
+            inline int callConstructor(lua_State *luaState);
+            
+            template<typename T, typename ...A, unsigned ...S>
+            void callConstructor(lua_State *luaState, TemplateSequence<S...>);
+            
+            //--
+            
+            template<typename T, typename ...A>
+            inline int callConstructor(lua_State *luaState) {
+                callConstructor<T, A...>(luaState, typename TemplateSequenceGenerator<sizeof...(A)>::TemplateSequenceType());
+                return 1;
+            }
+            
+            template<typename T, typename ...A, unsigned ...S>
+            void callConstructor(lua_State *luaState, TemplateSequence<S...>) {
+                exchanger::push<T>(luaState, exchanger::get<A>(luaState, S + 1)...);
+            }
         }
     }
 }

@@ -2,7 +2,7 @@
 //  UserDataWrapper.h
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -28,18 +28,25 @@
 #include "UserDataWrapperBase.h"
 
 namespace integral {
-    template<typename T>
-    class UserDataWrapper : public UserDataWrapperBase, public T {
-    public:
-        template<typename ...A>
-        inline UserDataWrapper(A &&...arguments);
-    };
+    namespace detail {
+        template<typename T>
+        class UserDataWrapper : public UserDataWrapperBase, public T {
+        public:
+            template<typename ...A>
+            inline UserDataWrapper(A &&...arguments);
+            
+            inline virtual ~UserDataWrapper() override;
+        };
 
-    //--
-    
-    template<typename T>
-    template<typename ...A>
-    inline UserDataWrapper<T>::UserDataWrapper(A &&...arguments) : T(std::forward<A>(arguments)...) {}
+        //--
+        
+        template<typename T>
+        template<typename ...A>
+        inline UserDataWrapper<T>::UserDataWrapper(A &&...arguments) : T(std::forward<A>(arguments)...) {}
+        
+        template<typename T>
+        inline UserDataWrapper<T>::~UserDataWrapper() {}
+    }
 }
 
 #endif

@@ -2,7 +2,7 @@
 //  basic.cpp
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -24,12 +24,14 @@
 #include "basic.h"
 
 namespace integral {
-    namespace basic {
-        const char * const gkUnknownExceptionMessage = "[integral] unknown exception thrown";
-        
-        void setLuaFunction(lua_State *luaState, const char *name, lua_CFunction function, int nUpValues) {
-            const luaL_Reg functionRegistry[] = {{name, function}, {NULL, NULL}};
-            luaL_setfuncs(luaState, functionRegistry, nUpValues);
+    namespace detail {
+        namespace basic {
+            const char * const gkUnknownExceptionMessage = "[integral] unknown exception thrown";
+            
+            void setLuaFunction(lua_State *luaState, const char *name, lua_CFunction function, int nUpValues) {
+                const luaL_Reg functionRegistry[] = {{name, function}, {NULL, NULL}};
+                luaL_setfuncs(luaState, functionRegistry, nUpValues);
+            }
         }
     }
 }

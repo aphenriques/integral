@@ -2,7 +2,7 @@
 //  LuaFunctionWrapper.h
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -30,30 +30,32 @@
 #include "basic.h"
 
 namespace integral {
-    // This class exists to make it possible to get exceptions thrown by luaFunction_ on FunctionWrapperBase::callFunctionWrapper. For example, this is important to get exceptions thrown by exchanger::callConstructor when there are wrong parameters (exchanger::Exchange throws). 
-    class LuaFunctionWrapper {
-    public:
-        static void setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction, int nUpValues = 0);
-        
-        inline LuaFunctionWrapper(const std::function<int(lua_State *)> &luaFunction);
-        inline LuaFunctionWrapper(lua_CFunction luaFunction);
-        
-        inline int call(lua_State *luaState) const;
-        
-    private:
-        static const char * const kMetatableName_;
+    namespace detail {
+        // This class exists to make it possible to get exceptions thrown by luaFunction_ on FunctionWrapperBase::callFunctionWrapper. For example, this is important to get exceptions thrown by exchanger::callConstructor when there are wrong parameters (exchanger::Exchange throws). 
+        class LuaFunctionWrapper {
+        public:
+            static void setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction, int nUpValues = 0);
+            
+            inline LuaFunctionWrapper(const std::function<int(lua_State *)> &luaFunction);
+            inline LuaFunctionWrapper(lua_CFunction luaFunction);
+            
+            inline int call(lua_State *luaState) const;
+            
+        private:
+            static const char * const kMetatableName_;
 
-        std::function<int(lua_State *)> luaFunction_;
-    };
-    
-    //--
-    
-    inline LuaFunctionWrapper::LuaFunctionWrapper(const std::function<int(lua_State *)> &luaFunction) : luaFunction_(luaFunction) {}
+            std::function<int(lua_State *)> luaFunction_;
+        };
+        
+        //--
+        
+        inline LuaFunctionWrapper::LuaFunctionWrapper(const std::function<int(lua_State *)> &luaFunction) : luaFunction_(luaFunction) {}
 
-    inline LuaFunctionWrapper::LuaFunctionWrapper(lua_CFunction luaFunction) : LuaFunctionWrapper(std::function<int(lua_State *)>(luaFunction)) {}
+        inline LuaFunctionWrapper::LuaFunctionWrapper(lua_CFunction luaFunction) : LuaFunctionWrapper(std::function<int(lua_State *)>(luaFunction)) {}
 
-    inline int LuaFunctionWrapper::call(lua_State *luaState) const {
-        return luaFunction_(luaState);
+        inline int LuaFunctionWrapper::call(lua_State *luaState) const {
+            return luaFunction_(luaState);
+        }
     }
 }
 

@@ -2,7 +2,7 @@
 //  basic.h
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -29,36 +29,61 @@
 #include <lua.hpp>
 
 namespace integral {
-    namespace basic {
-        extern const char * const gkUnknownExceptionMessage;
-        
-        void setLuaFunction(lua_State *luaState, const char *name, lua_CFunction function, int nUpValues);
-        
-        inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues);
-        
-        template<typename T, typename ...A>
-        inline void pushUserData(lua_State *luaState, A &&...arguments);
+    namespace detail {
+        namespace basic {
+            extern const char * const gkUnknownExceptionMessage;
+            
+            void setLuaFunction(lua_State *luaState, const char *name, lua_CFunction function, int nUpValues);
+            
+            inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues);
+            
+            template<typename T, typename ...A>
+            inline void pushUserData(lua_State *luaState, A &&...arguments);
 
-        template<typename T>
-        bool pushClassMetatable(lua_State *luaState, const char *name);
+            template<typename T>
+            bool pushClassMetatable(lua_State *luaState, const char *name);
 
-        template<typename T>
-        inline bool pushClassMetatable(lua_State *luaState, const std::string &name);
+            template<typename T>
+            inline bool pushClassMetatable(lua_State *luaState, const std::string &name);
+            
+            template<typename T>
+            void pushClassMetatable(lua_State *luaState);
 
-        //--
-        
-        inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues) {
-            setLuaFunction(luaState, name.c_str(), function, nUpValues);
-        }
-        
-        template<typename T, typename ...A>
-        inline void pushUserData(lua_State *luaState, A &&...arguments) {
-            new(lua_newuserdata(luaState, sizeof(T))) T(std::forward<A>(arguments)...);
-        }
-        
-        template<typename T>
-        bool pushClassMetatable(lua_State *luaState, const char *name) {
-            if (luaL_newmetatable(luaState, name) != 0) {
+            //--
+            
+            inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues) {
+                setLuaFunction(luaState, name.c_str(), function, nUpValues);
+            }
+            
+            template<typename T, typename ...A>
+            inline void pushUserData(lua_State *luaState, A &&...arguments) {
+                new(lua_newuserdata(luaState, sizeof(T))) T(std::forward<A>(arguments)...);
+            }
+            
+            template<typename T>
+            bool pushClassMetatable(lua_State *luaState, const char *name) {
+                if (luaL_newmetatable(luaState, name) != 0) {
+                    // metatable.__index = metatable
+                    lua_pushstring(luaState, "__index");
+                    lua_pushvalue(luaState, -2); // duplicates the metatable
+                    lua_rawset(luaState, -3);
+                    setLuaFunction(luaState, "__gc", [](lua_State *luaState) {
+                        static_cast<T *>(lua_touserdata(luaState, 1))->~T();
+                        return 0;
+                    }, 0);
+                    return true;
+                }
+                return false;
+            }
+            
+            template<typename T>
+            inline bool pushClassMetatable(lua_State *luaState, const std::string &name) {
+                return pushClassMetatable<T>(luaState, name.c_str());
+            }
+            
+            template<typename T>
+            void pushClassMetatable(lua_State *luaState) {
+                lua_newtable(luaState);
                 // metatable.__index = metatable
                 lua_pushstring(luaState, "__index");
                 lua_pushvalue(luaState, -2); // duplicates the metatable
@@ -67,14 +92,7 @@ namespace integral {
                     static_cast<T *>(lua_touserdata(luaState, 1))->~T();
                     return 0;
                 }, 0);
-                return true;
             }
-            return false;
-        }
-        
-        template<typename T>
-        inline bool pushClassMetatable(lua_State *luaState, const std::string &name) {
-            return pushClassMetatable<T>(luaState, name.c_str());
         }
     }
 }

@@ -2,7 +2,7 @@
 //  hello.cpp
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -35,7 +35,7 @@ extern "C" {
             lua_newtable(luaState);
             // module table
 
-            integral::core::setFunction(luaState, "printHello", printHello);
+            integral::setFunction(luaState, "printHello", printHello);
 
             return 1;
         } catch (const std::exception &exception) {

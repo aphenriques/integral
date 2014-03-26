@@ -2,7 +2,7 @@
 //  utility.cpp
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -44,14 +44,22 @@ namespace integral {
                         std::cout << lua_tonumber(luaState, i);
                         break;
                         
+                    case LUA_TLIGHTUSERDATA:
+                        std::cout << "lightuserdata";
+                        break;
+                        
                     default:
-                        std::cout << lua_typename(luaState, t);
+                        if (lua_iscfunction(luaState, i) == true) {
+                            std::cout << "cfunction";
+                        } else {
+                            std::cout << lua_typename(luaState, t);
+                        }
                         break;
                         
                 }
                 std::cout << "  ";
             }
-            std::cout << "\n";
+            std::cout << std::endl;
         }
     }
 }

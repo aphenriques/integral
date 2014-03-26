@@ -2,7 +2,7 @@
 //  exchanger.cpp
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -24,13 +24,58 @@
 #include "exchanger.h"
 
 namespace integral {
-    namespace exchanger {
-        const char * CompoundExchanger<const char *>::get(lua_State *luaState, int index) {
-            const char * const string = lua_tostring(luaState, index);
-            if (string == nullptr) {
-                throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
+    namespace detail {
+        namespace exchanger {
+            const char * Exchanger<const char *>::get(lua_State *luaState, int index) {
+                if (lua_isuserdata(luaState, index) == 0) {
+                    const char * const string = lua_tostring(luaState, index);
+                    if (string == nullptr) {
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
+                    }
+                    return string;
+                } else {
+                    const char **userDataBase = type_manager::getConvertibleType<const char *>(luaState, index);
+                    if (userDataBase != nullptr) {
+                        return *userDataBase;
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
+                    }
+                }
             }
-            return string;
+            
+            std::string Exchanger<std::string>::get(lua_State *luaState, int index) {
+                if (lua_isuserdata(luaState, index) == 0) {
+                    const char * const string = lua_tostring(luaState, index);
+                    if (string == nullptr) {
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
+                    }
+                    return string;
+                } else {
+                    return getObject<std::string>(luaState, index);
+                }
+            }
+            
+            
+            void Exchanger<std::string>::push(lua_State *luaState, const std::string &string) {
+                if (type_manager::checkClassMetatableExistence<std::string>(luaState) == false) {
+                    lua_pushstring(luaState, string.c_str());
+                } else {
+                    pushObject<std::string>(luaState, string);
+                }
+            }
+            
+            bool Exchanger<bool>::get(lua_State *luaState, int index) {
+                if (lua_isuserdata(luaState, index) == 0) {
+                    return lua_toboolean(luaState, index);
+                } else {
+                    bool *userDataBase = type_manager::getConvertibleType<bool>(luaState, index);
+                    if (userDataBase != nullptr) {
+                        return *userDataBase;
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TBOOLEAN));
+                    }
+                }
+            }
         }
     }
 }

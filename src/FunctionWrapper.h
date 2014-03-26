@@ -2,7 +2,7 @@
 //  FunctionWrapper.h
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -35,50 +35,52 @@
 #include "TemplateSequenceGenerator.h"
 
 namespace integral {
-    template<typename R, typename ...A>
-    class FunctionWrapper {
-    public:
-        static void setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function);
+    namespace detail {
+        template<typename R, typename ...A>
+        class FunctionWrapper {
+        public:
+            static void setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function);
+            
+            inline FunctionWrapper(const std::function<R(A...)> &function);
+            
+            inline int call(lua_State *luaState) const;
+            
+        private:
+            std::function<R(A...)> function_;
+        };
         
-        inline FunctionWrapper(const std::function<R(A...)> &function);
+        //--
         
-        inline int call(lua_State *luaState) const;
-        
-    private:
-        std::function<R(A...)> function_;
-    };
-    
-    //--
-    
-    template<typename R, typename ...A>
-    void FunctionWrapper<R, A...>::setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function) {
-        basic::pushUserData<UserDataWrapper<FunctionWrapper<R, A...>>>(luaState, function);
-        type_manager::pushClassMetatable<FunctionWrapper<R, A...>>(luaState);
-        lua_setmetatable(luaState, -2);
-        basic::setLuaFunction(luaState, name, [](lua_State *luaState) -> int {
-            try {
-                UserDataWrapper<FunctionWrapper<R, A...>> *functionWrapper = type_manager::getUserDataWrapper<FunctionWrapper<R, A...>>(luaState, lua_upvalueindex(1));
-                if (functionWrapper != nullptr) {
-                    return functionWrapper->call(luaState);
-                } else {
-                    throw std::runtime_error("corrupted FunctionWrapper");
+        template<typename R, typename ...A>
+        void FunctionWrapper<R, A...>::setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function) {
+            basic::pushUserData<UserDataWrapper<FunctionWrapper<R, A...>>>(luaState, function);
+            type_manager::pushClassMetatable<FunctionWrapper<R, A...>>(luaState);
+            lua_setmetatable(luaState, -2);
+            basic::setLuaFunction(luaState, name, [](lua_State *luaState) -> int {
+                try {
+                    UserDataWrapper<FunctionWrapper<R, A...>> *functionWrapper = type_manager::getUserDataWrapper<FunctionWrapper<R, A...>>(luaState, lua_upvalueindex(1));
+                    if (functionWrapper != nullptr) {
+                        return functionWrapper->call(luaState);
+                    } else {
+                        throw std::runtime_error("corrupted FunctionWrapper");
+                    }
+                } catch (const std::exception &exception) {
+                    lua_pushstring(luaState, (std::string("[integral] ") + exception.what()).c_str());
+                } catch (...) {
+                    lua_pushstring(luaState, basic::gkUnknownExceptionMessage);
                 }
-            } catch (const std::exception &exception) {
-                lua_pushstring(luaState, (std::string("[integral] ") + exception.what()).c_str());
-            } catch (...) {
-                lua_pushstring(luaState, basic::gkUnknownExceptionMessage);
-            }
-            // error return outside catch scope so that the exception destructor can be called
-            return lua_error(luaState);
-        }, 1);
-    }
-    
-    template<typename R, typename ...A>
-    inline FunctionWrapper<R, A...>::FunctionWrapper(const std::function<R(A...)> &function) : function_(function) {}
-    
-    template<typename R, typename ...A>
-    inline int FunctionWrapper<R, A...>::call(lua_State *luaState) const {
-        return static_cast<int>(FunctionCaller<R, A...>::call(luaState, function_, typename TemplateSequenceGenerator<sizeof...(A)>::TemplateSequenceType()));
+                // error return outside catch scope so that the exception destructor can be called
+                return lua_error(luaState);
+            }, 1);
+        }
+        
+        template<typename R, typename ...A>
+        inline FunctionWrapper<R, A...>::FunctionWrapper(const std::function<R(A...)> &function) : function_(function) {}
+        
+        template<typename R, typename ...A>
+        inline int FunctionWrapper<R, A...>::call(lua_State *luaState) const {
+            return static_cast<int>(FunctionCaller<R, A...>::call(luaState, function_, typename TemplateSequenceGenerator<sizeof...(A)>::TemplateSequenceType()));
+        }
     }
 }
 

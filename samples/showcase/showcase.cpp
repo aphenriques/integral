@@ -2,7 +2,7 @@
 //  showcase.cpp
 //  integral
 //
-//  Copyright (C) 2013  André Pereira Henriques
+//  Copyright (C) 2013, 2014  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -61,16 +61,16 @@ extern "C" {
             lua_pushstring(luaState, "Base");
             // stack: table (module table); string (Base class metatable field name on module table)
 
-            integral::core::pushClassMetatable<Base>(luaState);
+            integral::pushClassMetatable<Base>(luaState);
             // stack: table (module table); string (Base class metatable field name on module table) | metatable (Base class metatable)
 
-            integral::core::setConstructor<Base, double>(luaState, "new");
-            integral::core::setCopyGetter(luaState, "getNumber", &Base::number_);
-            integral::core::setSetter(luaState, "setNumber", &Base::number_);
+            integral::setConstructor<Base, double>(luaState, "new");
+            integral::setCopyGetter(luaState, "getNumber", &Base::number_);
+            integral::setSetter(luaState, "setNumber", &Base::number_);
 
             // Automatic conversion between c++ floating-point types (std::is_floating_point) and lua number for function return value and arguments
             // The same applies for integral types (std::is_integral)
-            integral::core::setFunction(luaState, "getSum", &Base::getSum);
+            integral::setFunction(luaState, "getSum", &Base::getSum);
 
             // Setting methods, constructors and accessors does not change the stack:
             // stack: table (module table); string (Base class metatable field name on module table) | metatable (Base class metatable)
@@ -81,27 +81,27 @@ extern "C" {
             lua_pushstring(luaState, "Derived");
             // stack: table (module table); string (Derived class metatable field name on module table)
 
-            integral::core::pushClassMetatable<Derived>(luaState);
+            integral::pushClassMetatable<Derived>(luaState);
             // stack: table (module table); string (Derived class metatable field name on module table) | metatable (Derived class metatable)
 
-            integral::core::setConstructor<Derived, double, const char *>(luaState, "new");
-            integral::core::setSetter(luaState, "setNumber", &Derived::number_);
-            integral::core::setCopyGetter(luaState, "getNumber", &Derived::number_);
-            integral::core::setCopyGetter(luaState, "getString", &Derived::string_);
+            integral::setConstructor<Derived, double, const char *>(luaState, "new");
+            integral::setSetter(luaState, "setNumber", &Derived::number_);
+            integral::setCopyGetter(luaState, "getNumber", &Derived::number_);
+            integral::setCopyGetter(luaState, "getString", &Derived::string_);
 
             // Automatic conversion between lua string and "[cv] std::string" or "const char *"
-            integral::core::setFunction(luaState, "getConcatenated", &Derived::getConcatenated);
+            integral::setFunction(luaState, "getConcatenated", &Derived::getConcatenated);
 
             // Method definition with lambda:
-            integral::core::setFunction(luaState, "__tostring", std::function<std::string(const Derived &)>([](const Derived &derived) -> std::string {
+            integral::setFunction(luaState, "__tostring", std::function<std::string(const Derived &)>([](const Derived &derived) -> std::string {
                 return std::to_string(derived.number_) + " | " + derived.string_;
             }));
 
-            // Lua functions can be registered. Similarly to luaL_setfuncs (lua_CFunction). But, in integral, they can also be functors, can handle exceptions and invalid arguments (with integral::core::get) graciously
-            integral::core::setLuaFunction(luaState, "getNumberAndString", [](lua_State * luaState) -> int {
-                Derived &derived = integral::core::get<Derived>(luaState, 1);
-                integral::core::push<double>(luaState, derived.number_);
-                integral::core::push<std::string>(luaState, derived.string_);
+            // Lua functions can be registered. Similarly to luaL_setfuncs (lua_CFunction). But, in integral, they can also be functors, and handle exceptions and invalid arguments (with integral::get) graciously
+            integral::setLuaFunction(luaState, "getNumberAndString", [](lua_State * luaState) -> int {
+                Derived &derived = integral::get<Derived>(luaState, 1);
+                integral::push<double>(luaState, derived.number_);
+                integral::push<std::string>(luaState, derived.string_);
                 return 2; // 2 return values
             });
 
@@ -113,9 +113,9 @@ extern "C" {
             lua_rawset(luaState, -3);
             // stack: table (module table)
 
-            integral::core::setFunction(luaState, "getSumBase", &getSumBase);
+            integral::setFunction(luaState, "getSumBase", &getSumBase);
 
-            integral::core::setFunction(luaState, "throwCppException", std::function<void(const char *)>([](const char * message) {
+            integral::setFunction(luaState, "throwCppException", std::function<void(const char *)>([](const char * message) {
                 throw std::runtime_error(message);
             }));
 

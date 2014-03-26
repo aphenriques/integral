@@ -2,7 +2,7 @@
 --  showcase.lua
 --  integral
 --
---  Copyright (C) 2013  André Pereira Henriques
+--  Copyright (C) 2013, 2014  André Pereira Henriques
 --  aphenriques (at) outlook (dot) com
 --
 --  This file is part of integral.
@@ -50,6 +50,7 @@ print("derivedObject:getNumberAndString(): ", derivedObject:getNumberAndString()
 
 print("\n-> Inheritance and functions:")
 
+-- FIXME showcase inheritance
 -- number error due to float c type argument in c function (to avoid it, use double c type)
 -- calling Base metatable class with a Derived object
 print("showcase.Base.getSum(derivedObject, 21.1): ", showcase.Base.getSum(derivedObject, 21.1))
@@ -66,6 +67,8 @@ print("Wrong function parameter: ", message)
 local _, message = pcall(function() showcase.Derived.getString(baseObject) end)
 print("Incompatible userdata (class) function parameter: ", message)
 local _, message = pcall(function() showcase.Derived.getNumberAndString(nil) end)
-print("Safe lua function argument with integral::core::get<T>: ", message)
+print("Safe lua function argument with integral::get<T>: ", message)
+local _, message = pcall(function() showcase.Derived.getNumberAndString(Regex.new('.')) end)
+print("Incompatible usedata from other library", message)
 
 print("\nEnd of showcase")
