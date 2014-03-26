@@ -128,7 +128,6 @@ namespace integral {
                         } else {
                             UserDataWrapperBase *userDataWrapperBase = type_manager::getUserDataWrapperBase(luaState, index);
                             if (userDataWrapperBase != nullptr) {
-                                puts("[[ Direct RTTI ]]"); // FIXME
                                 T *castenObject = dynamic_cast<T *>(userDataWrapperBase);
                                 if (castenObject != nullptr) {
                                     return *castenObject;
