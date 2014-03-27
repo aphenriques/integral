@@ -48,7 +48,13 @@ namespace integral {
             
             template<typename T, typename ...A, unsigned ...S>
             void callConstructor(lua_State *luaState, TemplateSequence<S...>) {
-                exchanger::push<T>(luaState, exchanger::get<A>(luaState, S + 1)...);
+                const unsigned numberOfParameters = static_cast<unsigned>(lua_gettop(luaState));
+                constexpr unsigned expectedNumberOfParameters = sizeof...(S);
+                if (numberOfParameters == expectedNumberOfParameters) {
+                    exchanger::push<T>(luaState, exchanger::get<A>(luaState, S + 1)...);
+                } else {
+                    throw ArgumentException(luaState, expectedNumberOfParameters, numberOfParameters);
+                }
             }
         }
     }

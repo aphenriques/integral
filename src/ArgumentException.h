@@ -35,6 +35,7 @@ namespace integral {
             static ArgumentException createTypeErrorException(lua_State *luaState, unsigned index, const std::string &userDataName);
             
             ArgumentException(lua_State *luaState, unsigned index, const std::string &extraMessage);
+            ArgumentException(lua_State *luaState, unsigned expectedNumberOfArguments, unsigned actualNumberOfArguments);
             
             inline virtual const char * what() const noexcept override;
             

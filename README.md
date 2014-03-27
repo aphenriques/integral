@@ -30,7 +30,7 @@ and cloned with:
 ## Small intrusion on the lua state
 
 * `integral` has a few reserved names (see **integral reserved names in Lua** ahead);
-* the library allows integration with other bound libraries (wether using `integral` or not)
+* the library allows integration with other bound libraries (wether using `integral` - statically *or* dynamically linked - or not)
 * the library is thread safe (as per lua state).
 
 ## Automatic type management
@@ -46,9 +46,10 @@ and cloned with:
 ## Error safety
 
 * `integral` will not crash the lua state;
-* thrown exceptions are converted to lua errors;
-* wrong parameter types turn into lua errors;
-* functions returning pointers (except char * - string) and references are regarded as unsafe, therefore not supported. Trying to register these functions will cause compilation error.
+* thrown exceptions in exported functions are converted to lua errors;
+* wrong parameter types in exported functions turn into lua errors;
+* wrong number of parameters in exported functions turn into lua errors;
+* functions returning pointers (except const char * - string) and references are regarded as unsafe, therefore cannot be exported. Trying to register these functions will cause compilation error.
 
 
 # Example

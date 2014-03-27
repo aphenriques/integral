@@ -58,6 +58,29 @@ namespace integral {
             message_ = messageStream.str();
         }
         
+        ArgumentException::ArgumentException(lua_State *luaState, unsigned expectedNumberOfArguments, unsigned actualNumberOfArguments) {
+            lua_Debug debugInfo;
+            if (lua_getstack(luaState, 0, &debugInfo) == 0) {
+                std::stringstream messageStream;
+                messageStream << "wrong number of parameters to function (" << expectedNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
+                message_ = messageStream.str();
+                return;
+            }
+            lua_getinfo(luaState, "n", &debugInfo);
+            if (std::strcmp(debugInfo.namewhat, "method") == 0) {
+                std::stringstream messageStream;
+                messageStream << "wrong number of parameters to method " << debugInfo.name << " (" << (expectedNumberOfArguments - 1) << " expected, got " << (actualNumberOfArguments - 1) << ")";
+                message_ = messageStream.str();
+                return;
+            }
+            if (debugInfo.name == NULL) {
+                debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
+            }
+            std::stringstream messageStream;
+            messageStream << "wrong number of parameters to function " << debugInfo.name << " (" << expectedNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
+            message_ = messageStream.str();
+        }
+        
         bool ArgumentException::findField(lua_State *luaState, int index, int level) {
             if (level == 0 || lua_istable(luaState, -1) == 0) {
                 return false;
