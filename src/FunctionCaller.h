@@ -26,7 +26,6 @@
 
 #include <functional>
 #include <lua.hpp>
-#include "ArgumentException.h"
 #include "TemplateSequence.h"
 #include "exchanger.h"
 
@@ -51,27 +50,15 @@ namespace integral {
         template<typename R, typename ...A>
         template<unsigned ...S>
         unsigned FunctionCaller<R, A...>::call(lua_State *luaState, const std::function<R(A...)> &function, TemplateSequence<S...>) {
-            const unsigned numberOfParameters = static_cast<unsigned>(lua_gettop(luaState));
-            constexpr unsigned expectedNumberOfParameters = sizeof...(S);
-            if (numberOfParameters == expectedNumberOfParameters) {
-                exchanger::push<R>(luaState, function(exchanger::get<A>(luaState, S + 1)...));
-                return 1;
-            } else {
-                throw ArgumentException(luaState, expectedNumberOfParameters, numberOfParameters);
-            }
+            exchanger::push<R>(luaState, function(exchanger::get<A>(luaState, S + 1)...));
+            return 1;
         }
         
         template<typename ...A>
         template<unsigned ...S>
         unsigned FunctionCaller<void, A...>::call(lua_State *luaState, const std::function<void(A...)> &function, TemplateSequence<S...>) {
-            const unsigned numberOfParameters = static_cast<unsigned>(lua_gettop(luaState));
-            constexpr unsigned expectedNumberOfParameters = sizeof...(S);
-            if (numberOfParameters == expectedNumberOfParameters) {
-                function(exchanger::get<A>(luaState, S + 1)...);
-                return 0;
-            } else {
-                throw ArgumentException(luaState, expectedNumberOfParameters, numberOfParameters);
-            }
+            function(exchanger::get<A>(luaState, S + 1)...);
+            return 0;
         }
     }
 }

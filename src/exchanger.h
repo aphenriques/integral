@@ -28,9 +28,9 @@
 #include <type_traits>
 #include <utility>
 #include <lua.hpp>
-#include "type_manager.h"
 #include "ArgumentException.h"
 #include "basic.h"
+#include "type_manager.h"
 #include "UserDataWrapper.h"
 #include "UserDataWrapperBase.h"
 
@@ -41,7 +41,7 @@ namespace integral {
             T & getObject(lua_State *luaState, int index);
             
             template<typename T, typename ...A>
-            static void pushObject(lua_State *luaState, A &&...arguments);
+            void pushObject(lua_State *luaState, A &&...arguments);
             
             template<typename T, typename Enable = void>
             class Exchanger {
@@ -103,8 +103,7 @@ namespace integral {
             };
 
             template<typename T>
-            using ExchangerType = Exchanger<typename std::remove_cv<typename std::remove_reference<T>::type>::type>;
-            
+            using ExchangerType = Exchanger<basic::BasicType<T>>;
             
             template<typename T>
             inline auto get(lua_State *luaState, int index) -> decltype(ExchangerType<T>::get(luaState, index));
@@ -145,7 +144,7 @@ namespace integral {
             }
             
             template<typename T, typename ...A>
-            static void pushObject(lua_State *luaState, A &&...arguments) {
+            void pushObject(lua_State *luaState, A &&...arguments) {
                 basic::pushUserData<UserDataWrapper<T>>(luaState, std::forward<A>(arguments)...);
                 type_manager::pushClassMetatable<T>(luaState); // type_manager will automatically register unknown types
                 lua_setmetatable(luaState, -2);

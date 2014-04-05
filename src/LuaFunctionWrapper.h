@@ -37,6 +37,7 @@ namespace integral {
             static void setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction, int nUpValues = 0);
             
             inline LuaFunctionWrapper(const std::function<int(lua_State *)> &luaFunction);
+            inline LuaFunctionWrapper(std::function<int(lua_State *)> &&luaFunction);
             inline LuaFunctionWrapper(lua_CFunction luaFunction);
             
             inline int call(lua_State *luaState) const;
@@ -50,6 +51,8 @@ namespace integral {
         //--
         
         inline LuaFunctionWrapper::LuaFunctionWrapper(const std::function<int(lua_State *)> &luaFunction) : luaFunction_(luaFunction) {}
+        
+        inline LuaFunctionWrapper::LuaFunctionWrapper(std::function<int(lua_State *)> &&luaFunction) : luaFunction_(luaFunction) {}
 
         inline LuaFunctionWrapper::LuaFunctionWrapper(lua_CFunction luaFunction) : LuaFunctionWrapper(std::function<int(lua_State *)>(luaFunction)) {}
 

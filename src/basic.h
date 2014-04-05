@@ -31,7 +31,13 @@
 namespace integral {
     namespace detail {
         namespace basic {
+            template<typename T>
+            using BasicType = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+            
             extern const char * const gkUnknownExceptionMessage;
+            
+            template<typename ...T>
+            inline void expandDummyTemplatePack(T...);
             
             void setLuaFunction(lua_State *luaState, const char *name, lua_CFunction function, int nUpValues);
             
@@ -50,6 +56,9 @@ namespace integral {
             void pushClassMetatable(lua_State *luaState);
 
             //--
+            
+            template<typename ...T>
+            inline void expandDummyTemplatePack(T...) {}
             
             inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues) {
                 setLuaFunction(luaState, name.c_str(), function, nUpValues);

@@ -24,43 +24,66 @@
 #ifndef integral_FunctionWrapper_h
 #define integral_FunctionWrapper_h
 
-#include <string>
-#include <functional>
 #include <exception>
+#include <functional>
 #include <stdexcept>
+#include <string>
+#include <utility>
 #include <lua.hpp>
-#include "UserDataWrapper.h"
-#include "type_manager.h"
+#include "argument.h"
+#include "ArgumentException.h"
+#include "basic.h"
+#include "DefaultArgument.h"
+#include "DefaultArgumentManager.h"
 #include "FunctionCaller.h"
 #include "TemplateSequenceGenerator.h"
+#include "type_manager.h"
+#include "UserDataWrapper.h"
 
 namespace integral {
     namespace detail {
-        template<typename R, typename ...A>
+        template<typename M, typename R, typename ...A>
         class FunctionWrapper {
         public:
-            static void setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function);
-            
-            inline FunctionWrapper(const std::function<R(A...)> &function);
+            template<typename ...E, unsigned ...I>
+            static void setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments);
             
             inline int call(lua_State *luaState) const;
             
+        protected:
+            template<typename ...E, unsigned ...I>
+            FunctionWrapper(const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments);
+            
         private:
+            using FunctionWrapperType = FunctionWrapper<M, R, A...>;
+            
+            static constexpr unsigned keNumberOfFunctionArguments_ = sizeof...(A);
+
             std::function<R(A...)> function_;
+            M defaultArgumentManager_;
         };
         
         //--
         
-        template<typename R, typename ...A>
-        void FunctionWrapper<R, A...>::setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function) {
-            basic::pushUserData<UserDataWrapper<FunctionWrapper<R, A...>>>(luaState, function);
-            type_manager::pushClassMetatable<FunctionWrapper<R, A...>>(luaState);
+        template<typename M, typename R, typename ...A>
+        template<typename ...E, unsigned ...I>
+        void FunctionWrapper<M, R, A...>::setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments) {
+            argument::validateDefaultArguments<A...>(std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+            basic::pushUserData<UserDataWrapper<FunctionWrapperType>>(luaState, function, std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+            type_manager::pushClassMetatable<FunctionWrapperType>(luaState);
             lua_setmetatable(luaState, -2);
             basic::setLuaFunction(luaState, name, [](lua_State *luaState) -> int {
                 try {
-                    UserDataWrapper<FunctionWrapper<R, A...>> *functionWrapper = type_manager::getUserDataWrapper<FunctionWrapper<R, A...>>(luaState, lua_upvalueindex(1));
+                    UserDataWrapper<FunctionWrapperType> *functionWrapper = type_manager::getUserDataWrapper<FunctionWrapperType>(luaState, lua_upvalueindex(1));
                     if (functionWrapper != nullptr) {
-                        return functionWrapper->call(luaState);
+                        // replicate code of maximum number of parameters checking in function::callConstructor
+                        const unsigned numberOfArgumentsOnStack = static_cast<unsigned>(lua_gettop(luaState));
+                        if (numberOfArgumentsOnStack <= keNumberOfFunctionArguments_) {
+                            functionWrapper->defaultArgumentManager_.processDefaultArguments(luaState, keNumberOfFunctionArguments_, numberOfArgumentsOnStack);
+                            return functionWrapper->call(luaState);
+                        } else {
+                            throw ArgumentException(luaState, keNumberOfFunctionArguments_, numberOfArgumentsOnStack);
+                        }
                     } else {
                         throw std::runtime_error("corrupted FunctionWrapper");
                     }
@@ -74,13 +97,14 @@ namespace integral {
             }, 1);
         }
         
-        template<typename R, typename ...A>
-        inline FunctionWrapper<R, A...>::FunctionWrapper(const std::function<R(A...)> &function) : function_(function) {}
-        
-        template<typename R, typename ...A>
-        inline int FunctionWrapper<R, A...>::call(lua_State *luaState) const {
-            return static_cast<int>(FunctionCaller<R, A...>::call(luaState, function_, typename TemplateSequenceGenerator<sizeof...(A)>::TemplateSequenceType()));
+        template<typename M, typename R, typename ...A>
+        inline int FunctionWrapper<M, R, A...>::call(lua_State *luaState) const {
+            return static_cast<int>(FunctionCaller<R, A...>::call(luaState, function_, typename TemplateSequenceGenerator<keNumberOfFunctionArguments_>::TemplateSequenceType()));
         }
+        
+        template<typename M, typename R, typename ...A>
+        template<typename ...E, unsigned ...I>
+        FunctionWrapper<M, R, A...>::FunctionWrapper(const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments) : function_(function), defaultArgumentManager_(std::forward<DefaultArgument<E, I>>(defaultArguments)...) {}
     }
 }
 

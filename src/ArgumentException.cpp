@@ -58,18 +58,18 @@ namespace integral {
             message_ = messageStream.str();
         }
         
-        ArgumentException::ArgumentException(lua_State *luaState, unsigned expectedNumberOfArguments, unsigned actualNumberOfArguments) {
+        ArgumentException::ArgumentException(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments) {
             lua_Debug debugInfo;
             if (lua_getstack(luaState, 0, &debugInfo) == 0) {
                 std::stringstream messageStream;
-                messageStream << "wrong number of parameters to function (" << expectedNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
+                messageStream << "excessive parameters provided to function (" << maximumNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
                 message_ = messageStream.str();
                 return;
             }
             lua_getinfo(luaState, "n", &debugInfo);
             if (std::strcmp(debugInfo.namewhat, "method") == 0) {
                 std::stringstream messageStream;
-                messageStream << "wrong number of parameters to method " << debugInfo.name << " (" << (expectedNumberOfArguments - 1) << " expected, got " << (actualNumberOfArguments - 1) << ")";
+                messageStream << "excessive parameters provided to method " << debugInfo.name << " (" << (maximumNumberOfArguments - 1) << " expected, got " << (actualNumberOfArguments - 1) << ")";
                 message_ = messageStream.str();
                 return;
             }
@@ -77,7 +77,7 @@ namespace integral {
                 debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
             }
             std::stringstream messageStream;
-            messageStream << "wrong number of parameters to function " << debugInfo.name << " (" << expectedNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
+            messageStream << "excessive parameters provided to function " << debugInfo.name << " (" << maximumNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
             message_ = messageStream.str();
         }
         

@@ -24,8 +24,8 @@
 #ifndef integral_ArgumentException_h
 #define integral_ArgumentException_h
 
-#include <string>
 #include <exception>
+#include <string>
 #include <lua.hpp>
 
 namespace integral {
@@ -35,7 +35,7 @@ namespace integral {
             static ArgumentException createTypeErrorException(lua_State *luaState, unsigned index, const std::string &userDataName);
             
             ArgumentException(lua_State *luaState, unsigned index, const std::string &extraMessage);
-            ArgumentException(lua_State *luaState, unsigned expectedNumberOfArguments, unsigned actualNumberOfArguments);
+            ArgumentException(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments);
             
             inline virtual const char * what() const noexcept override;
             

@@ -24,8 +24,8 @@
 #ifndef integral_type_manager_h
 #define integral_type_manager_h
 
-#include <stdexcept>
 #include <functional>
+#include <stdexcept>
 #include <typeindex>
 #include <lua.hpp>
 #include "basic.h"
@@ -44,7 +44,7 @@
 
 // there might be clashes with typeHash. It is NOT a problem. TypeManager is implemented as a hashmap.
 
-// Attention! The stored type_index (type_index_udata) is UserDataWrapper<T>
+// Attention! The stored type_index (type_index_udata) is from std::type_index(typeid(UserDataWrapper<T>))
 // This is useful when multiple integral versions are used.
 // Maybe UserDataWrapper<T> is incompatible from different integral versions used together; this way, it will fail gracefully.
 
@@ -75,19 +75,19 @@ namespace integral {
             
             // FIXME change this constants to enums
             
-            constexpr int INHERITANCE_TYPE_INDEX_INDEX = 1;
+            constexpr int keInheritanceTypeIndexIndex = 1;
             
-            constexpr int INHERITANCE_METATABLE_INDEX = 2;
+            constexpr int keInheritanceMetatableIndex = 2;
             
-            constexpr int USERDATAWRAPPERBASE_TYPE_INDEX_INDEX = 1;
+            constexpr int keUserDataWrapperBaseTypeIndexIndex = 1;
             
-            constexpr int USERDATAWRAPPERBASE_FUNCTION_INDEX = 2;
+            constexpr int keUserDataWrapperBaseFunctionIndex = 2;
             
             const std::type_index * getClassMetatableType(lua_State *luaState);
             
             bool checkClassMetatableType(lua_State *luaState, const std::type_index &typeIndex);
             
-            // type index is the netatable type (type = typeid(UserDataWrapper<T>))
+            // typeIndex is the class metatable type (typeIndex = std::type_index(typeid(UserDataWrapper<T>)))
             bool checkClassMetatableExistence(lua_State *luaState, const std::type_index &typeIndex);
             
             // T is the underlying type
@@ -127,15 +127,15 @@ namespace integral {
             template<typename T, typename U>
             void defineTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
             
-            // protects from recursion (although in a very unlikely scenario)
+            // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic'inheritance)
             // index: metatable to be tagged
             bool checkInheritanceSearchTag(lua_State *luaState, int index);
 
-            // protects from recursion (although in a very unlikely scenario)
+            // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic'inheritance)
             // index: metatable to be tagged
             void tagInheritanceSearch(lua_State *luaState, int index);
             
-            // protects from recursion (although in a very unlikely scenario)
+            // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic'inheritance)
             // index: metatable to be tagged
             void untagInheritanceSearch(lua_State *luaState, int index);
             
@@ -416,14 +416,14 @@ namespace integral {
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable*
                 pushTypeIndexUserData<UserDataWrapperBase>(luaState);
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable* | userDataWrapperBaseTypeIndex*
-                lua_rawseti(luaState, -2, USERDATAWRAPPERBASE_TYPE_INDEX_INDEX);
+                lua_rawseti(luaState, -2, keUserDataWrapperBaseTypeIndexIndex);
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable*
                 lua_pushcclosure(luaState, [](lua_State *luaState) -> int {
                     lua_pushlightuserdata(luaState, static_cast<UserDataWrapperBase *>(static_cast<UserDataWrapper<T> *>(lua_touserdata(luaState, 1))));
                     return 1;
                 }, 0);
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable* | userDataWrapperBaseFunction*
-                lua_rawseti(luaState, -2, USERDATAWRAPPERBASE_FUNCTION_INDEX);
+                lua_rawseti(luaState, -2, keUserDataWrapperBaseFunctionIndex);
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable*
                 lua_rawset(luaState, -3);
                 // stack: metatable
@@ -525,11 +525,11 @@ namespace integral {
                 // stack: metatable | inheritanceTable | baseTable
                 pushTypeIndexUserData<B>(luaState);
                 // stack: metatable | inheritanceTable | baseTable | baseTypeIndex*
-                lua_rawseti(luaState, -2, INHERITANCE_TYPE_INDEX_INDEX);
+                lua_rawseti(luaState, -2, keInheritanceTypeIndexIndex);
                 // stack: metatable | inheritanceTable | baseTable
                 pushClassMetatable<B>(luaState);
                 // stack: metatable | inheritanceTable | baseTable | baseMetatable*
-                lua_rawseti(luaState, -2, INHERITANCE_METATABLE_INDEX);
+                lua_rawseti(luaState, -2, keInheritanceMetatableIndex);
                 // stack: metatable | inheritanceTable | baseTable
                 lua_pop(luaState, 2);
                 // stack: metatable

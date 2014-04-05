@@ -22,8 +22,8 @@
 //
 
 #include "type_manager.h"
-#include <typeindex>
 #include <stdexcept>
+#include <typeindex>
 #include <lua.hpp>
 #include "basic.h"
 
@@ -361,11 +361,11 @@ namespace integral {
                                 // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable (?)
                                 if (lua_istable(luaState, -1) != 0) {
                                     // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable
-                                    lua_rawgeti(luaState, -1, INHERITANCE_METATABLE_INDEX);
+                                    lua_rawgeti(luaState, -1, keInheritanceMetatableIndex);
                                     // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable | baseMetatable (?)
                                     if (lua_istable(luaState, -1) != 0) {
                                         // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable | baseMetatable
-                                        lua_rawgeti(luaState, -2, INHERITANCE_TYPE_INDEX_INDEX);
+                                        lua_rawgeti(luaState, -2, keInheritanceTypeIndexIndex);
                                         // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable | baseMetatable | baseTypeIndex (?)
                                         const std::type_index *baseTypeIndex = static_cast<std::type_index *>(luaL_testudata(luaState, -1, gkTypeIndexMetatableName));
                                         if (baseTypeIndex != nullptr) {
@@ -440,7 +440,7 @@ namespace integral {
                     // stack: userdata | metatable | userDataWrapperBaseTable (?)
                     if (lua_istable(luaState, -1) != 0) {
                         // stack: userdata | metatable | userDataWrapperBaseTable
-                        lua_rawgeti(luaState, -1, USERDATAWRAPPERBASE_TYPE_INDEX_INDEX);
+                        lua_rawgeti(luaState, -1, keUserDataWrapperBaseTypeIndexIndex);
                         // stack: userdata | metatable | userDataWrapperBaseTable | userDataWrapperBaseTypeIndex (?)
                         const std::type_index *typeIndex = static_cast<std::type_index *>(luaL_testudata(luaState, -1, gkTypeIndexMetatableName));
                         if (typeIndex != nullptr) {
@@ -449,7 +449,7 @@ namespace integral {
                                 // stack: userdata | metatable | userDataWrapperBaseTable | userDataWrapperBaseTypeIndex
                                 lua_pop(luaState, 1);
                                 // stack: userdata | metatable | userDataWrapperBaseTable
-                                lua_rawgeti(luaState, -1, USERDATAWRAPPERBASE_FUNCTION_INDEX);
+                                lua_rawgeti(luaState, -1, keUserDataWrapperBaseFunctionIndex);
                                 // stack: userdata | metatable | userDataWrapperBaseTable | function (?)
                                 if (lua_iscfunction(luaState, -1) != 0) {
                                     // stack: userdata | metatable | userDataWrapperBaseTable | function
@@ -537,7 +537,7 @@ namespace integral {
                                 lua_rawgeti(luaState, -1, static_cast<int>(i));
                                 if (lua_istable(luaState, -1) != 0) {
                                     // stack: inheritanceTable | baseTable
-                                    lua_rawgeti(luaState, -1, INHERITANCE_METATABLE_INDEX);
+                                    lua_rawgeti(luaState, -1, keInheritanceMetatableIndex);
                                     // stack: inheritanceTable | baseTable | baseMetatable (?)
                                     if (lua_istable(luaState, -1) != 0) {
                                         // stack: inheritanceTable | baseTable | baseMetatable
