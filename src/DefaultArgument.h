@@ -28,11 +28,14 @@
 #include "ArgumentTag.h"
 
 namespace integral {
+    // "T": type of default argument
+    // "I": lua index (starts with 1) of the default argument
     template<typename T, unsigned I>
     class DefaultArgument {
     public:
         using ArgumentTag = detail::ArgumentTag<T, I>;
         
+        // Arguments are forwarded to typename T constructor
         template<typename ...A>
         inline DefaultArgument(A &&...arguments);
         

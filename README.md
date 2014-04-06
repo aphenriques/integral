@@ -129,7 +129,9 @@ Include integral headers in your project search path and link to `integral` libr
     compiler flag: `-I/usr/local/integral`
     linker flags: `-L/usr/local/lib -lintegral`
 
-The library interface is comprised of the functions in `integral.h` (`namespace integral`), which has a brief description for each of them.
+Include the library header `integral.h` in your code (`namespace integral`). This header includes `core.h` and `DefaultArgument.h`.
+
+The library interface is comprised of the functions in `core.h`, which has a brief description for each of them.
 
 Check the `samples` directory for examples.
 
