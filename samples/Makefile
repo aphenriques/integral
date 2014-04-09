@@ -1,6 +1,18 @@
-.PHONY: all regex showcase hello embedded clean
+.PHONY: all class embedded hello inheritance regex showcase clean
 
-all: regex showcase hello embedded
+all: class embedded hello inheritance regex showcase
+
+class:
+	cd class && $(MAKE) all
+
+embedded:
+	cd embedded && $(MAKE) all
+
+hello:
+	cd hello && $(MAKE) all
+
+inheritance:
+	cd inheritance && $(MAKE) all
 
 regex:
 	cd regex && $(MAKE) all
@@ -8,14 +20,10 @@ regex:
 showcase: regex
 	cd showcase && $(MAKE) all
 
-hello:
-	cd hello && $(MAKE) all
-
-embedded:
-	cd embedded && $(MAKE) all
-
 clean:
+	cd class && $(MAKE) $@
+	cd embedded && $(MAKE) $@
+	cd hello && $(MAKE) $@
+	cd inheritance && $(MAKE) $@
 	cd regex && $(MAKE) $@
 	cd showcase && $(MAKE) $@
-	cd hello && $(MAKE) $@
-	cd embedded && $(MAKE) $@

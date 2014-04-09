@@ -594,6 +594,7 @@ namespace integral {
             }
             
             void pushInheritanceIndexMetaTable(lua_State *luaState) {
+                // stack: metatable
                 lua_pushstring(luaState, gkInheritanceIndexMetatable);
                 // stack: gkInheritanceIndexMetatable
                 lua_rawget(luaState, LUA_REGISTRYINDEX);

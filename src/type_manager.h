@@ -83,8 +83,10 @@ namespace integral {
             
             constexpr int keUserDataWrapperBaseFunctionIndex = 2;
             
+            // stack argument: metatable
             const std::type_index * getClassMetatableType(lua_State *luaState);
             
+            // stack argument: metatable
             bool checkClassMetatableType(lua_State *luaState, const std::type_index &typeIndex);
             
             // typeIndex is the class metatable type (typeIndex = std::type_index(typeid(UserDataWrapper<T>)))
@@ -113,11 +115,14 @@ namespace integral {
             
             void setTypeFunctionHashTable(lua_State *luaState, size_t baseTypeHash);
             
+            // stack argument: metatable
             void pushTypeFunctionHashTable(lua_State *luaState, const std::type_index &baseTypeIndex);
             
+            // stack argument: metatable
             template<typename D, typename B>
             void setTypeFunction(lua_State *luaState);
             
+            // stack argument: metatable
             template<typename T, typename U>
             void setTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
             
@@ -151,6 +156,7 @@ namespace integral {
             // metatable will be popped from stack in either case
             bool pushConvertibleOrInheritedType(lua_State *luaState, int index, const std::type_index &convertibleTypeIndex, bool isRecursion);
             
+            // stack argument: metatable
             template<typename T>
             void setUserDataWrapperBaseTable(lua_State *luaState);
             
@@ -164,9 +170,11 @@ namespace integral {
             template<typename T>
             T * getConvertibleType(lua_State *luaState, int index);
 
+            // stack argument: metatable
             template<typename D, typename B>
             void setInheritance(lua_State *luaState);
             
+            // stack argument: metatable
             template<typename T, typename U>
             void setInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
             
@@ -175,11 +183,13 @@ namespace integral {
             template<typename T, typename U>
             void defineInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
 
+            // stack argument: metatable
             template<typename B>
             void setInheritanceTable(lua_State *luaState);
             
             int callIndexMetamethod(lua_State *luaState);
             
+            // stack argument: metatable
             void pushInheritanceIndexMetaTable(lua_State *luaState);
             
             //--
@@ -384,7 +394,7 @@ namespace integral {
             template<typename D, typename B>
             void defineTypeFunction(lua_State *luaState) {
                 static_assert(std::is_same<D, B>::value == false, "conversion to itself");
-                if (checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<D>))) == true) {
+                if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<D>))) == true) {
                     setTypeFunction<D, B>(luaState);
                 } else {
                     pushClassMetatable<D>(luaState);
@@ -396,7 +406,7 @@ namespace integral {
             template<typename T, typename U>
             void defineTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction) {
                 static_assert(std::is_same<T, U>::value == false, "conversion to itself");
-                if (checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<T>))) == true) {
+                if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<T>))) == true) {
                     setTypeFunction(luaState, typeFunction);
                 } else {
                     pushClassMetatable<T>(luaState);
@@ -476,7 +486,7 @@ namespace integral {
             template<typename D, typename B>
             void defineInheritance(lua_State *luaState) {
                 static_assert(std::is_same<D, B>::value == false, "Inheritance to itself");
-                if (checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<D>))) == true) {
+                if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<D>))) == true) {
                     setInheritance<D, B>(luaState);
                 } else {
                     pushClassMetatable<D>(luaState);
@@ -488,7 +498,7 @@ namespace integral {
             template<typename T, typename U>
             void defineInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction) {
                 static_assert(std::is_same<T, U>::value == false, "Inheritance to itself");
-                if (checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<T>))) == true) {
+                if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<T>))) == true) {
                     setInheritance(luaState, typeFunction);
                 } else {
                     pushClassMetatable<T>(luaState);
