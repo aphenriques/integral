@@ -62,7 +62,7 @@ extern "C" {
             // base and derived class registering could have been done in any order
             // besides what is stack concerned, integral does not rely on the order in which its functions are called
             // multiple inheritance is supported
-            // inheritance of inherited methods (and typeFunctions) is also possible
+            // inherited methods (and typeFunctions) are also inherited to derived classes
 
             integral::pushClassMetatable<Base2>(luaState);
             integral::setFunction(luaState, "base2Method", &Base2::base2Method);

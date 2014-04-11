@@ -90,9 +90,9 @@ extern "C" {
 
             return 1;
         } catch (const std::exception &exception) {
-            lua_pushstring(luaState, (std::string("[synthetically_inheritance sample setup] ") + exception.what()).c_str());
+            lua_pushstring(luaState, (std::string("[synthetic_inheritance sample setup] ") + exception.what()).c_str());
         } catch (...) {
-            lua_pushstring(luaState, "[synthetically_inheritance sample setup] unknown exception thrown");
+            lua_pushstring(luaState, "[synthetic_inheritance sample setup] unknown exception thrown");
         }
         // Error return outside catch scope so that the exception destructor can be called
         return lua_error(luaState);
