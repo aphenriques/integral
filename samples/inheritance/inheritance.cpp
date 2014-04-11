@@ -21,6 +21,7 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <functional>
 #include <iostream>
 #include <string>
 #include <lua.hpp>
@@ -59,6 +60,7 @@ extern "C" {
     LUALIB_API int luaopen_libinheritance(lua_State *luaState) {
         try {
             // base and derived class registering could have been done in any order
+            // besides what is stack concerned, integral does not rely on the order in which its functions are called
             // multiple inheritance is supported
             // inheritance of inherited methods (and typeFunctions) is also possible
 

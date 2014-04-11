@@ -1,5 +1,5 @@
 --
---  class.lua
+--  synthetic_inheritance.lua
 --  integral
 --
 --  Copyright (C) 2013, 2014  André Pereira Henriques
@@ -21,15 +21,9 @@
 --  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 --
 
-Object = require("libObject")
+SyntheticallyDerived = require("libsynthetic_inheritance")
 
-object = Object.new("string", 42)
-persistence = object:getPersistence()
-object:setStringAndNumber("new string", 421)
-print(object:toString())
-object:setStringAndNumberFromPersistence(persistence)
-print(object:toString())
-object:setNumber(84)
-print(object:getNumber())
-otherObject = Object.newFromPersistence(persistence)
-print(otherObject:toString())
+syntheticallyDerived = SyntheticallyDerived.new()
+syntheticallyDerived:baseOfSyntheticBaseMethod()
+syntheticallyDerived:syntheticBaseMethod()
+syntheticallyDerived:syntheticallyDerivedMethod()

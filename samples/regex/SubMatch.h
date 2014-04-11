@@ -24,9 +24,9 @@
 #ifndef SUBMATCH_H
 #define SUBMATCH_H
 
-#include <string>
 #include <memory>
 #include <regex>
+#include <string>
 
 // Forward declaration
 class Match;

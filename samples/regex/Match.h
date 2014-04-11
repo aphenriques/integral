@@ -24,9 +24,9 @@
 #ifndef MATCH_H
 #define MATCH_H
 
-#include <string>
 #include <memory>
 #include <regex>
+#include <string>
 #include "SubMatch.h"
 
 class Match : public std::cmatch {
@@ -41,7 +41,7 @@ public:
     inline const std::shared_ptr<const std::string> & getSharedData() const;
 
 private:
-    // the matching string data must be stored because std::csub_match and std::cmatch rely on it, and there is no guarantee that it would be kept in the lua stack
+    // the matching string data must be stored because std::csub_match and std::cmatch rely on it, and there is no guarantee that lua would not collect it
     const std::shared_ptr<const std::string> sharedData_;
 };
 

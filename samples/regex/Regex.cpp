@@ -21,9 +21,9 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <string>
-#include <regex>
 #include <functional>
+#include <regex>
+#include <string>
 #include <utility>
 #include <lua.hpp>
 #include "integral.h"
@@ -40,7 +40,6 @@ extern "C" {
             integral::setFunction(luaState, "__tostring", std::function<std::string(const Match &)>(std::bind(&Match::str, std::placeholders::_1, 0)));
             integral::setFunction(luaState, "getSize", &Match::size);
             integral::setFunction(luaState, "__call", &Match::getSubMatch);
-            // Everything registered
             lua_pop(luaState, 1);
             // Match class could be pushed back again to register other functions with all its functions already registered (nothing is lost)
 
@@ -48,7 +47,6 @@ extern "C" {
             integral::pushClassMetatable<SubMatch>(luaState);
             // Methods
             integral::setFunction(luaState, "__tostring", &SubMatch::str);
-            // Everything registered
             lua_pop(luaState, 1);
             // SubMatch class could be pushed back again to register other functions with all its functions already registered (nothing is lost)
 

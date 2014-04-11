@@ -1,6 +1,6 @@
-.PHONY: all class embedded hello inheritance regex showcase clean
+.PHONY: all class embedded hello inheritance regex showcase synthetic_inheritance clean
 
-all: class embedded hello inheritance regex showcase
+all: class embedded hello inheritance regex synthetic_inheritance showcase
 
 class:
 	cd class && $(MAKE) all
@@ -20,6 +20,9 @@ regex:
 showcase: regex
 	cd showcase && $(MAKE) all
 
+synthetic_inheritance:
+	cd synthetic_inheritance && $(MAKE) all
+
 clean:
 	cd class && $(MAKE) $@
 	cd embedded && $(MAKE) $@
@@ -27,3 +30,4 @@ clean:
 	cd inheritance && $(MAKE) $@
 	cd regex && $(MAKE) $@
 	cd showcase && $(MAKE) $@
+	cd synthetic_inheritance && $(MAKE) $@

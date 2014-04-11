@@ -21,9 +21,9 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <functional>
 #include <sstream>
 #include <string>
-#include <functional>
 #include <lua.hpp>
 #include "integral.h"
 
@@ -39,6 +39,7 @@ public:
     double number_;
 
     Object(const std::string &string, double number) : string_(string), number_(number) {}
+    Object(const Persistence &persistence) : string_(persistence.string_), number_(persistence.number_) {}
 
     void setStringAndNumber(const char *string, double number) {
         string_ = string;
@@ -60,7 +61,8 @@ extern "C" {
         try {
             integral::pushClassMetatable<Object>(luaState);
 
-            // functions and constructor can be registered in any order.
+            // functions and constructors can be registered in any order.
+            // besides what is stack concerned, integral does not rely on the order in which its functions are called
 
             // functions can be lambdas
             integral::setFunction(luaState, "toString", std::function<std::string(const Object &)>([](const Object &object) -> std::string {
@@ -69,13 +71,17 @@ extern "C" {
                 return ss.str();
             }));
 
-            integral::setConstructor<Object, std::string, double>(luaState, "new");
+            // overloading is not supported, so diferent constructors names must be provided
+            // assigning a registered construct name will override it
+            integral::setConstructor<Object, const std::string &, double>(luaState, "new");
+            integral::setConstructor<Object, const Persistence &>(luaState, "newFromPersistence");
 
-            // static_cast is necessary for name overload ambiguity resolving
+            // static_cast is necessary for function overload ambiguity resolving
             // const char * and std::string are seamlessly converted to and from lua string type
             integral::setFunction(luaState, "setStringAndNumber", static_cast<void(Object::*)(const char *, double)>(&Object::setStringAndNumber));
 
-            // function overload is not supported in integral (registering a different function with the same name of other will override the previous definition). So it is necessary to register the overload with a diferent name
+            // function overload is not supported in integral. So it is necessary to register the overload with a diferent name
+            // registering a different function with the same name of a previously registered one will override it
             integral::setFunction(luaState, "setStringAndNumberFromPersistence", static_cast<void(Object::*)(const Persistence &)>(&Object::setStringAndNumber));
 
             // Persistence need not be manually declared. Every type is automatically managed by integral
