@@ -170,10 +170,11 @@ namespace integral {
                 if (lua_isuserdata(luaState, index) == 0) {
                     int isNumber;
                     lua_Integer integer = lua_tointegerx(luaState, index, &isNumber);
-                    if (isNumber == 0) {
+                    if (isNumber != 0) {
+                        return static_cast<T>(integer);
+                    } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TNUMBER));
                     }
-                    return static_cast<T>(integer);
                 } else {
                     T *userDataBase = type_manager::getConvertibleType<T>(luaState, index);
                     if (userDataBase != nullptr) {
@@ -194,10 +195,11 @@ namespace integral {
                 if (lua_isuserdata(luaState, index) == 0) {
                     int isNumber;
                     lua_Unsigned unsignedNumber = lua_tounsignedx(luaState, index, &isNumber);
-                    if (isNumber == 0) {
+                    if (isNumber != 0) {
+                        return static_cast<T>(unsignedNumber);
+                    } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TNUMBER));
                     }
-                    return static_cast<T>(unsignedNumber);
                 } else {
                     T *userDataBase = type_manager::getConvertibleType<T>(luaState, index);
                     if (userDataBase != nullptr) {
@@ -222,10 +224,11 @@ namespace integral {
                 if (lua_isuserdata(luaState, index) == 0) {
                     int isNumber;
                     lua_Number number = lua_tonumberx(luaState, index, &isNumber);
-                    if (isNumber == 0) {
+                    if (isNumber != 0) {
+                        return static_cast<T>(number);
+                    } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TNUMBER));
                     }
-                    return static_cast<T>(number);
                 } else {
                     T *userDataBase = type_manager::getConvertibleType<T>(luaState, index);
                     if (userDataBase != nullptr) {

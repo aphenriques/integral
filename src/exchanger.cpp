@@ -46,22 +46,22 @@ namespace integral {
             std::string Exchanger<std::string>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     const char * const string = lua_tostring(luaState, index);
-                    if (string == nullptr) {
+                    if (string != nullptr) {
+                        return string;
+                    } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
                     }
-                    return string;
                 } else {
-                    return getObject<std::string>(luaState, index);
-                }
+                    std::string *userDataBase = type_manager::getConvertibleType<std::string>(luaState, index);
+                    if (userDataBase != nullptr) {
+                        return *userDataBase;
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TBOOLEAN));
+                    }                }
             }
             
-            
             void Exchanger<std::string>::push(lua_State *luaState, const std::string &string) {
-                if (type_manager::checkClassMetatableExistence<std::string>(luaState) == false) {
-                    lua_pushstring(luaState, string.c_str());
-                } else {
-                    pushObject<std::string>(luaState, string);
-                }
+                lua_pushstring(luaState, string.c_str());
             }
             
             bool Exchanger<bool>::get(lua_State *luaState, int index) {
