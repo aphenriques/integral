@@ -1,12 +1,15 @@
-.PHONY: all class embedded hello inheritance luafunction regex showcase synthetic_inheritance clean
+.PHONY: all class embedded error_handling hello inheritance luafunction regex showcase synthetic_inheritance clean
 
-all: class embedded hello inheritance luafunction regex synthetic_inheritance showcase
+all: class embedded error_handling hello inheritance luafunction regex synthetic_inheritance showcase
 
 class:
 	cd class && $(MAKE) all
 
 embedded:
 	cd embedded && $(MAKE) all
+
+error_handling:
+	cd error_handling && $(MAKE) all
 
 hello:
 	cd hello && $(MAKE) all
@@ -29,6 +32,7 @@ synthetic_inheritance:
 clean:
 	cd class && $(MAKE) $@
 	cd embedded && $(MAKE) $@
+	cd error_handling && $(MAKE) $@
 	cd hello && $(MAKE) $@
 	cd inheritance && $(MAKE) $@
 	cd luafunction && $(MAKE) $@

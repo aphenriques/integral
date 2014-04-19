@@ -56,7 +56,7 @@ namespace integral {
                     if (userDataBase != nullptr) {
                         return *userDataBase;
                     } else {
-                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TBOOLEAN));
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
                     }                }
             }
             

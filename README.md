@@ -30,13 +30,15 @@ and cloned with:
 ## Small intrusion on the lua state
 
 * `integral` has a few reserved names (see **integral reserved names in Lua** ahead);
-* the library allows integration with other bound libraries (wether using `integral` - statically *or* dynamically linked - or not)
+* the library allows integration with other bound libraries (wether using `integral` - statically *or* dynamically linked - or not);
 * the library is thread safe (as per lua state).
 
 ## Automatic type management
 
 * bound C/C++ types are not needed to be given a name;
-* inheritance support.
+* inheritance support;
+* automatic type conversion to base types;
+* custom type conversions.
 
 ## Memory safety
 
