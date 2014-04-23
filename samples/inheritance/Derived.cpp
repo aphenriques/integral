@@ -1,5 +1,5 @@
 //
-//  inheritance.cpp
+//  Derived.cpp
 //  integral
 //
 //  Copyright (C) 2013, 2014  André Pereira Henriques
@@ -57,7 +57,7 @@ public:
 
 
 extern "C" {
-    LUALIB_API int luaopen_libinheritance(lua_State *luaState) {
+    LUALIB_API int luaopen_libDerived(lua_State *luaState) {
         try {
             // base and derived class registering could have been done in any order
             // besides what is stack concerned, integral does not rely on the order in which its functions are called

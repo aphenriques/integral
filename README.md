@@ -51,7 +51,8 @@ and cloned with:
 * thrown exceptions in exported functions are converted to lua errors;
 * wrong parameter types in exported functions turn into lua errors;
 * wrong number of parameters in exported functions turn into lua errors;
-* functions returning pointers (except const char * - string) and references are regarded as unsafe, therefore cannot be exported. Trying to register these functions will cause compilation error.
+* functions returning pointers (except const char * - string) and references are regarded as unsafe, therefore cannot be exported. Trying to register these functions will cause compilation error;
+* invalid default arguments definition causes compilation error.
 
 
 # Example
@@ -126,14 +127,14 @@ To clean everything compiled (including samples):
 
 # Usage
 
-Include integral headers in your project search path and link to `integral` library. E.g:
+Include `integral` headers in your project search path and link to `integral` library. E.g:
 
     compiler flag: `-I/usr/local/integral`
     linker flags: `-L/usr/local/lib -lintegral`
 
-Include the library header `integral.h` in your code (`namespace integral`). This header includes `core.h` and `DefaultArgument.h`.
+Include the library header `integral.h` in your code (`namespace integral`).
 
-The library interface is comprised of the functions in `core.h`, which has a brief description for each of them.
+The library interface is comprised of the functions in `integral.h`, which has a brief description for each of them.
 
 Check the `samples` directory for examples.
 

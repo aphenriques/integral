@@ -27,19 +27,19 @@ local _, message = pcall(function() Object.new("prefix", 42) end)
 print("Constructor argument error message (1): ", message)
 local _, message = pcall(function() Object.new() end)
 print("Constructor argument error message (2): ", message)
--- correct expression
+-- correct expression:
 local o1 = Object.new("o1_string")
 
 local _, message = pcall(function() o1.getString(42) end)
 print("Function argument error message (1): ", message)
 local _, message = pcall(function() o1:getString(42) end)
 print("Function argument error message (2): ", message)
--- correct expression
+-- correct expression:
 o1:getString()
 
 local _, message = pcall(function() o1:createSuffixedObjectLuaFunction(o1) end)
 print("Lua Function argument error message: ", message)
--- correct exception
+-- correct exceptiosion:
  o1:createSuffixedObjectLuaFunction("_suffix")
 
 local _, message = pcall(function() Object.throwCppException() end)

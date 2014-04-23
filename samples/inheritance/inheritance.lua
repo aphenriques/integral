@@ -21,7 +21,7 @@
 --  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 --
 
-Derived = require("libinheritance")
+Derived = require("libDerived")
 
 derived = Derived.new()
 derived:base1Method()
