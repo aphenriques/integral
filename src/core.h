@@ -38,6 +38,16 @@
 #include "type_manager.h"
 
 namespace integral {
+    // Adaptor to std::vector<T> and lua table.
+    // LuaVector can be seamlessly converted to std::vector.
+    template<typename T>
+    using LuaVector = detail::exchanger::LuaVector<T>;
+    
+    // Adaptor to std::array<T, N> and lua table.
+    // LuaArray can be seamlessly converted to std::array.
+    template<typename T, std::size_t N>
+    using LuaArray = detail::exchanger::LuaArray<T, N>;
+    
     // Pushes class metatable of type "T".
     // The class metatable can be converted to base types EVEN when they are NOT especified with defineTypeFunction or defineInheritance.
     // The class will be registered in the first time this function is called.
@@ -145,7 +155,7 @@ namespace integral {
     inline void setLuaFunction(lua_State *luaState, const std::string &name, const std::function<int(lua_State *)> &function, int nUpValues = 0);
     
     template<typename T>
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, const T &&function, int nUpValues = 0);
+    inline void setLuaFunction(lua_State *luaState, const std::string &name, T &&function, int nUpValues = 0);
     
     // Binds a function in the table or metatable on top of the stack.
     // The function is managed by integral so that if an exception is thrown from it, it is translated to a Lua error
@@ -172,13 +182,13 @@ namespace integral {
     // "name": name of the bound Lua function.
     // "attribute": attribute address.
     template<typename R, typename T>
-    void setCopyGetter(lua_State *luaState, const std::string &name, R T::* attribute);
+    inline void setCopyGetter(lua_State *luaState, const std::string &name, R T::* attribute);
     
     // Binds a setter function in the table or metatable on top of the stack.
     // "name": name of the bound Lua function.
     // "attribute": attribute address.
     template<typename R, typename T>
-    void setSetter(lua_State *luaState, const std::string &name, R T::* attribute);
+    inline void setSetter(lua_State *luaState, const std::string &name, R T::* attribute);
     
     //--
     
@@ -265,8 +275,8 @@ namespace integral {
     }
     
     template<typename T>
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, const T &&function, int nUpValues) {
-        // explicitly call to detail::LuaFunctionWrapper::setFunction is necessary to avoid infinite recursion
+    inline void setLuaFunction(lua_State *luaState, const std::string &name, T &&function, int nUpValues) {
+        // explicit call to detail::LuaFunctionWrapper::setFunction is necessary to avoid infinite recursion
         detail::LuaFunctionWrapper::setFunction(luaState, name,  std::function<int(lua_State *)>(std::forward<const T>(function)), nUpValues);
     }
     
@@ -291,14 +301,14 @@ namespace integral {
     }
     
     template<typename R, typename T>
-    void setCopyGetter(lua_State *luaState, const std::string &name, R T::* attribute) {
+    inline void setCopyGetter(lua_State *luaState, const std::string &name, R T::* attribute) {
         setFunction(luaState, name, std::function<R(const T &)>([attribute](const T &object) -> R {
             return object.*attribute;
         }));
     }
     
     template<typename R, typename T>
-    void setSetter(lua_State *luaState, const std::string &name, R T::* attribute) {
+    inline void setSetter(lua_State *luaState, const std::string &name, R T::* attribute) {
         setFunction(luaState, name, std::function<void(T &, const R&)>([attribute](T &object, const R &value) -> void {
             object.*attribute = value;
         }));

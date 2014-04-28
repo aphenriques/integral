@@ -57,7 +57,8 @@ namespace integral {
                         return *userDataBase;
                     } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
-                    }                }
+                    }
+                }
             }
             
             void Exchanger<std::string>::push(lua_State *luaState, const std::string &string) {

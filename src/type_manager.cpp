@@ -33,13 +33,15 @@ namespace integral {
             const char * const gkTypeMangerRegistryKey = "integral_TypeManagerRegistryKey";
             const char * const gkTypeIndexKey = "integral_TypeIndexKey";
             const char * const gkTypeManagerVersionKey = "integral_TypeManagerVersionKey";
-            const char * const gkTypeIndexMetatableName = "integral_TypeIndexMetatableName";        
+            const char * const gkTypeManagerVersion = "0.1";
+            const char * const gkTypeIndexMetatableName = "integral_TypeIndexMetatableName";
             const char * const gkTypeFunctionsKey = "integral_TypeFunctionsKey";
             const char * const gkUserDataWrapperBaseTableKey = "integral_UserDataWrapperBaseTableKey";
             const char * const gkUnderlyingTypeFunctionKey = "integral_UnderlyingTypeFunctionKey";
             const char * const gkInheritanceSearchTagKey = "integral_InheritanceSearchTagKey";
             const char * const gkInheritanceKey = "integral_InheritanceKey";
             const char * const gkInheritanceIndexMetatable = "integral_InheritanceIndexMetatable";
+
             
             const std::type_index * getClassMetatableType(lua_State *luaState) {
                 //stack: metatable
@@ -127,7 +129,7 @@ namespace integral {
                 lua_setmetatable(luaState, -2);
             }
             
-            void setTypeFunctionHashTable(lua_State *luaState, size_t baseTypeHash) {
+            void setTypeFunctionHashTable(lua_State *luaState, std::size_t baseTypeHash) {
                 // stack: metatable | typeFunctionTable
                 lua_pushinteger(luaState, baseTypeHash);
                 lua_newtable(luaState);
@@ -143,7 +145,7 @@ namespace integral {
             
             void pushTypeFunctionHashTable(lua_State *luaState, const std::type_index &baseTypeIndex) {
                 // stack: metatable
-                const size_t baseTypeHash = baseTypeIndex.hash_code();
+                const std::size_t baseTypeHash = baseTypeIndex.hash_code();
                 lua_pushstring(luaState, gkTypeFunctionsKey);
                 lua_rawget(luaState, -2);
                 if (lua_istable(luaState, -1) != 0) {
@@ -354,10 +356,11 @@ namespace integral {
                             }
                             // [-]
                             // stack: underlyingLightUserData | metatable | inheritanceTable
-                            const int inheritanceTableSize = static_cast<int>(lua_rawlen(luaState, -1));
-                            for (int i = inheritanceTableSize; i >= 1; --i) {
+                            for (std::size_t i = lua_rawlen(luaState, -1); i >= 1; --i) {
                                 // stack: underlyingLightUserData | metatable | inheritanceTable
-                                lua_rawgeti(luaState, -1, static_cast<int>(i));
+                                lua_pushunsigned(luaState, i);
+                                // stack: underlyingLightUserData | metatable | inheritanceTable | i
+                                lua_rawget(luaState, -2);
                                 // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable (?)
                                 if (lua_istable(luaState, -1) != 0) {
                                     // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable
@@ -531,10 +534,11 @@ namespace integral {
                         lua_rawget(luaState, 1);
                         if (lua_istable(luaState, -1) != 0) {
                             // stack: inheritanceTable
-                            const int inheritanceTableSize = static_cast<int>(lua_rawlen(luaState, -1));
-                            for (int i = inheritanceTableSize; i >= 1; --i) {
+                            for (std::size_t i = lua_rawlen(luaState, -1); i >= 1; --i) {
                                 // stack: inheritanceTable
-                                lua_rawgeti(luaState, -1, static_cast<int>(i));
+                                lua_pushunsigned(luaState, i);
+                                // stack: inheritanceTable | i
+                                lua_rawget(luaState, -2);
                                 if (lua_istable(luaState, -1) != 0) {
                                     // stack: inheritanceTable | baseTable
                                     lua_rawgeti(luaState, -1, keInheritanceMetatableIndex);

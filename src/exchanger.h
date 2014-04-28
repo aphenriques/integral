@@ -24,10 +24,15 @@
 #ifndef integral_exchanger_h
 #define integral_exchanger_h
 
+#include <array>
+#include <limits>
+#include <sstream>
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <vector>
 #include <lua.hpp>
+#include "Adaptor.h"
 #include "ArgumentException.h"
 #include "basic.h"
 #include "type_manager.h"
@@ -37,6 +42,12 @@
 namespace integral {
     namespace detail {
         namespace exchanger {
+            template<typename T>
+            using LuaVector = Adaptor<std::vector<T>>;
+            
+            template<typename T, std::size_t N>
+            using LuaArray = Adaptor<std::array<T, N>>;
+            
             template<typename T>
             T & getObject(lua_State *luaState, int index);
             
@@ -100,6 +111,20 @@ namespace integral {
             public:
                 static T get(lua_State *luaState, int index);
                 inline static void push(lua_State *luaState, T number);
+            };
+            
+            template<typename T>
+            class Exchanger<LuaVector<T>> {
+            public:
+                static LuaVector<T> get(lua_State *luaState, int index);
+                static void push(lua_State *luaState, const LuaVector<T> &luaVector);
+            };
+            
+            template<typename T, std::size_t N>
+            class Exchanger<LuaArray<T, N>> {
+            public:
+                static LuaArray<T, N> get(lua_State *luaState, int index);
+                static void push(lua_State *luaState, const LuaArray<T, N> &luaArray);
             };
 
             template<typename T>
@@ -242,6 +267,131 @@ namespace integral {
             template<typename T>
             inline void Exchanger< T, typename std::enable_if<std::is_floating_point<T>::value>::type>::push(lua_State *luaState, T number) {
                 lua_pushnumber(luaState, static_cast<lua_Number>(number));
+            }
+            
+            template<typename T>
+            LuaVector<T> Exchanger<LuaVector<T>>::get(lua_State *luaState, int index) {
+                if (lua_isuserdata(luaState, index) == 0) {
+                    if (lua_istable(luaState, index) != 0) {
+                        lua_pushvalue(luaState, index);
+                        // stack: table
+                        const std::size_t tableSize = lua_rawlen(luaState, -1);
+                        LuaVector<T> returnVector;
+                        returnVector.reserve(tableSize);
+                        for (std::size_t i = 1; i <= tableSize; ++i) {
+                            // stack: table
+                            lua_pushunsigned(luaState, i);
+                            // stack: table | i
+                            lua_rawget(luaState, -2);
+                            // stack: table | luaVectorElement (?)
+                            try {
+                                returnVector.push_back(ExchangerType<T>::get(luaState, -1));
+                            } catch (const ArgumentException &argumentException) {
+                                throw ArgumentException(luaState, index, std::string("invalid table - LuaVector - element: " ) + argumentException.what());
+                            }
+                            // stack: table | luaVectorElement
+                            lua_pop(luaState, 1);
+                            // stack: table
+                        }
+                        // stack: table
+                        lua_pop(luaState, 1);
+                        return returnVector;
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TTABLE));
+                    }
+                } else {
+                    LuaVector<T> *userDataBase = type_manager::getConvertibleType<LuaVector<T>>(luaState, index);
+                    if (userDataBase != nullptr) {
+                        return *userDataBase;
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, "table or LuaVector");
+                    }
+                }
+            }
+            
+            template<typename T>
+            void Exchanger<LuaVector<T>>::push(lua_State *luaState, const LuaVector<T> &luaVector) {
+                using SizeType = typename LuaVector<T>::size_type;
+                const SizeType vectorSize = luaVector.size();
+                if (vectorSize <= std::numeric_limits<int>::max()) {
+                    lua_createtable(luaState, static_cast<int>(vectorSize), 0);
+                } else {
+                    lua_createtable(luaState, std::numeric_limits<int>::max(), 0);
+                }
+                // stack: table
+                for (SizeType i = 0; i < vectorSize; ++i) {
+                    // stack: table
+                    lua_pushunsigned(luaState, i + 1);
+                    // stack: table | i
+                    Exchanger<T>::push(luaState, luaVector.at(i));
+                    // stack: table | i | luaVectorElement
+                    lua_rawset(luaState, -3);
+                    // stack: table
+                }
+            }
+            
+            template<typename T, std::size_t N>
+            LuaArray<T, N> Exchanger<LuaArray<T, N>>::get(lua_State *luaState, int index) {
+                if (lua_isuserdata(luaState, index) == 0) {
+                    if (lua_istable(luaState, index) != 0) {
+                        lua_pushvalue(luaState, index);
+                        // stack: table
+                        const std::size_t tableSize = lua_rawlen(luaState, -1);
+                        if (tableSize == N) {
+                            LuaArray<T, N> returnArray;
+                            for (std::size_t i = 1; i <= tableSize; ++i) {
+                                // stack: table
+                                lua_pushunsigned(luaState, i);
+                                // stack: table | i
+                                lua_rawget(luaState, -2);
+                                // stack: table | luaArrayElement (?)
+                                try {
+                                    returnArray.at(i - 1) = ExchangerType<T>::get(luaState, -1);
+                                } catch (const ArgumentException &argumentException) {
+                                    throw ArgumentException(luaState, index, std::string("invalid table - LuaArray - element: " ) + argumentException.what());
+                                }
+                                // stack: table | luaArrayElement
+                                lua_pop(luaState, 1);
+                                // stack: table
+                            }
+                            // stack: table
+                            lua_pop(luaState, 1);
+                            return returnArray;
+                        } else {
+                            std::stringstream errorMessage;
+                            errorMessage << "wrong table - LuaArray - size: expected " << N << ", got " << tableSize;
+                            throw ArgumentException(luaState, index, errorMessage.str());
+                        }
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TTABLE));
+                    }
+                } else {
+                    LuaArray<T, N> *userDataBase = type_manager::getConvertibleType<LuaArray<T, N>>(luaState, index);
+                    if (userDataBase != nullptr) {
+                        return *userDataBase;
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, "table or LuaArray");
+                    }
+                }
+            }
+            
+            template<typename T, std::size_t N>
+            void Exchanger<LuaArray<T, N>>::push(lua_State *luaState, const LuaArray<T, N> &luaArray) {
+                if (N <= std::numeric_limits<int>::max()) {
+                    lua_createtable(luaState, static_cast<int>(N), 0);
+                } else {
+                    lua_createtable(luaState, std::numeric_limits<int>::max(), 0);
+                }
+                // stack: table
+                for (std::size_t i = 0; i < N; ++i) {
+                    // stack: table
+                    lua_pushunsigned(luaState, i + 1);
+                    // stack: table | i
+                    Exchanger<T>::push(luaState, luaArray.at(i));
+                    // stack: table | i | luaArrayElement
+                    lua_rawset(luaState, -3);
+                    // stack: table
+                }
             }
             
             template<typename T>

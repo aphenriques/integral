@@ -59,6 +59,8 @@ namespace integral {
             
             extern const char * const gkTypeManagerVersionKey;
             
+            extern const char * const gkTypeManagerVersion;
+            
             extern const char * const gkTypeIndexMetatableName;
             
             extern const char * const gkTypeFunctionsKey;
@@ -72,8 +74,6 @@ namespace integral {
             extern const char * const gkInheritanceKey;
             
             extern const char * const gkInheritanceIndexMetatable;
-            
-            constexpr unsigned TYPE_MANAGER_VERSION = 1;
             
             // FIXME change this constants to enums
             
@@ -105,7 +105,7 @@ namespace integral {
             void pushRootMetatableFromTypeHashTable(lua_State *luaState, const std::type_index &typeIndex);
             
             template<typename T>
-            void pushRootMetatableFromTypeManager(lua_State *luaState, const std::type_index &typeIndex, size_t typeHash);
+            void pushRootMetatableFromTypeManager(lua_State *luaState, const std::type_index &typeIndex, std::size_t typeHash);
             
             template<typename T>
             bool pushClassMetatable(lua_State *luaState);
@@ -115,7 +115,7 @@ namespace integral {
             template<typename T>
             inline void pushTypeIndexUserData(lua_State *luaState);
             
-            void setTypeFunctionHashTable(lua_State *luaState, size_t baseTypeHash);
+            void setTypeFunctionHashTable(lua_State *luaState, std::size_t baseTypeHash);
             
             // stack argument: metatable
             void pushTypeFunctionHashTable(lua_State *luaState, const std::type_index &baseTypeIndex);
@@ -256,7 +256,7 @@ namespace integral {
             }
             
             template<typename T>
-            void pushRootMetatableFromTypeManager(lua_State *luaState, const std::type_index &typeIndex, size_t typeHash) {
+            void pushRootMetatableFromTypeManager(lua_State *luaState, const std::type_index &typeIndex, std::size_t typeHash) {
                 // stack: typeManager
                 lua_pushinteger(luaState, typeHash);
                 lua_newtable(luaState);
@@ -279,7 +279,7 @@ namespace integral {
                 // Maybe UserDataWrapper<T> is incompatible from different integral versions used together; this way, it will fail gracefully.
                 static_assert(std::is_same<basic::BasicType<T>, std::string>::value == false, "cannot push std::string metatable. integral treats it as a primitive lua type");
                 const std::type_index typeIndex = typeid(UserDataWrapper<T>);
-                const size_t typeHash = typeIndex.hash_code();
+                const std::size_t typeHash = typeIndex.hash_code();
                 lua_pushstring(luaState, gkTypeMangerRegistryKey);
                 lua_rawget(luaState, LUA_REGISTRYINDEX);
                 if (lua_istable(luaState, -1) != 0) {
@@ -328,8 +328,8 @@ namespace integral {
                     // stack: typeManager
                     lua_pushstring(luaState, gkTypeManagerVersionKey);
                     // stack: typeManager | gkTypeManagerVersionKey
-                    lua_pushunsigned(luaState, TYPE_MANAGER_VERSION);
-                    // stack: typeManager | gkTypeManagerVersionKey | TYPE_MANAGER_VERSION
+                    lua_pushstring(luaState, gkTypeManagerVersion);
+                    // stack: typeManager | gkTypeManagerVersionKey | gkTypeManagerVersion
                     lua_rawset(luaState, -3);
                     // stack: typeManager
                     pushRootMetatableFromTypeManager<T>(luaState, typeIndex, typeHash);
@@ -532,9 +532,11 @@ namespace integral {
                 // stack: metatable | inheritanceTable
                 lua_createtable(luaState, 2, 0);
                 // stack: metatable | inheritanceTable | baseTable*
-                lua_pushvalue(luaState, -1);
-                // stack: metatable | inheritanceTable | baseTable* | baseTable*
-                lua_rawseti(luaState, -3, static_cast<int>(lua_rawlen(luaState, -3)) + 1);
+                lua_pushunsigned(luaState, lua_rawlen(luaState, -2) + 1);
+                // stack: metatable | inheritanceTable | baseTable* | inheritanceTableLength
+                lua_pushvalue(luaState, -2);
+                // stack: metatable | inheritanceTable | baseTable* | inheritanceTableLength | baseTable*
+                lua_rawset(luaState, -4);
                 // stack: metatable | inheritanceTable | baseTable
                 pushTypeIndexUserData<B>(luaState);
                 // stack: metatable | inheritanceTable | baseTable | baseTypeIndex*

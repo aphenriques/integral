@@ -1,8 +1,9 @@
 # integral
 
-`integral` is a C++ library for generating lua bindings. It is **not** a binding-code generator. It utilizes template meta programming to expose C/C++ functions and classes to lua, directly from C++ code.
+`integral` is a C++ library for binding C++ code with lua. It utilizes C++ template meta programming to interface both languages.
 
 ![Lua logo](http://www.lua.org/images/lua-logo.gif)
+
 
 # Source
 
@@ -20,6 +21,7 @@ and cloned with:
 ## Concise API
 
 * it is comprised of few but flexible functions;
+* no macros;
 * it follows the stack based structure of Lua API. Both APIs are fully compatible and can be mixed;
 * there is no manual initialization of the library. Each of its functions is autonomous.
 
@@ -36,6 +38,7 @@ and cloned with:
 ## Automatic type management
 
 * bound C/C++ types are not needed to be given a name;
+* types are automatically registered;
 * inheritance support;
 * automatic type conversion to base types;
 * custom type conversions.
@@ -127,14 +130,14 @@ To clean everything compiled (including samples):
 
 # Usage
 
-Include `integral` headers in your project search path and link to `integral` library. E.g:
+Include `integral` headers in your project search path and link to its library. E.g:
 
     compiler flag: `-I/usr/local/integral`
     linker flags: `-L/usr/local/lib -lintegral`
 
-Include the library header `integral.h` in your code (`namespace integral`).
+Include the library header `integral.h` in your code (`namespace integral`). This header includes `core.h` and `DefaultArgument.h`.
 
-The library interface is comprised of the functions in `integral.h`, which has a brief description for each of them.
+The library interface is comprised of the functions in `core.h`, which has a brief description for each of them.
 
 Check the `samples` directory for examples.
 

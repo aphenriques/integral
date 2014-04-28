@@ -28,11 +28,11 @@
 
 namespace integral {
     namespace detail {
-        ArgumentException ArgumentException::createTypeErrorException(lua_State *luaState, unsigned index, const std::string &userDataName) {
+        ArgumentException ArgumentException::createTypeErrorException(lua_State *luaState, int index, const std::string &userDataName) {
             return ArgumentException(luaState, index, std::string(userDataName) + " expected, got " + std::string(luaL_typename(luaState, index)));
         }
         
-        ArgumentException::ArgumentException(lua_State *luaState, unsigned index, const std::string &extraMessage) {
+        ArgumentException::ArgumentException(lua_State *luaState, int index, const std::string &extraMessage) {
             lua_Debug debugInfo;
             if (lua_getstack(luaState, 0, &debugInfo) == 0) {
                 std::stringstream messageStream;

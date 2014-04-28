@@ -32,9 +32,9 @@ namespace integral {
     namespace detail {
         class ArgumentException : public std::exception {
         public:
-            static ArgumentException createTypeErrorException(lua_State *luaState, unsigned index, const std::string &userDataName);
+            static ArgumentException createTypeErrorException(lua_State *luaState, int index, const std::string &userDataName);
             
-            ArgumentException(lua_State *luaState, unsigned index, const std::string &extraMessage);
+            ArgumentException(lua_State *luaState, int index, const std::string &extraMessage);
             ArgumentException(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments);
             
             inline virtual const char * what() const noexcept override;
