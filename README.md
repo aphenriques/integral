@@ -191,3 +191,5 @@ integral is free software: you can redistribute it and/or modify it under the te
 integral is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 See file `COPYING` included with this distribution or check <http://www.gnu.org/licenses/> for license information.
+
+![gplv3 logo](http://www.gnu.org/graphics/gplv3-127x51.png)
