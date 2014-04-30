@@ -287,6 +287,8 @@ namespace integral {
                             try {
                                 returnVector.push_back(ExchangerType<T>::get(luaState, -1));
                             } catch (const ArgumentException &argumentException) {
+                                // stack: table | ?
+                                lua_pop(luaState, 2);
                                 throw ArgumentException(luaState, index, std::string("invalid table - LuaVector - element: " ) + argumentException.what());
                             }
                             // stack: table | luaVectorElement
@@ -348,6 +350,8 @@ namespace integral {
                                 try {
                                     returnArray.at(i - 1) = ExchangerType<T>::get(luaState, -1);
                                 } catch (const ArgumentException &argumentException) {
+                                    // stack: table | ?
+                                    lua_pop(luaState, 2);
                                     throw ArgumentException(luaState, index, std::string("invalid table - LuaArray - element: " ) + argumentException.what());
                                 }
                                 // stack: table | luaArrayElement
