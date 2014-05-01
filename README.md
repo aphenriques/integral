@@ -96,7 +96,7 @@ int main(int argc, char * argv[]) {
 
 # Install
 
-`integral` builds on Linux and MacOSX (Windows has not been tested yet). It requires a modern C++ compiler. The library has been successfully built with:
+`integral` builds on Linux and MacOSX (Windows has not been tested yet). It requires a C++11 compatible compiler. The library has been successfully built with:
 
 * Apple LLVM version 5.0; and
 * gcc (Debian 4.7.2-5) 4.7.2
@@ -130,9 +130,9 @@ To clean everything compiled (including samples):
 
 # Usage
 
-Include `integral` headers in your project search path and link to its library. E.g:
+Set C++11 flag, include `integral` headers in your project search path and link to its library. E.g:
 
-    compiler flag: `-I/usr/local/integral`
+    compiler flag: `-std=c++11 -I/usr/local/integral`
     linker flags: `-L/usr/local/lib -lintegral`
 
 Include the library header `integral.h` in your code (`namespace integral`). This header includes `core.h` and `DefaultArgument.h`.
