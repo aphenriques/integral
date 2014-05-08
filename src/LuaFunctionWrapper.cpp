@@ -32,7 +32,7 @@ namespace integral {
     namespace detail {
         const char * const LuaFunctionWrapper::kMetatableName_ = "integral_LuaFunctionWrapperMetatableName";
         
-        void LuaFunctionWrapper::setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction, int nUpValues) {
+        void LuaFunctionWrapper::setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction) {
             basic::pushUserData<LuaFunctionWrapper>(luaState, luaFunction);
             basic::pushClassMetatable<LuaFunctionWrapper>(luaState, kMetatableName_);
             lua_setmetatable(luaState, -2);
@@ -51,7 +51,7 @@ namespace integral {
                 }
                 // error return outside catch scope so that the exception destructor can be called
                 return lua_error(luaState);
-            }, 1 + nUpValues);
+            }, 1);
         }
     }
 }

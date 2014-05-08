@@ -48,8 +48,6 @@ namespace integral {
             template<typename ...E, unsigned ...I>
             static void setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments);
             
-            inline int call(lua_State *luaState) const;
-            
         protected:
             template<typename ...E, unsigned ...I>
             FunctionWrapper(const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments);
@@ -61,6 +59,8 @@ namespace integral {
 
             std::function<R(A...)> function_;
             M defaultArgumentManager_;
+            
+            inline int call(lua_State *luaState) const;
         };
         
         //--
@@ -98,13 +98,13 @@ namespace integral {
         }
         
         template<typename M, typename R, typename ...A>
+        template<typename ...E, unsigned ...I>
+        FunctionWrapper<M, R, A...>::FunctionWrapper(const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments) : function_(function), defaultArgumentManager_(std::forward<DefaultArgument<E, I>>(defaultArguments)...) {}
+        
+        template<typename M, typename R, typename ...A>
         inline int FunctionWrapper<M, R, A...>::call(lua_State *luaState) const {
             return static_cast<int>(FunctionCaller<R, A...>::call(luaState, function_, typename TemplateSequenceGenerator<keNumberOfFunctionArguments_>::TemplateSequenceType()));
         }
-        
-        template<typename M, typename R, typename ...A>
-        template<typename ...E, unsigned ...I>
-        FunctionWrapper<M, R, A...>::FunctionWrapper(const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments) : function_(function), defaultArgumentManager_(std::forward<DefaultArgument<E, I>>(defaultArguments)...) {}
     }
 }
 

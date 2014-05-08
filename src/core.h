@@ -149,13 +149,13 @@ namespace integral {
     // The function is managed by integral so that if an exception is thrown from it, it is translated to a Lua error
     // "name": name of the bound Lua function.
     // "function": function that takes a lua_State * as argument and return an int (number of return values/objects).
-    // "nUpValues": number of upvalues on the stack.
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues = 0);
+    // no upvalues because function objects can be used
+    inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function);
     
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, const std::function<int(lua_State *)> &function, int nUpValues = 0);
+    inline void setLuaFunction(lua_State *luaState, const std::string &name, const std::function<int(lua_State *)> &function);
     
     template<typename T>
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, T &&function, int nUpValues = 0);
+    inline void setLuaFunction(lua_State *luaState, const std::string &name, T &&function);
     
     // Binds a function in the table or metatable on top of the stack.
     // The function is managed by integral so that if an exception is thrown from it, it is translated to a Lua error
@@ -266,18 +266,18 @@ namespace integral {
         detail::ConstructorWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, T, A...>::setConstructor(luaState, name, std::forward<DefaultArgument<E, I>>(defaultArguments)...);
     }
     
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues) {
-        detail::LuaFunctionWrapper::setFunction(luaState, name, function, nUpValues);
+    inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function) {
+        detail::LuaFunctionWrapper::setFunction(luaState, name, function);
     }
     
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, const std::function<int(lua_State *)> &function, int nUpValues) {
-        detail::LuaFunctionWrapper::setFunction(luaState, name, function, nUpValues);
+    inline void setLuaFunction(lua_State *luaState, const std::string &name, const std::function<int(lua_State *)> &function) {
+        detail::LuaFunctionWrapper::setFunction(luaState, name, function);
     }
     
     template<typename T>
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, T &&function, int nUpValues) {
+    inline void setLuaFunction(lua_State *luaState, const std::string &name, T &&function) {
         // explicit call to detail::LuaFunctionWrapper::setFunction is necessary to avoid infinite recursion
-        detail::LuaFunctionWrapper::setFunction(luaState, name,  std::function<int(lua_State *)>(std::forward<const T>(function)), nUpValues);
+        detail::LuaFunctionWrapper::setFunction(luaState, name,  std::function<int(lua_State *)>(std::forward<const T>(function)));
     }
     
     template<typename R, typename ...A, typename ...E, unsigned ...I>

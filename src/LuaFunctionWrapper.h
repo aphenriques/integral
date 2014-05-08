@@ -34,18 +34,18 @@ namespace integral {
         // This class exists to make it possible to get exceptions thrown by luaFunction_ on FunctionWrapperBase::callFunctionWrapper. For example, this is important to get exceptions thrown by exchanger::callConstructor when there are wrong parameters (exchanger::Exchange throws). 
         class LuaFunctionWrapper {
         public:
-            static void setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction, int nUpValues = 0);
+            static void setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction);
             
             inline LuaFunctionWrapper(const std::function<int(lua_State *)> &luaFunction);
             inline LuaFunctionWrapper(std::function<int(lua_State *)> &&luaFunction);
             inline LuaFunctionWrapper(lua_CFunction luaFunction);
             
-            inline int call(lua_State *luaState) const;
-            
         private:
             static const char * const kMetatableName_;
 
             std::function<int(lua_State *)> luaFunction_;
+            
+            inline int call(lua_State *luaState) const;
         };
         
         //--

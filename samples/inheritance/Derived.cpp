@@ -60,7 +60,6 @@ extern "C" {
     LUALIB_API int luaopen_libDerived(lua_State *luaState) {
         try {
             // base and derived class registering could have been done in any order
-            // besides what is stack concerned, integral does not rely on the order in which its functions are called
             // multiple inheritance is supported
             // inherited methods (and typeFunctions) are also inherited to derived classes
 

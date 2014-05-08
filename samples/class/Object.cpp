@@ -62,7 +62,6 @@ extern "C" {
             integral::pushClassMetatable<Object>(luaState);
 
             // functions and constructors can be registered in any order.
-            // besides what is stack concerned, integral does not rely on the order in which its functions are called
 
             // functions can be lambdas
             integral::setFunction(luaState, "toString", std::function<std::string(const Object &)>([](const Object &object) -> std::string {

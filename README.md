@@ -20,7 +20,6 @@ and cloned with:
 
 ## Concise API
 
-* it is comprised of few but flexible functions;
 * no macros;
 * it follows the stack based structure of Lua API. Both APIs are fully compatible and can be mixed;
 * there is no manual initialization of the library. Each of its functions is autonomous.
@@ -130,12 +129,12 @@ To clean everything compiled (including samples):
 
 # Usage
 
-Set C++11 flag, include `integral` headers in your project search path and link to its library. E.g:
+Set the compiler standard to C++11, include `integral` headers in the search path and link to its library. E.g:
 
     compiler flag: `-std=c++11 -I/usr/local/integral`
     linker flags: `-L/usr/local/lib -lintegral`
 
-Include the library header `integral.h` in your code (`namespace integral`). This header includes `core.h` and `DefaultArgument.h`.
+Include the library header `integral.h` (`namespace integral`). This header includes `core.h` and `DefaultArgument.h`.
 
 The library interface is comprised of the functions in `core.h`, which has a brief description for each of them.
 
