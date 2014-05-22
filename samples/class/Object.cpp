@@ -61,8 +61,6 @@ extern "C" {
         try {
             integral::pushClassMetatable<Object>(luaState);
 
-            // functions and constructors can be registered in any order.
-
             // functions can be lambdas
             integral::setFunction(luaState, "toString", std::function<std::string(const Object &)>([](const Object &object) -> std::string {
                 std::stringstream ss;
@@ -83,7 +81,7 @@ extern "C" {
             // registering a different function with the same name of a previously registered one will override it
             integral::setFunction(luaState, "setStringAndNumberFromPersistence", static_cast<void(Object::*)(const Persistence &)>(&Object::setStringAndNumber));
 
-            // Persistence need not be manually declared. Every type is automatically managed by integral
+            // Persistence class metatable need NOT be manually registered. Every type is automatically managed by integral
             integral::setFunction(luaState, "getPersistence", &Object::getPersistence);
 
             // getter (by value only) and setter functions

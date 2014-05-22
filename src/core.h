@@ -48,6 +48,12 @@ namespace integral {
     template<typename T, std::size_t N>
     using LuaArray = detail::exchanger::LuaArray<T, N>;
     
+    // Adaptor to std::tuple<T...> and lua pack (multiple return values).
+    // It is used to push multiple (function return) values.
+    // LuaPack can be seamlessly converted to std::tuple.
+    template<typename ...T>
+    using LuaPack = detail::exchanger::LuaPack<T...>;
+    
     // Pushes class metatable of type "T".
     // The class metatable can be converted to base types EVEN when they are NOT especified with defineTypeFunction or defineInheritance.
     // The class will be registered in the first time this function is called.

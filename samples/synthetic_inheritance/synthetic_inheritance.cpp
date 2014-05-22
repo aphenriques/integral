@@ -60,8 +60,6 @@ extern "C" {
         try {
             // 'synthetic inheritance' works just like inheritance with a conversion function provided
             // it is like defining type functions, but with methods inheritance
-            // there is no order requisite for defining synthetic inheritance
-            // besides what is stack concerned, integral does not rely on the order in which its functions are called
 
             integral::pushClassMetatable<BaseOfSyntheticBase>(luaState);
             integral::setFunction(luaState, "baseOfSyntheticBaseMethod", &BaseOfSyntheticBase::baseOfSyntheticBaseMethod);

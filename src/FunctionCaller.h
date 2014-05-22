@@ -26,8 +26,9 @@
 
 #include <functional>
 #include <lua.hpp>
-#include "TemplateSequence.h"
 #include "exchanger.h"
+#include "TemplateSequence.h"
+#include "type_counter.h"
 
 namespace integral {
     namespace detail {
@@ -51,7 +52,7 @@ namespace integral {
         template<unsigned ...S>
         unsigned FunctionCaller<R, A...>::call(lua_State *luaState, const std::function<R(A...)> &function, TemplateSequence<S...>) {
             exchanger::push<R>(luaState, function(exchanger::get<A>(luaState, S + 1)...));
-            return 1;
+            return static_cast<int>(type_counter::getCount<R>());
         }
         
         template<typename ...A>

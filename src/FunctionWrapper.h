@@ -37,6 +37,7 @@
 #include "DefaultArgumentManager.h"
 #include "FunctionCaller.h"
 #include "TemplateSequenceGenerator.h"
+#include "type_counter.h"
 #include "type_manager.h"
 #include "UserDataWrapper.h"
 
@@ -55,8 +56,6 @@ namespace integral {
         private:
             using FunctionWrapperType = FunctionWrapper<M, R, A...>;
             
-            static constexpr unsigned keNumberOfFunctionArguments_ = sizeof...(A);
-
             std::function<R(A...)> function_;
             M defaultArgumentManager_;
             
@@ -78,11 +77,13 @@ namespace integral {
                     if (functionWrapper != nullptr) {
                         // replicate code of maximum number of parameters checking in function::callConstructor
                         const unsigned numberOfArgumentsOnStack = static_cast<unsigned>(lua_gettop(luaState));
-                        if (numberOfArgumentsOnStack <= keNumberOfFunctionArguments_) {
-                            functionWrapper->defaultArgumentManager_.processDefaultArguments(luaState, keNumberOfFunctionArguments_, numberOfArgumentsOnStack);
+                        // type_counter::getCount provides the pack expanded count
+                        constexpr unsigned keLuaNumberOfArguments = type_counter::getCount<A...>();
+                        if (numberOfArgumentsOnStack <= keLuaNumberOfArguments) {
+                            functionWrapper->defaultArgumentManager_.processDefaultArguments(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
                             return functionWrapper->call(luaState);
                         } else {
-                            throw ArgumentException(luaState, keNumberOfFunctionArguments_, numberOfArgumentsOnStack);
+                            throw ArgumentException(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
                         }
                     } else {
                         throw std::runtime_error("corrupted FunctionWrapper");
@@ -103,7 +104,8 @@ namespace integral {
         
         template<typename M, typename R, typename ...A>
         inline int FunctionWrapper<M, R, A...>::call(lua_State *luaState) const {
-            return static_cast<int>(FunctionCaller<R, A...>::call(luaState, function_, typename TemplateSequenceGenerator<keNumberOfFunctionArguments_>::TemplateSequenceType()));
+            constexpr unsigned keCppNumberOfArguments = sizeof...(A);
+            return static_cast<int>(FunctionCaller<R, A...>::call(luaState, function_, typename TemplateSequenceGenerator<keCppNumberOfArguments>::TemplateSequenceType()));
         }
     }
 }

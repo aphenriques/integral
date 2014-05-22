@@ -108,7 +108,7 @@ extern "C" {
             // Setting methods, constructors and accessors does not change the stack
             // stack: table (module table); string (Derived class metatable field name on module table) | metatable (Derived class metatable)
 
-            // There is no order requirement for the registration of a class and its methods. A Class metatable can be pushed into stack, have some methods registered, then popped, and pushed again later for more methods registration
+            // A Class metatable can be pushed into stack, have some methods registered, then popped, and pushed again later for more methods registration
 
             lua_rawset(luaState, -3);
             // stack: table (module table)

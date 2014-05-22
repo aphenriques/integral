@@ -28,6 +28,7 @@
 #include <limits>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -35,6 +36,8 @@
 #include "Adaptor.h"
 #include "ArgumentException.h"
 #include "basic.h"
+#include "TemplateSequence.h"
+#include "TemplateSequenceGenerator.h"
 #include "type_manager.h"
 #include "UserDataWrapper.h"
 #include "UserDataWrapperBase.h"
@@ -47,6 +50,9 @@ namespace integral {
             
             template<typename T, std::size_t N>
             using LuaArray = Adaptor<std::array<T, N>>;
+            
+            template<typename ...T>
+            using LuaPack = Adaptor<std::tuple<T...>>;
             
             template<typename T>
             T & getObject(lua_State *luaState, int index);
@@ -125,6 +131,26 @@ namespace integral {
             public:
                 static LuaArray<T, N> get(lua_State *luaState, int index);
                 static void push(lua_State *luaState, const LuaArray<T, N> &luaArray);
+            };
+            
+            template<typename ...T>
+            class Exchanger<LuaPack<T...>> {
+            public:
+                inline static LuaPack<T...> get(lua_State *luaState, int index);
+                inline static void push(lua_State *luaState, const LuaPack<T...> &luaPack);
+                static void push(lua_State *luaState, T &&...luaPack);
+                
+            private:
+                template<unsigned ...S>
+                static LuaPack<T...> get(lua_State *luaState, int index, TemplateSequence<S...>);
+
+                template<unsigned ...S>
+                inline static void push(lua_State *luaState, const LuaPack<T...> &luaPack, TemplateSequence<S...>);
+
+                inline static void push_(lua_State *luaState);
+                
+                template<typename U, typename ...V>
+                static void push_(lua_State *luaState, U &&value, V &&...remainingPack);
             };
 
             template<typename T>
@@ -396,6 +422,44 @@ namespace integral {
                     lua_rawset(luaState, -3);
                     // stack: table
                 }
+            }
+            
+            template<typename ...T>
+            inline LuaPack<T...> Exchanger<LuaPack<T...>>::get(lua_State *luaState, int index) {
+                return Exchanger<LuaPack<T...>>::get(luaState, index, typename TemplateSequenceGenerator<sizeof...(T)>::TemplateSequenceType());
+            }
+            
+            template<typename ...T>
+            inline void Exchanger<LuaPack<T...>>::push(lua_State *luaState, const LuaPack<T...> &luaPack) {
+                Exchanger<LuaPack<T...>>::push(luaState, luaPack, typename TemplateSequenceGenerator<sizeof...(T)>::TemplateSequenceType());
+            }
+            
+            template<typename ...T>
+            inline void Exchanger<LuaPack<T...>>::push(lua_State *luaState, T &&...luaPack) {
+                Exchanger<LuaPack<T...>>::push_(luaState, std::forward<T>(luaPack)...);
+            }
+            
+            template<typename ...T>
+            template<unsigned ...S>
+            LuaPack<T...> Exchanger<LuaPack<T...>>::get(lua_State *luaState, int index, TemplateSequence<S...>) {
+                return LuaPack<T...>(Exchanger<T>::get(luaState, index + S)...);
+            }
+            
+            template<typename ...T>
+            template<unsigned ...S>
+            inline void Exchanger<LuaPack<T...>>::push(lua_State *luaState, const LuaPack<T...> &luaPack, TemplateSequence<S...>) {
+                Exchanger<LuaPack<T...>>::push_(luaState, std::get<S>(luaPack)...);
+            }
+
+            template<typename ...T>
+            inline void Exchanger<LuaPack<T...>>::push_(lua_State *luaState) {}
+            
+            template<typename ...T>
+            template<typename U, typename ...V>
+            void Exchanger<LuaPack<T...>>::push_(lua_State *luaState, U &&value, V &&...remainingPack) {
+                // push in order
+                ExchangerType<U>::push(luaState, std::forward<U>(value));
+                Exchanger<LuaPack<T...>>::push_(luaState, std::forward<V>(remainingPack)...);
             }
             
             template<typename T>

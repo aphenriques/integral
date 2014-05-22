@@ -50,8 +50,6 @@ extern "C" {
             lua_pop(luaState, 1);
             // SubMatch class could be pushed back again to register other functions with all its functions already registered (nothing is lost)
 
-            // Attention! There is NO requirement for the order in which the classes and its functons are registered
-
             // Regex class
             integral::pushClassMetatable<Regex>(luaState);
             // Constructor
