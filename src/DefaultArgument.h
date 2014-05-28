@@ -39,6 +39,10 @@ namespace integral {
         template<typename ...A>
         inline DefaultArgument(A &&...arguments);
         
+        // Avoids template constructor ambiguity
+        DefaultArgument(const DefaultArgument<T, I> &) = default;
+        DefaultArgument(DefaultArgument<T, I> &&) = default;
+        
         inline const T & getArgument() const;
         
     private:
