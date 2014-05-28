@@ -442,7 +442,11 @@ namespace integral {
             template<typename ...T>
             template<unsigned ...S>
             LuaPack<T...> Exchanger<LuaPack<T...>>::get(lua_State *luaState, int index, TemplateSequence<S...>) {
-                return LuaPack<T...>(Exchanger<T>::get(luaState, index + S)...);
+                if (index >= 0) {
+                    return LuaPack<T...>(Exchanger<T>::get(luaState, index + S)...);
+                } else {
+                    return LuaPack<T...>(Exchanger<T>::get(luaState, index - (sizeof...(S) - 1) + S)...);
+                }
             }
             
             template<typename ...T>
