@@ -28,16 +28,14 @@
 #include <string>
 
 namespace integral {
-    namespace detail {
-        class CallerException : public std::runtime_error {
-        public:
-            inline CallerException(const std::string &errorMessage);
-        };
-        
-        //--
-        
-        inline CallerException::CallerException(const std::string &errorMessage) : std::runtime_error(errorMessage) {}
-    }
+    class CallerException : public std::runtime_error {
+    public:
+        inline CallerException(const std::string &errorMessage);
+    };
+    
+    //--
+    
+    inline CallerException::CallerException(const std::string &errorMessage) : std::runtime_error(errorMessage) {}
 }
 
 #endif
