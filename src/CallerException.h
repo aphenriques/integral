@@ -1,5 +1,5 @@
 //
-//  integral.h
+//  CallerException.h
 //  integral
 //
 //  Copyright (C) 2013, 2014  André Pereira Henriques
@@ -21,11 +21,23 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_integral_h
-#define integral_integral_h
+#ifndef integral_CallerException_h
+#define integral_CallerException_h
 
-#include "CallerException.h"
-#include "core.h"
-#include "DefaultArgument.h"
+#include <stdexcept>
+#include <string>
+
+namespace integral {
+    namespace detail {
+        class CallerException : public std::runtime_error {
+        public:
+            inline CallerException(const std::string &errorMessage);
+        };
+        
+        //--
+        
+        inline CallerException::CallerException(const std::string &errorMessage) : std::runtime_error(errorMessage) {}
+    }
+}
 
 #endif

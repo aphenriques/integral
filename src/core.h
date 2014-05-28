@@ -29,6 +29,7 @@
 #include <typeindex>
 #include <utility>
 #include <lua.hpp>
+#include "caller.h"
 #include "ConstructorWrapper.h"
 #include "DefaultArgument.h"
 #include "DefaultArgumentManager.h"
@@ -196,6 +197,11 @@ namespace integral {
     template<typename R, typename T>
     inline void setSetter(lua_State *luaState, const std::string &name, R T::* attribute);
     
+    // arguments are pushed by value.
+    // Throws a CallerException exception on error.
+    template<typename R, typename ...A>
+    inline auto call(lua_State *luaState, A &&...arguments) -> decltype(detail::caller::call<R>(luaState, std::forward<A>(arguments)...));
+    
     //--
     
     template<typename T>
@@ -318,6 +324,11 @@ namespace integral {
         setFunction(luaState, name, std::function<void(T &, const R&)>([attribute](T &object, const R &value) -> void {
             object.*attribute = value;
         }));
+    }
+    
+    template<typename R, typename ...A>
+    inline auto call(lua_State *luaState, A &&...arguments) -> decltype(detail::caller::call<R>(luaState, std::forward<A>(arguments)...)) {
+        return detail::caller::call<R>(luaState, std::forward<A>(arguments)...);
     }
 }
 
