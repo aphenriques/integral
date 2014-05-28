@@ -162,6 +162,11 @@ namespace integral {
             template<typename T, typename ...A>
             inline void push(lua_State *luaState, A &&...arguments);
             
+            inline void pushCopy(lua_State *luaState);
+            
+            template<typename A, typename ...B>
+            void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments);
+            
             //--
             
             // dynamic_cast is faster then getConvertibleType, but getConvertibleType provides the expected behaviour with synthetic inheritance
@@ -475,6 +480,14 @@ namespace integral {
             inline void push(lua_State *luaState, A &&...arguments) {
                 static_assert(std::is_reference<T>::value == false, "cannot push reference");
                 ExchangerType<T>::push(luaState, std::forward<A>(arguments)...);
+            }
+            
+            inline void pushCopy(lua_State *luaState) {}
+            
+            template<typename A, typename ...B>
+            void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments) {
+                exchanger::push<basic::BasicType<A>>(luaState, std::forward<A>(firstArgument));
+                pushCopy(luaState, std::forward<B>(remainingArguments)...);
             }
         }
     }

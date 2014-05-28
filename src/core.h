@@ -29,7 +29,7 @@
 #include <typeindex>
 #include <utility>
 #include <lua.hpp>
-#include "caller.h"
+#include "Caller.h"
 #include "ConstructorWrapper.h"
 #include "DefaultArgument.h"
 #include "DefaultArgumentManager.h"
@@ -138,7 +138,8 @@ namespace integral {
     inline void push(lua_State *luaState, A &&...arguments);
     
     // Returns a type "T" value (string or number) or object from the stack at "index" position.
-    // Objects are returned as references.
+    // Objects are returned by reference.
+    // Lua types (number, table and strings) are returned by value.
     // If the type is incorrect, an exception is thrown.
     template<typename T>
     inline auto get(lua_State *luaState, int index) -> decltype(detail::exchanger::get<T>(luaState, index));
@@ -197,10 +198,17 @@ namespace integral {
     template<typename R, typename T>
     inline void setSetter(lua_State *luaState, const std::string &name, R T::* attribute);
     
-    // arguments are pushed by value.
+    // Calls function on top of the stack
+    // "arguments" are pushed by value.
+    // "R" is the return type, returned as follows (such as integral::get):
+    // - objects are returned by reference;
+    // - lua types (number, table and strings) are returned by value.
+    // The function is popped from stack
     // Throws a CallerException exception on error.
+    // Attention! Explicitly specifying argument types causes compilation error on Clang (it works on GCC). It looks like it is a bug.
+    // It is not necessary to explicitly specify argument types.
     template<typename R, typename ...A>
-    inline auto call(lua_State *luaState, A &&...arguments) -> decltype(detail::caller::call<R>(luaState, std::forward<A>(arguments)...));
+    inline auto call(lua_State *luaState, A &&...arguments) -> decltype(detail::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...));
     
     //--
     
@@ -327,8 +335,8 @@ namespace integral {
     }
     
     template<typename R, typename ...A>
-    inline auto call(lua_State *luaState, A &&...arguments) -> decltype(detail::caller::call<R>(luaState, std::forward<A>(arguments)...)) {
-        return detail::caller::call<R>(luaState, std::forward<A>(arguments)...);
+    inline auto call(lua_State *luaState, A &&...arguments) -> decltype(detail::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...)) {
+        return detail::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...);
     }
 }
 
