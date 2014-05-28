@@ -25,14 +25,17 @@
 #define integral_basic_h
 
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <lua.hpp>
+#include "IsStringLiteral.h"
 
 namespace integral {
     namespace detail {
         namespace basic {
+            // string literals (const char (&) [N]) are converted to const char *
             template<typename T>
-            using BasicType = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+            using BasicType = typename std::conditional<IsStringLiteral<T>::value, const char *, typename std::remove_cv<typename std::remove_reference<T>::type>::type>::type;
             
             extern const char * const gkUnknownExceptionMessage;
             
