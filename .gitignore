@@ -21,6 +21,7 @@
 ehthumbs.db
 Thumbs.db
 
-# utility files #
+# utility files and folders #
 ######################
 update.sh
+test
