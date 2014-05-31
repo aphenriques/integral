@@ -37,7 +37,6 @@
 #include "LuaFunctionWrapper.h"
 #include "TemplateSequence.h"
 #include "TemplateSequenceGenerator.h"
-#include "type_counter.h"
 
 namespace integral {
     namespace detail {
@@ -75,8 +74,8 @@ namespace integral {
             // replicate code of maximum number of parameters checking in FunctionWrapper<...>::setFunction
             const unsigned numberOfArgumentsOnStack = static_cast<unsigned>(lua_gettop(luaState));
             constexpr unsigned keCppNumberOfArguments = sizeof...(A);
-            // type_counter::getCount provides the pack expanded count
-            constexpr unsigned keLuaNumberOfArguments = type_counter::getCount<A...>();
+            // exchanger::getTypeCount provides the pack expanded count
+            constexpr unsigned keLuaNumberOfArguments = exchanger::getTypeCount<A...>();
             if (numberOfArgumentsOnStack <= keLuaNumberOfArguments) {
                 defaultArgumentManager_.processDefaultArguments(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
                 call(luaState, typename TemplateSequenceGenerator<keCppNumberOfArguments>::TemplateSequenceType());

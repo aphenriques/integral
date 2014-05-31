@@ -29,7 +29,6 @@
 #include <typeindex>
 #include <utility>
 #include <lua.hpp>
-#include "Caller.h"
 #include "ConstructorWrapper.h"
 #include "DefaultArgument.h"
 #include "DefaultArgumentManager.h"
@@ -54,6 +53,12 @@ namespace integral {
     // LuaPack can be seamlessly converted to std::tuple.
     template<typename ...T>
     using LuaPack = detail::exchanger::LuaPack<T...>;
+    
+    // Proxy to a (either C or lua) function in lua state.
+    // The object of this class cannot be stored, it only points to a function in the stack.
+    // It is meant to be used as an argument to a C function.
+    template<typename R, typename ...A>
+    using LuaFunctionArgument = detail::exchanger::LuaFunctionArgument<R, A...>;
     
     // Pushes class metatable of type "T".
     // The class metatable can be converted to base types EVEN when they are NOT especified with defineTypeFunction or defineInheritance.
@@ -208,7 +213,7 @@ namespace integral {
     // Attention! Explicitly specifying argument types causes compilation error on Clang (it works on GCC). It looks like it is a bug.
     // It is not necessary to explicitly specify argument types.
     template<typename R, typename ...A>
-    inline auto call(lua_State *luaState, A &&...arguments) -> decltype(detail::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...));
+    inline auto call(lua_State *luaState, A &&...arguments) -> decltype(detail::exchanger::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...));
     
     //--
     
@@ -335,8 +340,8 @@ namespace integral {
     }
     
     template<typename R, typename ...A>
-    inline auto call(lua_State *luaState, A &&...arguments) -> decltype(detail::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...)) {
-        return detail::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...);
+    inline auto call(lua_State *luaState, A &&...arguments) -> decltype(detail::exchanger::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...)) {
+        return detail::exchanger::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...);
     }
 }
 

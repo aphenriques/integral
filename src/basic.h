@@ -57,6 +57,11 @@ namespace integral {
             
             template<typename T>
             void pushClassMetatable(lua_State *luaState);
+            
+            constexpr unsigned getSum();
+            
+            template<typename ...J>
+            constexpr unsigned getSum(unsigned i, J... j);
 
             //--
             
@@ -104,6 +109,15 @@ namespace integral {
                     static_cast<T *>(lua_touserdata(luaState, 1))->~T();
                     return 0;
                 }, 0);
+            }
+            
+            constexpr unsigned getSum() {
+                return 0;
+            }
+            
+            template<typename ...J>
+            constexpr unsigned getSum(unsigned i, J... j) {
+                return i + getSum(j...);
             }
         }
     }
