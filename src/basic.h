@@ -33,9 +33,13 @@
 namespace integral {
     namespace detail {
         namespace basic {
-            // string literals (const char (&) [N]) are converted to const char *
+            // String literals (const char (&) [N]) are converted to const char *
+            // If it is no a string literal, the type is the same.
             template<typename T>
-            using BasicType = typename std::conditional<IsStringLiteral<T>::value, const char *, typename std::remove_cv<typename std::remove_reference<T>::type>::type>::type;
+            using StringLiteralFilterType = typename std::conditional<IsStringLiteral<T>::value, const char *, T>::type;
+            
+            template<typename T>
+            using BasicType = typename std::remove_cv<typename std::remove_reference<StringLiteralFilterType<T>>::type>::type;
             
             extern const char * const gkUnknownExceptionMessage;
             
@@ -62,6 +66,11 @@ namespace integral {
             
             template<typename ...J>
             constexpr unsigned getSum(unsigned i, J... j);
+            
+            constexpr bool getLogicalOr();
+            
+            template<typename ...B>
+            constexpr bool getLogicalOr(bool i, B... j);
 
             //--
             
@@ -118,6 +127,15 @@ namespace integral {
             template<typename ...J>
             constexpr unsigned getSum(unsigned i, J... j) {
                 return i + getSum(j...);
+            }
+            
+            constexpr bool getLogicalOr() {
+                return false;
+            }
+            
+            template<typename ...B>
+            constexpr bool getLogicalOr(bool i, B... j) {
+                return i | getLogicalOr(j...);
             }
         }
     }

@@ -210,10 +210,9 @@ namespace integral {
     // - lua types (number, table and strings) are returned by value.
     // The function is popped from stack
     // Throws a CallerException exception on error.
-    // Attention! Explicitly specifying argument types causes compilation error on Clang (it works on GCC). It looks like it is a bug.
     // It is not necessary to explicitly specify argument types.
     template<typename R, typename ...A>
-    inline auto call(lua_State *luaState, A &&...arguments) -> decltype(detail::exchanger::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...));
+    inline auto call(lua_State *luaState, const A &...arguments) -> decltype(detail::exchanger::Caller<R, A...>::call(luaState, arguments...));
     
     //--
     
@@ -340,8 +339,8 @@ namespace integral {
     }
     
     template<typename R, typename ...A>
-    inline auto call(lua_State *luaState, A &&...arguments) -> decltype(detail::exchanger::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...)) {
-        return detail::exchanger::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...);
+    inline auto call(lua_State *luaState, const A &...arguments) -> decltype(detail::exchanger::Caller<R, A...>::call(luaState, arguments...)) {
+        return detail::exchanger::Caller<R, A...>::call(luaState, arguments...);
     }
 }
 

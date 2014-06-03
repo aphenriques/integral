@@ -131,7 +131,7 @@ To clean everything compiled (including samples):
 
 Set the compiler standard to C++11, include `integral` headers in the search path and link to its library. E.g:
 
-    compiler flag: `-std=c++11 -I/usr/local/integral`
+    compiler flags: `-std=c++11 -I/usr/local/integral`
     linker flags: `-L/usr/local/lib -lintegral`
 
 Include the library header `integral.h` (`namespace integral`). This header includes `core.h` and `DefaultArgument.h`.

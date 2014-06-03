@@ -168,6 +168,8 @@ namespace integral {
             template<typename A, typename ...B>
             void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments);
             
+            // TypeCounter, Caller, LuaFunctionArgument and exchanger have intricate dependency, so they need to be in the same header
+            
             template<typename T>
             class TypeCounter {
             public:
@@ -186,13 +188,13 @@ namespace integral {
             template<typename R, typename ...A>
             class Caller {
             public:
-                static auto call(lua_State *luaState, A &&...arguments) -> decltype(get<R>(luaState, -1));
+                static auto call(lua_State *luaState, const A &...arguments) -> decltype(get<R>(luaState, -1));
             };
             
             template<typename ...A>
             class Caller<void, A...> {
             public:
-                static void call(lua_State *luaState, A &&...arguments);
+                static void call(lua_State *luaState, const A &...arguments);
             };
             
             template<typename R, typename ...A>
@@ -212,11 +214,10 @@ namespace integral {
                 LuaFunctionArgument(LuaFunctionArgument &&) = default;
 
                 // definition in class body because GCC gives strange errors inside of decltype when class definition is done separately. There is no such problem in Clang.
-                auto operator()(A &&...arguments) const -> decltype(Caller<R, A...>::call(luaState_, std::forward<A>(arguments)...)) {
+                auto operator()(const A &...arguments) const -> decltype(Caller<R, A...>::call(luaState_, arguments...)) {
                     lua_pushvalue(luaState_, luaAbsoluteStackIndex_);
-                    return Caller<R, A...>::call(luaState_, std::forward<A>(arguments)...);
+                    return Caller<R, A...>::call(luaState_, arguments...);
                 }
-
             };
             
             template<typename R, typename ...A>
@@ -565,8 +566,9 @@ namespace integral {
             }
             
             template<typename R, typename ...A>
-            auto Caller<R, A...>::call(lua_State *luaState, A &&...arguments) -> decltype(get<R>(luaState, -1)) {
-                pushCopy(luaState, std::forward<A>(arguments)...);
+            auto Caller<R, A...>::call(lua_State *luaState, const A &...arguments) -> decltype(get<R>(luaState, -1)) {
+                static_assert(basic::getLogicalOr(std::is_reference<basic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
+                pushCopy(luaState, arguments...);
                 if (lua_pcall(luaState, getTypeCount<A...>(), getTypeCount<R>(), 0) == LUA_OK) {
                     using ReturnType = decltype(get<R>(luaState, -1));
                     ReturnType returnValue = get<R>(luaState, -1);
@@ -580,13 +582,16 @@ namespace integral {
             }
             
             template<typename ...A>
-            void Caller<void, A...>::call(lua_State *luaState, A &&...arguments) {
-                pushCopy(luaState, std::forward<A>(arguments)...);
+            void Caller<void, A...>::call(lua_State *luaState, const A &...arguments) {
+                static_assert(basic::getLogicalOr(std::is_reference<basic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
+                pushCopy(luaState, arguments...);
                 lua_call(luaState, getTypeCount<A...>(), 0);
             }
             
             template<typename R, typename ...A>
-            inline LuaFunctionArgument<R, A...>::LuaFunctionArgument(lua_State *luaState, int luaAbsoluteStackIndex) : luaState_(luaState), luaAbsoluteStackIndex_(luaAbsoluteStackIndex) {}
+            inline LuaFunctionArgument<R, A...>::LuaFunctionArgument(lua_State *luaState, int luaAbsoluteStackIndex) : luaState_(luaState), luaAbsoluteStackIndex_(luaAbsoluteStackIndex) {
+                static_assert(basic::getLogicalOr(std::is_reference<basic::StringLiteralFilterType<A>>::value...) == false, "LuaFunctionArgument arguments can not be pushed as reference. They are pushed by value");
+            }
             
             template<typename R, typename ...A>
             LuaFunctionArgument<R, A...> Exchanger<LuaFunctionArgument<R, A...>>::get(lua_State *luaState, int index) {
