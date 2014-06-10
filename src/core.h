@@ -54,11 +54,12 @@ namespace integral {
     template<typename ...T>
     using LuaPack = detail::exchanger::LuaPack<T...>;
     
-    // Proxy to a (either C or lua) function in lua state.
+    // Proxy to a (either C++ or lua) function in lua state.
     // The object of this class cannot be stored, it only points to a function in the stack.
-    // It is meant to be used as an argument to a C function.
-    template<typename R, typename ...A>
-    using LuaFunctionArgument = detail::exchanger::LuaFunctionArgument<R, A...>;
+    // It is meant to be used as an argument to a C++ function.
+    // F = R(A...) (function reference type).
+    template<typename F>
+    using LuaFunctionArgument = detail::exchanger::LuaFunctionArgument<F>;
     
     // Pushes class metatable of type "T".
     // The class metatable can be converted to base types EVEN when they are NOT especified with defineTypeFunction or defineInheritance.
