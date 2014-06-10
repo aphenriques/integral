@@ -69,7 +69,7 @@ extern "C" {
             }));
 
             // overloading is not supported, so diferent constructors names must be provided
-            // assigning a registered construct name will override it
+            // assigning a registered constructor name will override it
             integral::setConstructor<Object, const std::string &, double>(luaState, "new");
             integral::setConstructor<Object, const Persistence &>(luaState, "newFromPersistence");
 
