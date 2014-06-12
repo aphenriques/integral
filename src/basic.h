@@ -33,18 +33,7 @@
 namespace integral {
     namespace detail {
         namespace basic {
-            // String literals (const char (&) [N]) are converted to const char *
-            // If it is no a string literal, the type is the same.
-            template<typename T>
-            using StringLiteralFilterType = typename std::conditional<IsStringLiteral<T>::value, const char *, T>::type;
-            
-            template<typename T>
-            using BasicType = typename std::remove_cv<typename std::remove_reference<StringLiteralFilterType<T>>::type>::type;
-            
             extern const char * const gkUnknownExceptionMessage;
-            
-            template<typename ...T>
-            inline void expandDummyTemplatePack(T...);
             
             void setLuaFunction(lua_State *luaState, const char *name, lua_CFunction function, int nUpValues);
             
@@ -61,21 +50,8 @@ namespace integral {
             
             template<typename T>
             void pushClassMetatable(lua_State *luaState);
-            
-            constexpr unsigned getSum();
-            
-            template<typename ...J>
-            constexpr unsigned getSum(unsigned i, J... j);
-            
-            constexpr bool getLogicalOr();
-            
-            template<typename ...B>
-            constexpr bool getLogicalOr(bool i, B... j);
 
             //--
-            
-            template<typename ...T>
-            inline void expandDummyTemplatePack(T...) {}
             
             inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues) {
                 setLuaFunction(luaState, name.c_str(), function, nUpValues);
@@ -118,24 +94,6 @@ namespace integral {
                     static_cast<T *>(lua_touserdata(luaState, 1))->~T();
                     return 0;
                 }, 0);
-            }
-            
-            constexpr unsigned getSum() {
-                return 0;
-            }
-            
-            template<typename ...J>
-            constexpr unsigned getSum(unsigned i, J... j) {
-                return i + getSum(j...);
-            }
-            
-            constexpr bool getLogicalOr() {
-                return false;
-            }
-            
-            template<typename ...B>
-            constexpr bool getLogicalOr(bool i, B... j) {
-                return i | getLogicalOr(j...);
             }
         }
     }

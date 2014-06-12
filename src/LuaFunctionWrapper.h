@@ -27,7 +27,6 @@
 #include <string>
 #include <functional>
 #include <lua.hpp>
-#include "basic.h"
 
 namespace integral {
     namespace detail {

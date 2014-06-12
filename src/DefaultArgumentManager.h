@@ -27,9 +27,9 @@
 #include <utility>
 #include <tuple>
 #include <lua.hpp>
-#include "basic.h"
 #include "DefaultArgument.h"
 #include "exchanger.h"
+#include "generic.h"
 #include "TemplateSequence.h"
 #include "TemplateSequenceGenerator.h"
 
@@ -73,7 +73,7 @@ namespace integral {
         template<typename ...F>
         template<unsigned ...S>
         inline void DefaultArgumentManager<F...>::processDefaultArguments(lua_State *luaState, TemplateSequence<S...>) const {
-            basic::expandDummyTemplatePack((processArgument(luaState, std::get<S>(defaultArguments_)), 0)...);
+            generic::expandDummyTemplatePack((processArgument(luaState, std::get<S>(defaultArguments_)), 0)...);
         }
         
         template<typename ...F>

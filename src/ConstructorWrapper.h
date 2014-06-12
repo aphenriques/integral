@@ -30,7 +30,6 @@
 #include <lua.hpp>
 #include "argument.h"
 #include "ArgumentException.h"
-#include "basic.h"
 #include "DefaultArgument.h"
 #include "DefaultArgumentManager.h"
 #include "exchanger.h"

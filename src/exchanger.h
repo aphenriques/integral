@@ -37,6 +37,7 @@
 #include "ArgumentException.h"
 #include "basic.h"
 #include "CallerException.h"
+#include "generic.h"
 #include "TemplateSequence.h"
 #include "TemplateSequenceGenerator.h"
 #include "type_manager.h"
@@ -155,7 +156,7 @@ namespace integral {
             };
 
             template<typename T>
-            using ExchangerType = Exchanger<basic::BasicType<T>>;
+            using ExchangerType = Exchanger<generic::BasicType<T>>;
             
             template<typename T>
             inline auto get(lua_State *luaState, int index) -> decltype(ExchangerType<T>::get(luaState, index));
@@ -550,7 +551,7 @@ namespace integral {
             
             template<typename A, typename ...B>
             void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments) {
-                push<basic::BasicType<A>>(luaState, std::forward<A>(firstArgument));
+                push<generic::BasicType<A>>(luaState, std::forward<A>(firstArgument));
                 pushCopy(luaState, std::forward<B>(remainingArguments)...);
             }
             
@@ -566,12 +567,12 @@ namespace integral {
             
             template<typename ...T>
             constexpr unsigned getTypeCount() {
-                return basic::getSum(TypeCounter<basic::BasicType<T>>::getCount()...);
+                return generic::getSum(TypeCounter<generic::BasicType<T>>::getCount()...);
             }
             
             template<typename R, typename ...A>
             auto Caller<R, A...>::call(lua_State *luaState, const A &...arguments) -> decltype(get<R>(luaState, -1)) {
-                static_assert(basic::getLogicalOr(std::is_reference<basic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
+                static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
                 pushCopy(luaState, arguments...);
                 if (lua_pcall(luaState, getTypeCount<A...>(), getTypeCount<R>(), 0) == LUA_OK) {
                     using ReturnType = decltype(get<R>(luaState, -1));
@@ -587,14 +588,14 @@ namespace integral {
             
             template<typename ...A>
             void Caller<void, A...>::call(lua_State *luaState, const A &...arguments) {
-                static_assert(basic::getLogicalOr(std::is_reference<basic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
+                static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
                 pushCopy(luaState, arguments...);
                 lua_call(luaState, getTypeCount<A...>(), 0);
             }
             
             template<typename R, typename ...A>
             inline LuaFunctionArgument<R(A...)>::LuaFunctionArgument(lua_State *luaState, int luaAbsoluteStackIndex) : luaState_(luaState), luaAbsoluteStackIndex_(luaAbsoluteStackIndex) {
-                static_assert(basic::getLogicalOr(std::is_reference<basic::StringLiteralFilterType<A>>::value...) == false, "LuaFunctionArgument arguments can not be pushed as reference. They are pushed by value");
+                static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "LuaFunctionArgument arguments can not be pushed as reference. They are pushed by value");
             }
             
             template<typename R, typename ...A>

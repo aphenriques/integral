@@ -26,8 +26,8 @@
 
 #include <type_traits>
 #include "ArgumentTag.h"
-#include "basic.h"
 #include "DefaultArgument.h"
+#include "generic.h"
 #include "MultipleInheritancePack.h"
 #include "TemplateSequence.h"
 #include "TemplateSequenceGenerator.h"
@@ -36,7 +36,7 @@ namespace integral {
     namespace detail {
         namespace argument {
             template<typename ...T, unsigned ...S>
-            constexpr auto createArgumentTagPack(TemplateSequence<S...>) -> decltype(MultipleInheritancePack<ArgumentTag<basic::BasicType<T>, S + 1>...>());
+            constexpr auto createArgumentTagPack(TemplateSequence<S...>) -> decltype(MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>());
             
             template<typename ...T, unsigned ...I>
             inline void checkDefaultArgumentTypeAndIndex(const MultipleInheritancePack<ArgumentTag<T, I>...> &);
@@ -50,8 +50,8 @@ namespace integral {
             //--
             
             template<typename ...T, unsigned ...S>
-            constexpr auto createArgumentTagPack(TemplateSequence<S...>) -> decltype(MultipleInheritancePack<ArgumentTag<basic::BasicType<T>, S + 1>...>()) {
-                return MultipleInheritancePack<ArgumentTag<basic::BasicType<T>, S + 1>...>();
+            constexpr auto createArgumentTagPack(TemplateSequence<S...>) -> decltype(MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>()) {
+                return MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>();
             }
             
             template<typename ...T, unsigned ...I>
@@ -66,7 +66,7 @@ namespace integral {
             inline void validateDefaultArguments(const DefaultArgument<T, I> &...defaultArguments) {
                 // comma operator in "(checkDefaultArgumentTypeAndIndex<E>(...), 0)" is used for function call expansion
                 // check if each default argument type and index is valid
-                basic::expandDummyTemplatePack((checkDefaultArgumentTypeAndIndex<DefaultArgument<T, I>>(createArgumentTagPack<A...>(typename TemplateSequenceGenerator<sizeof...(A)>::TemplateSequenceType())), 0)...);
+                generic::expandDummyTemplatePack((checkDefaultArgumentTypeAndIndex<DefaultArgument<T, I>>(createArgumentTagPack<A...>(typename TemplateSequenceGenerator<sizeof...(A)>::TemplateSequenceType())), 0)...);
                 // check if there is only one default argument for each index
                 MultipleInheritancePack<typename DefaultArgument<T, I>::ArgumentTag...>();
             }

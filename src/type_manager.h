@@ -31,6 +31,7 @@
 #include <type_traits>
 #include <lua.hpp>
 #include "basic.h"
+#include "generic.h"
 #include "UserDataWrapper.h"
 
 // typeid(T).name() cannot be used as an automatic indentifier for metatables. It is not safe: different classes might have the same typeid(T).name() (c++ standard)
@@ -277,7 +278,7 @@ namespace integral {
                 // Attention! The stored type_index is UserDataWrapper<T>
                 // This is useful when multiple integral versions are used.
                 // Maybe UserDataWrapper<T> is incompatible from different integral versions used together; this way, it will fail gracefully.
-                static_assert(std::is_same<basic::BasicType<T>, std::string>::value == false, "cannot push std::string metatable. integral treats it as a primitive lua type");
+                static_assert(std::is_same<generic::BasicType<T>, std::string>::value == false, "cannot push std::string metatable. integral treats it as a primitive lua type");
                 const std::type_index typeIndex = typeid(UserDataWrapper<T>);
                 const std::size_t typeHash = typeIndex.hash_code();
                 lua_pushstring(luaState, gkTypeMangerRegistryKey);
