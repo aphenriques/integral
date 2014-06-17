@@ -24,9 +24,9 @@
 #include "LuaFunctionWrapper.h"
 #include <string>
 #include <exception>
-#include <stdexcept>
 #include <lua.hpp>
 #include "basic.h"
+#include "RuntimeException.h"
 
 namespace integral {
     namespace detail {
@@ -42,7 +42,7 @@ namespace integral {
                     if (luaFunctionWrapper != nullptr) {
                         return luaFunctionWrapper->call(luaState);
                     } else {
-                        throw std::runtime_error("corrupted LuaFunctionWrapper");
+                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted LuaFunctionWrapper");
                     }
                 } catch (const std::exception &exception) {
                     lua_pushstring(luaState, (std::string("[integral] ") + exception.what()).c_str());

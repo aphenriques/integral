@@ -1,5 +1,5 @@
 //
-//  integral.h
+//  RuntimeException.cpp
 //  integral
 //
 //  Copyright (C) 2013, 2014  André Pereira Henriques
@@ -21,12 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_integral_h
-#define integral_integral_h
-
-#include "CallerException.h"
-#include "core.h"
-#include "DefaultArgument.h"
 #include "RuntimeException.h"
 
-#endif
+namespace integral {
+    RuntimeException::RuntimeException(const std::string &fileName, unsigned lineNumber, const std::string &functionName, const std::string &errorMessage) : std::runtime_error(errorMessage + " at " + fileName + ":" + std::to_string(lineNumber) + ":(" + functionName + ")") {}
+}

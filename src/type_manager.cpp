@@ -22,10 +22,10 @@
 //
 
 #include "type_manager.h"
-#include <stdexcept>
 #include <typeindex>
 #include <lua.hpp>
 #include "basic.h"
+#include "RuntimeException.h"
 
 namespace integral {
     namespace detail {
@@ -59,7 +59,7 @@ namespace integral {
                     } else {
                         //stack: metatable | ???
                         lua_pop(luaState, 1);
-                        throw std::runtime_error("corrupted userdata type_index");
+                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted userdata type_index");
                     }
                 } else {
                     //stack: metatable | ???
@@ -104,7 +104,7 @@ namespace integral {
                                 }
                             } else {
                                 lua_pop(luaState, 3);
-                                throw std::runtime_error("corrupted TypeManager - checkClassMetatableExistence");
+                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeManager - checkClassMetatableExistence");
                             }
                             // stack: typeFunctionHashTable | type_index_udata | rootMetatable
                         }
@@ -265,7 +265,7 @@ namespace integral {
                                             } else {
                                                 // stack: userdata | function
                                                 lua_pop(luaState, 2);
-                                                throw std::runtime_error("corrupted UnderlyingTypeFunction - pushDirectConvertibleType");
+                                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted UnderlyingTypeFunction - pushDirectConvertibleType");
                                             }
                                         } else {
                                             // stack: underlyingLightUserData | metatable | function
@@ -283,18 +283,18 @@ namespace integral {
                                         } else {
                                             // stack: ???
                                             lua_pop(luaState, 1);
-                                            throw std::runtime_error("corrupted TypeFunction typeFunctionHashTable - 1");
+                                            throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeFunction typeFunctionHashTable - 1");
                                         }
                                     } else {
                                         // stack: [UnderlyingLight]UserData | metatable | ???
                                         lua_pop(luaState, 3);
-                                        throw std::runtime_error("corrupted TypeFunction typeFunctionHashTable - 2");
+                                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeFunction typeFunctionHashTable - 2");
                                     }
                                 }
                             } else {
                                 // stack: underlyingLightUserData | metatable | typeFunctionHashTable | ? | function (?)
                                 lua_pop(luaState, 5);
-                                throw std::runtime_error("corrupted TypeFunction typeFunctionHashTable - 3");
+                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeFunction typeFunctionHashTable - 3");
                             }
                             // stack: underlyingLightUserData | metatable | typeFunctionHashTable | type_index_udata | function
                         }
@@ -351,7 +351,7 @@ namespace integral {
                                 } else {
                                     // stack: userdata | metatable | inheritanceTable
                                     lua_pop(luaState, 3);
-                                    throw std::runtime_error("corrupted UnderlyingTypeFunction - pushConvertibleOrInheritedType");
+                                    throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted UnderlyingTypeFunction - pushConvertibleOrInheritedType");
                                 }
                             }
                             // [-]
@@ -401,23 +401,23 @@ namespace integral {
                                                 // stack: underlyingLightUserData | metatable | inheritanceTable | baseMetatable
                                                 lua_pop(luaState, 4);
                                                 // there should be a conversion function for a inherited type
-                                                throw std::runtime_error("corrupted TypeFunction inheritanceTable - pushInheritedConvertibleType - 1");
+                                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeFunction inheritanceTable - pushInheritedConvertibleType - 1");
                                             }
                                         } else {
                                             // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable | baseMetatable | ???
                                             lua_pop(luaState, 6);
-                                            throw std::runtime_error("corrupted inheritanceTable - pushInheritedConvertibleType - 2");
+                                            throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - pushInheritedConvertibleType - 2");
                                         }
                                     } else {
                                         // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable | ???
                                         lua_pop(luaState, 5);
-                                        throw std::runtime_error("corrupted inheritanceTable - pushInheritedConvertibleType - 3");
+                                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - pushInheritedConvertibleType - 3");
 
                                     }
                                 } else {
                                     // stack: underlyingLightUserData | metatable | inheritanceTable | ???
                                     lua_pop(luaState, 4);
-                                    throw std::runtime_error("corrupted TypeFunction inheritanceTable - pushInheritedConvertibleType - 4");
+                                    throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeFunction inheritanceTable - pushInheritedConvertibleType - 4");
                                 }
                             }
                             // stack: underlyingLightUserData | metatable | inheritanceTable
@@ -468,12 +468,12 @@ namespace integral {
                                     } else {
                                         // stack: userdata | metatable | userDataWrapperBaseTable | ???
                                         lua_pop(luaState, 4);
-                                        throw std::runtime_error("corrupted userDataWrapperBaseTable - 1");
+                                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted userDataWrapperBaseTable - 1");
                                     }
                                 } else {
                                     // stack: userdata | metatable | userDataWrapperBaseTable | ???
                                     lua_pop(luaState, 4);
-                                    throw std::runtime_error("corrupted userDataWrapperBaseTable - 2");
+                                    throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted userDataWrapperBaseTable - 2");
                                 }
                             } else {
                                 // stack: userdata | metatable | userDataWrapperBaseTable | ??? (wrongTypeIndex - incompatible integral library?)

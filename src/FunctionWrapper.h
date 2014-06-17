@@ -26,7 +26,6 @@
 
 #include <exception>
 #include <functional>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <lua.hpp>
@@ -36,6 +35,7 @@
 #include "DefaultArgument.h"
 #include "DefaultArgumentManager.h"
 #include "FunctionCaller.h"
+#include "RuntimeException.h"
 #include "TemplateSequenceGenerator.h"
 #include "type_manager.h"
 #include "UserDataWrapper.h"
@@ -85,7 +85,7 @@ namespace integral {
                             throw ArgumentException(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
                         }
                     } else {
-                        throw std::runtime_error("corrupted FunctionWrapper");
+                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted FunctionWrapper");
                     }
                 } catch (const std::exception &exception) {
                     lua_pushstring(luaState, (std::string("[integral] ") + exception.what()).c_str());
