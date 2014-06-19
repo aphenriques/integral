@@ -104,7 +104,7 @@ namespace integral {
                                 }
                             } else {
                                 lua_pop(luaState, 3);
-                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeManager - checkClassMetatableExistence");
+                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeManager");
                             }
                             // stack: typeFunctionHashTable | type_index_udata | rootMetatable
                         }
@@ -265,7 +265,7 @@ namespace integral {
                                             } else {
                                                 // stack: userdata | function
                                                 lua_pop(luaState, 2);
-                                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted UnderlyingTypeFunction - pushDirectConvertibleType");
+                                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted UnderlyingTypeFunction");
                                             }
                                         } else {
                                             // stack: underlyingLightUserData | metatable | function
@@ -351,7 +351,7 @@ namespace integral {
                                 } else {
                                     // stack: userdata | metatable | inheritanceTable
                                     lua_pop(luaState, 3);
-                                    throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted UnderlyingTypeFunction - pushConvertibleOrInheritedType");
+                                    throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted UnderlyingTypeFunction");
                                 }
                             }
                             // [-]
@@ -401,23 +401,23 @@ namespace integral {
                                                 // stack: underlyingLightUserData | metatable | inheritanceTable | baseMetatable
                                                 lua_pop(luaState, 4);
                                                 // there should be a conversion function for a inherited type
-                                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeFunction inheritanceTable - pushInheritedConvertibleType - 1");
+                                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - 1");
                                             }
                                         } else {
                                             // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable | baseMetatable | ???
                                             lua_pop(luaState, 6);
-                                            throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - pushInheritedConvertibleType - 2");
+                                            throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - 2");
                                         }
                                     } else {
                                         // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable | ???
                                         lua_pop(luaState, 5);
-                                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - pushInheritedConvertibleType - 3");
+                                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - 3");
 
                                     }
                                 } else {
                                     // stack: underlyingLightUserData | metatable | inheritanceTable | ???
                                     lua_pop(luaState, 4);
-                                    throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeFunction inheritanceTable - pushInheritedConvertibleType - 4");
+                                    throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - 4");
                                 }
                             }
                             // stack: underlyingLightUserData | metatable | inheritanceTable
