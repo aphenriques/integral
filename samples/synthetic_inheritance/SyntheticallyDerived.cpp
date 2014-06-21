@@ -1,5 +1,5 @@
 //
-//  synthetic_inheritance.cpp
+//  SyntheticallyDerived.cpp
 //  integral
 //
 //  Copyright (C) 2013, 2014  André Pereira Henriques
@@ -56,7 +56,7 @@ public:
 };
 
 extern "C" {
-    LUALIB_API int luaopen_libsynthetic_inheritance(lua_State *luaState) {
+    LUALIB_API int luaopen_libSyntheticallyDerived(lua_State *luaState) {
         try {
             // 'synthetic inheritance' works just like inheritance with a conversion function provided
             // it is like defining type functions, but with methods inheritance

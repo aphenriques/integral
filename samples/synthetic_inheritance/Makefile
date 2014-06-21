@@ -2,7 +2,7 @@ include ../../common.mk
 
 SRC_DIRS:=.
 
-SAMPLE_SHARED_LIB:=libsynthetic_inheritance.so
+SAMPLE_SHARED_LIB:=libSyntheticallyDerived.so
 
 SRCS=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
 OBJS=$(addsuffix .o, $(basename $(SRCS)))

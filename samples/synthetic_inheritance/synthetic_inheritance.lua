@@ -21,9 +21,12 @@
 --  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 --
 
-SyntheticallyDerived = require("libsynthetic_inheritance")
+SyntheticallyDerived = require("libSyntheticallyDerived")
 
 syntheticallyDerived = SyntheticallyDerived.new()
+print("-> syntheticallyDerived:baseOfSyntheticBaseMethod():")
 syntheticallyDerived:baseOfSyntheticBaseMethod()
+print("-> syntheticallyDerived:syntheticBaseMethod():")
 syntheticallyDerived:syntheticBaseMethod()
+print("-> syntheticallyDerived:syntheticallyDerivedMethod():")
 syntheticallyDerived:syntheticallyDerivedMethod()
