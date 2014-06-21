@@ -54,8 +54,8 @@ print("\n-> Inheritance and functions:")
 -- number error due to float c type argument in c function (to avoid it, use double c type)
 -- calling Base metatable class with a Derived object
 print("showcase.Base.getSum(derivedObject, 21.1): ", showcase.Base.getSum(derivedObject, 21.1))
--- it does not work "directly", because Derived.getSum was not registered
--- print("derivedObject.getSum(21.1)", derivedObject.getSum(21.1)) -- will not work because it was not registed
+-- or using inheritance:
+ print("derivedObject:getSum(21.1)", derivedObject:getSum(21.1))
 print("showcase.getSumBase(derivedObject, showcase.Base.new(-2)):getNumber(): ", showcase.getSumBase(derivedObject, showcase.Base.new(-2)):getNumber());
 print("showcase.getSumBase(showcase.Base.new(-2), derivedObject):getNumber(): ", showcase.getSumBase(showcase.Base.new(-2), derivedObject):getNumber());
 

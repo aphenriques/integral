@@ -72,14 +72,16 @@ extern "C" {
             // The same applies for integral types (std::is_integral)
             integral::setFunction(luaState, "getSum", &Base::getSum);
 
-            // Setting methods, constructors and accessors does not change the stack:
+            // Setting methods, constructors and accessors does not change the stack
             // stack: table (module table); string (Base class metatable field name on module table) | metatable (Base class metatable)
-
             lua_rawset(luaState, -3);
             // stack: table (module table)
 
             lua_pushstring(luaState, "Derived");
             // stack: table (module table); string (Derived class metatable field name on module table)
+
+            // Defining inheritance does not change the stack
+            integral::defineInheritance<Derived, Base>(luaState);
 
             integral::pushClassMetatable<Derived>(luaState);
             // stack: table (module table); string (Derived class metatable field name on module table) | metatable (Derived class metatable)
@@ -107,12 +109,12 @@ extern "C" {
 
             // Setting methods, constructors and accessors does not change the stack
             // stack: table (module table); string (Derived class metatable field name on module table) | metatable (Derived class metatable)
-
-            // A Class metatable can be pushed into stack, have some methods registered, then popped, and pushed again later for more methods registration
-
             lua_rawset(luaState, -3);
             // stack: table (module table)
 
+            // A Class metatable can be pushed into stack, have some methods registered, then popped, and pushed again later for more methods registration
+
+            // Module functions
             integral::setFunction(luaState, "getSumBase", &getSumBase);
 
             integral::setFunction(luaState, "throwCppException", std::function<void(const char *)>([](const char * message) {
