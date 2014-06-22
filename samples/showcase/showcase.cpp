@@ -59,10 +59,10 @@ extern "C" {
             // stack: table (module table)
 
             lua_pushstring(luaState, "Base");
-            // stack: table (module table); string (Base class metatable field name on module table)
+            // stack: table (module table) | string (Base class metatable field name on module table)
 
             integral::pushClassMetatable<Base>(luaState);
-            // stack: table (module table); string (Base class metatable field name on module table) | metatable (Base class metatable)
+            // stack: table (module table) | string (Base class metatable field name on module table) | metatable (Base class metatable)
 
             integral::setConstructor<Base, double>(luaState, "new");
             integral::setCopyGetter(luaState, "getNumber", &Base::number_);
@@ -73,18 +73,18 @@ extern "C" {
             integral::setFunction(luaState, "getSum", &Base::getSum);
 
             // Setting methods, constructors and accessors does not change the stack
-            // stack: table (module table); string (Base class metatable field name on module table) | metatable (Base class metatable)
+            // stack: table (module table) | string (Base class metatable field name on module table) | metatable (Base class metatable)
             lua_rawset(luaState, -3);
             // stack: table (module table)
 
             lua_pushstring(luaState, "Derived");
-            // stack: table (module table); string (Derived class metatable field name on module table)
+            // stack: table (module table) | string (Derived class metatable field name on module table)
 
             // Defining inheritance does not change the stack
             integral::defineInheritance<Derived, Base>(luaState);
 
             integral::pushClassMetatable<Derived>(luaState);
-            // stack: table (module table); string (Derived class metatable field name on module table) | metatable (Derived class metatable)
+            // stack: table (module table) | string (Derived class metatable field name on module table) | metatable (Derived class metatable)
 
             integral::setConstructor<Derived, double, const char *>(luaState, "new");
             integral::setSetter(luaState, "setNumber", &Derived::number_);
@@ -108,7 +108,7 @@ extern "C" {
             });
 
             // Setting methods, constructors and accessors does not change the stack
-            // stack: table (module table); string (Derived class metatable field name on module table) | metatable (Derived class metatable)
+            // stack: table (module table) | string (Derived class metatable field name on module table) | metatable (Derived class metatable)
             lua_rawset(luaState, -3);
             // stack: table (module table)
 
