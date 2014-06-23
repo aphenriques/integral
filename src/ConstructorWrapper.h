@@ -72,15 +72,15 @@ namespace integral {
         int ConstructorWrapper<M, T, A...>::operator()(lua_State *luaState) const {
             // replicate code of maximum number of parameters checking in FunctionWrapper<...>::setFunction
             const unsigned numberOfArgumentsOnStack = static_cast<unsigned>(lua_gettop(luaState));
-            constexpr unsigned keCppNumberOfArguments = sizeof...(A);
             // exchanger::getTypeCount provides the pack expanded count
             constexpr unsigned keLuaNumberOfArguments = exchanger::getTypeCount<A...>();
             if (numberOfArgumentsOnStack <= keLuaNumberOfArguments) {
                 defaultArgumentManager_.processDefaultArguments(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
+                constexpr unsigned keCppNumberOfArguments = sizeof...(A);
                 call(luaState, typename TemplateSequenceGenerator<keCppNumberOfArguments>::TemplateSequenceType());
                 return 1;
             } else {
-                throw ArgumentException(luaState, keCppNumberOfArguments, keLuaNumberOfArguments);
+                throw ArgumentException(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
             }
         }
         
