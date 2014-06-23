@@ -105,6 +105,7 @@ namespace integral {
     // typename D class metatable need not be on the stack
     // Methods are inherited with this function.
     // If D -> B is not a possible conversion, there will be a compilation error.
+    // the __index metamethod of the metatable of the class metatable if overriden
     template<typename D, typename B>
     inline void defineInheritance(lua_State *luaState);
     
@@ -112,6 +113,7 @@ namespace integral {
     // typename T class metatable need not be on the stack
     // Methods are inherited with this function.
     // Class U can be any class, not necessarily a base class
+    // the __index metamethod of the metatable of the class metatable if overriden
     template<typename T, typename U>
     inline void defineInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
     
@@ -119,6 +121,7 @@ namespace integral {
     // typename T class metatable need not be on the stack
     // Methods are inherited with this function.
     // Class U can be any class, not necessarily a base class
+    // the __index metamethod of the metatable of the class metatable if overriden
     template<typename T, typename U>
     inline void defineInheritance(lua_State *luaState, U *(*typeFunction)(T *));
     
@@ -126,6 +129,7 @@ namespace integral {
     // typename T class metatable need not be on the stack
     // Methods are inherited with this function.
     // Class U can be any class, not necessarily a base class
+    // the __index metamethod of the metatable of the class metatable if overriden
     template<typename T, typename U>
     inline void defineInheritance(lua_State *luaState, U *(T::*typeFunction)());
     
@@ -133,6 +137,7 @@ namespace integral {
     // typename T class metatable need not be on the stack
     // Methods are inherited with this function.
     // Class U can be any class, not necessarily a base class
+    // the __index metamethod of the metatable of the class metatable if overriden
     template<typename T, typename U>
     void defineInheritance(lua_State *luaState, U T::* attribute);
     

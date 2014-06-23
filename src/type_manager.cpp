@@ -40,8 +40,7 @@ namespace integral {
             const char * const gkUnderlyingTypeFunctionKey = "integral_UnderlyingTypeFunctionKey";
             const char * const gkInheritanceSearchTagKey = "integral_InheritanceSearchTagKey";
             const char * const gkInheritanceKey = "integral_InheritanceKey";
-            const char * const gkInheritanceIndexMetatable = "integral_InheritanceIndexMetatable";
-
+            const char * const gkInheritanceIndexMetamethodKey = "integral_InheritanceIndexMetamethodKey";
             
             const std::type_index * getClassMetatableType(lua_State *luaState) {
                 //stack: metatable
@@ -177,7 +176,7 @@ namespace integral {
                 }
             }
             
-            // not allowed to throw exception (this function is used in callIndexMetamethod)
+            // not allowed to throw exception (this function is used in callInheritanceIndexMetamethod)
             bool checkInheritanceSearchTag(lua_State *luaState, int index) {
                 lua_pushvalue(luaState, index);
                 // stack: metatable
@@ -195,7 +194,7 @@ namespace integral {
                 }
             }
             
-            // not allowed to throw exception (this function is used in callIndexMetamethod)
+            // not allowed to throw exception (this function is used in callInheritanceIndexMetamethod)
             void tagInheritanceSearch(lua_State *luaState, int index) {
                 lua_pushvalue(luaState, index);
                 // stack: metatable
@@ -208,7 +207,7 @@ namespace integral {
                 lua_pop(luaState, 1);
             }
             
-            // not allowed to throw exception (this function is used in callIndexMetamethod)
+            // not allowed to throw exception (this function is used in callInheritanceIndexMetamethod)
             void untagInheritanceSearch(lua_State *luaState, int index) {
                 lua_pushvalue(luaState, index);
                 // stack: metatable
@@ -519,7 +518,7 @@ namespace integral {
 
 
             // lua_CFunction style function: no exceptions and no objects (with destructors)
-            int callIndexMetamethod(lua_State *luaState) {
+            int callInheritanceIndexMetamethod(lua_State *luaState) {
                 // arguments: table (1), key (2)
                 if (checkInheritanceSearchTag(luaState, -2) == false) {
                     lua_pushvalue(luaState, 2);
@@ -597,24 +596,51 @@ namespace integral {
                 }
             }
             
-            void pushInheritanceIndexMetaTable(lua_State *luaState) {
-                // stack: metatable
-                lua_pushstring(luaState, gkInheritanceIndexMetatable);
-                // stack: gkInheritanceIndexMetatable
+            void pushInheritanceIndexMetamethod(lua_State *luaState) {
+                lua_pushstring(luaState, gkInheritanceIndexMetamethodKey);
+                // stack: gkInheritanceIndexMetamethodKey
                 lua_rawget(luaState, LUA_REGISTRYINDEX);
-                if (lua_istable(luaState, -1) == 0) {
-                    // stack: nil
+                // stack: callInheritanceIndexMetamethod (?)
+                if (lua_iscfunction(luaState, -1) == 0) {
+                    // stack: ?
                     lua_pop(luaState, 1);
-                    lua_newtable(luaState);
-                    lua_pushstring(luaState, gkInheritanceIndexMetatable);
-                    // stack: InheritanceMetatable* | gkInheritanceIndexMetatable
+                    // stack:
+                    lua_pushcfunction(luaState, callInheritanceIndexMetamethod);
+                    // stack: callInheritanceIndexMetamethod
+                    lua_pushstring(luaState, gkInheritanceIndexMetamethodKey);
+                    // stack: callInheritanceIndexMetamethod | gkInheritanceIndexMetamethodKey
                     lua_pushvalue(luaState, -2);
-                    // stack: InheritanceMetatable* | gkInheritanceIndexMetatable | InheritanceMetatable*
+                    // stack: callInheritanceIndexMetamethod | gkInheritanceIndexMetamethodKey | callInheritanceIndexMetamethod
                     lua_rawset(luaState, LUA_REGISTRYINDEX);
-                    // stack: InheritanceMetatable
-                    basic::setLuaFunction(luaState, "__index", callIndexMetamethod, 0);
+                    // stack: callInheritanceIndexMetamethod
                 }
-                // stack: InheritanceMetatable
+            }
+            
+            void setInheritanceIndexMetatable(lua_State *luaState) {
+                // stack: metatable
+                if (lua_getmetatable(luaState, -1) == 0) {
+                    // stack: metatable
+                    lua_createtable(luaState, 0, 1);
+                    // stack: metatable | metatableMetatable*
+                    lua_pushstring(luaState, "__index");
+                    // stack: metatable | metatableMetatable* | "__index"
+                    pushInheritanceIndexMetamethod(luaState);
+                    // stack: metatable | metatableMetatable* | "__index" | callInheritanceIndexMetamethod
+                    lua_rawset(luaState, -3);
+                    // stack: metatable | metatableMetatable*
+                    lua_setmetatable(luaState, -2);
+                    // stack: metatable
+                } else { // preserves a previously defined metatable (possibly with other metamethods)
+                    // stack: metatable | metatableMetatable
+                    lua_pushstring(luaState, "__index");
+                    // stack: metatable | metatableMetatable | "__index"
+                    pushInheritanceIndexMetamethod(luaState);
+                    // stack: metatable | metatableMetatable | "__index" | callInheritanceIndexMetamethod
+                    lua_rawset(luaState, -3);
+                    // stack: metatable | metatableMetatable
+                    lua_pop(luaState, 1);
+                    // stack: metatable
+                }
             }
         }
     }

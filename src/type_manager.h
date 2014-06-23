@@ -74,7 +74,7 @@ namespace integral {
             
             extern const char * const gkInheritanceKey;
             
-            extern const char * const gkInheritanceIndexMetatable;
+            extern const char * const gkInheritanceIndexMetamethodKey;
             
             // FIXME change this constants to enums
             
@@ -190,10 +190,12 @@ namespace integral {
             template<typename B>
             void setInheritanceTable(lua_State *luaState);
             
-            int callIndexMetamethod(lua_State *luaState);
+            int callInheritanceIndexMetamethod(lua_State *luaState);
+            
+            void pushInheritanceIndexMetamethod(lua_State *luaState);
             
             // stack argument: metatable
-            void pushInheritanceIndexMetaTable(lua_State *luaState);
+            void setInheritanceIndexMetatable(lua_State *luaState);
             
             //--
             
@@ -471,8 +473,8 @@ namespace integral {
                 // stack: metatable
                 setInheritanceTable<B>(luaState);
                 setTypeFunction<D, B>(luaState);
-                pushInheritanceIndexMetaTable(luaState);
-                lua_setmetatable(luaState, -2);
+                // preserves a previously defined metatable (possibly with other metamethods)
+                setInheritanceIndexMetatable(luaState);
                 // stack: metatable
             }
             
@@ -482,8 +484,8 @@ namespace integral {
                 // stack: metatable
                 setInheritanceTable<U>(luaState);
                 setTypeFunction<T, U>(luaState, typeFunction);
-                pushInheritanceIndexMetaTable(luaState);
-                lua_setmetatable(luaState, -2);
+                // preserves a previously defined metatable (possibly with other metamethods)
+                setInheritanceIndexMetatable(luaState);
                 // stack: metatable
             }
             
