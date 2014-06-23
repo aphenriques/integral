@@ -163,7 +163,7 @@ For `embedded`, run the compiled executable `embedded`
 * `integral_LuaFunctionWrapperMetatableName`;
 * `integral_TypeIndexMetatableName`;
 * `integral_TypeManagerRegistryKey`;
-* `integral_InheritanceIndexMetatable`.
+* `integral_InheritanceIndexMetamethodKey`.
 
 The library also makes use of the following field names for its generated class metatables:
 
