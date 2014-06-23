@@ -413,18 +413,18 @@ namespace integral {
                 const SizeType vectorSize = luaVector.size();
                 if (vectorSize <= std::numeric_limits<int>::max()) {
                     lua_createtable(luaState, static_cast<int>(vectorSize), 0);
+                    // stack: table
+                    for (SizeType i = 0; i < vectorSize; ++i) {
+                        // stack: table
+                        lua_pushunsigned(luaState, i + 1);
+                        // stack: table | i
+                        Exchanger<T>::push(luaState, luaVector.at(i));
+                        // stack: table | i | luaVectorElement
+                        lua_rawset(luaState, -3);
+                        // stack: table
+                    }
                 } else {
-                    lua_createtable(luaState, std::numeric_limits<int>::max(), 0);
-                }
-                // stack: table
-                for (SizeType i = 0; i < vectorSize; ++i) {
-                    // stack: table
-                    lua_pushunsigned(luaState, i + 1);
-                    // stack: table | i
-                    Exchanger<T>::push(luaState, luaVector.at(i));
-                    // stack: table | i | luaVectorElement
-                    lua_rawset(luaState, -3);
-                    // stack: table
+                    throw RuntimeException(__FILE__, __LINE__, __func__, "LuaVector is too big");
                 }
             }
             
@@ -479,18 +479,18 @@ namespace integral {
             void Exchanger<LuaArray<T, N>>::push(lua_State *luaState, const LuaArray<T, N> &luaArray) {
                 if (N <= std::numeric_limits<int>::max()) {
                     lua_createtable(luaState, static_cast<int>(N), 0);
+                    // stack: table
+                    for (std::size_t i = 0; i < N; ++i) {
+                        // stack: table
+                        lua_pushunsigned(luaState, i + 1);
+                        // stack: table | i
+                        Exchanger<T>::push(luaState, luaArray.at(i));
+                        // stack: table | i | luaArrayElement
+                        lua_rawset(luaState, -3);
+                        // stack: table
+                    }
                 } else {
-                    lua_createtable(luaState, std::numeric_limits<int>::max(), 0);
-                }
-                // stack: table
-                for (std::size_t i = 0; i < N; ++i) {
-                    // stack: table
-                    lua_pushunsigned(luaState, i + 1);
-                    // stack: table | i
-                    Exchanger<T>::push(luaState, luaArray.at(i));
-                    // stack: table | i | luaArrayElement
-                    lua_rawset(luaState, -3);
-                    // stack: table
+                    throw RuntimeException(__FILE__, __LINE__, __func__, "LuaArray is too big");
                 }
             }
             
