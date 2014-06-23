@@ -29,28 +29,26 @@
 #include <lua.hpp>
 
 namespace integral {
-    namespace detail {
-        class ArgumentException : public std::exception {
-        public:
-            static ArgumentException createTypeErrorException(lua_State *luaState, int index, const std::string &userDataName);
-            
-            ArgumentException(lua_State *luaState, int index, const std::string &extraMessage);
-            ArgumentException(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments);
-            
-            inline virtual const char * what() const noexcept override;
-            
-        private:
-            static bool findField (lua_State *luaState, int index, int level);        
-            static bool pushGlobalFunctionName (lua_State *L, lua_Debug *debugInfo);
-            
-            std::string message_;
-        };
+    class ArgumentException : public std::exception {
+    public:
+        static ArgumentException createTypeErrorException(lua_State *luaState, int index, const std::string &userDataName);
         
-        //--
+        ArgumentException(lua_State *luaState, int index, const std::string &extraMessage);
+        ArgumentException(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments);
         
-        inline const char * ArgumentException::what() const noexcept {
-            return message_.c_str();
-        }
+        inline virtual const char * what() const noexcept override;
+        
+    private:
+        static bool findField (lua_State *luaState, int index, int level);        
+        static bool pushGlobalFunctionName (lua_State *L, lua_Debug *debugInfo);
+        
+        std::string message_;
+    };
+    
+    //--
+    
+    inline const char * ArgumentException::what() const noexcept {
+        return message_.c_str();
     }
 }
 

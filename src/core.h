@@ -151,7 +151,7 @@ namespace integral {
     // Returns a type "T" value (string or number) or object from the stack at "index" position.
     // Objects are returned by reference.
     // Lua types (number, table and strings) are returned by value.
-    // If the type is incorrect, an exception is thrown.
+    // If the type is incorrect, an ArgumentException is thrown.
     template<typename T>
     inline auto get(lua_State *luaState, int index) -> decltype(detail::exchanger::get<T>(luaState, index));
     

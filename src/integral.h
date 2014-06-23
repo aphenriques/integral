@@ -24,6 +24,7 @@
 #ifndef integral_integral_h
 #define integral_integral_h
 
+#include "ArgumentException.h"
 #include "CallerException.h"
 #include "core.h"
 #include "DefaultArgument.h"
