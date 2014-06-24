@@ -28,7 +28,7 @@
 
 namespace integral {
     namespace utility {
-        void printStack(lua_State *luaState);
+        int printStack(lua_State *luaState);
     }
 }
 

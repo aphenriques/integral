@@ -26,7 +26,7 @@
 
 namespace integral {
     namespace utility {
-        void printStack(lua_State *luaState) {
+        int printStack(lua_State *luaState) {
             int top = lua_gettop(luaState);
             std::cout << "stack dump: ";
             for (int i = 1; i <= top; i++) {
@@ -60,6 +60,7 @@ namespace integral {
                 std::cout << "  ";
             }
             std::cout << std::endl;
+            return 0;
         }
     }
 }
