@@ -57,9 +57,10 @@ namespace integral {
     // Proxy to a (either C++ or lua) function in lua state.
     // The object of this class cannot be stored, it only points to a function in the stack.
     // It is meant to be used as an argument to a C++ function.
-    // F = R(A...) (function reference type).
-    template<typename F>
-    using LuaFunctionArgument = detail::exchanger::LuaFunctionArgument<F>;
+    // To call the function:
+    // - R LuaFunctionArgument::call<R>(const A ...&);
+    // - 'R' is a non-reference value (it can be void).
+    using LuaFunctionArgument = detail::exchanger::LuaFunctionArgument;
     
     // Pushes class metatable of type "T".
     // The class metatable can be converted to base types EVEN when they are NOT especified with defineTypeFunction or defineInheritance.

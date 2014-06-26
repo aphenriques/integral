@@ -198,12 +198,7 @@ namespace integral {
                 static void call(lua_State *luaState, const A &...arguments);
             };
             
-            // undefined to enforce function reference notation as defined in the template specialization below
-            template<typename>
-            class LuaFunctionArgument;
-            
-            template<typename R, typename ...A>
-            class LuaFunctionArgument<R(A...)> {
+            class LuaFunctionArgument {
                 template<typename, typename> friend class Exchanger;
                 
             private:
@@ -218,18 +213,19 @@ namespace integral {
             public:
                 LuaFunctionArgument(LuaFunctionArgument &&) = default;
 
-                // definition in class body because GCC gives strange errors inside of decltype when class definition is done separately. There is no such problem in Clang.
-                auto operator()(const A &...arguments) const -> decltype(Caller<R, A...>::call(luaState_, arguments...)) {
+                // definition in class body because GCC reports strange errors from inside decltype when class definition is done separately. There is no such problem in Clang.
+                template<typename R, typename ...A>
+                auto call(const A &...arguments) const -> decltype(Caller<R, A...>::call(luaState_, arguments...)) {
                     lua_pushvalue(luaState_, luaAbsoluteStackIndex_);
                     return Caller<R, A...>::call(luaState_, arguments...);
                 }
             };
             
-            template<typename R, typename ...A>
-            class Exchanger<LuaFunctionArgument<R(A...)>> {
+            template<>
+            class Exchanger<LuaFunctionArgument> {
             public:
-                static LuaFunctionArgument<R(A...)> get(lua_State *luaState, int index);
-                inline static void push(lua_State *luaState, const LuaFunctionArgument<R(A...)> &luaFunctionArgument);
+                static LuaFunctionArgument get(lua_State *luaState, int index);
+                inline static void push(lua_State *luaState, const LuaFunctionArgument &luaFunctionArgument);
             };
             
             //--
@@ -593,23 +589,11 @@ namespace integral {
                 lua_call(luaState, getTypeCount<A...>(), 0);
             }
             
-            template<typename R, typename ...A>
-            inline LuaFunctionArgument<R(A...)>::LuaFunctionArgument(lua_State *luaState, int luaAbsoluteStackIndex) : luaState_(luaState), luaAbsoluteStackIndex_(luaAbsoluteStackIndex) {
-                static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "LuaFunctionArgument arguments can not be pushed as reference. They are pushed by value");
+            inline LuaFunctionArgument::LuaFunctionArgument(lua_State *luaState, int luaAbsoluteStackIndex) : luaState_(luaState), luaAbsoluteStackIndex_(luaAbsoluteStackIndex) {
             }
             
-            template<typename R, typename ...A>
-            LuaFunctionArgument<R(A...)> Exchanger<LuaFunctionArgument<R(A...)>>::get(lua_State *luaState, int index) {
-                if (lua_isfunction(luaState, index) != 0) {
-                    return LuaFunctionArgument<R(A...)>(luaState, lua_absindex(luaState, index));
-                } else {
-                    throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TFUNCTION));
-                }
-            }
-            
-            template<typename R, typename ...A>
-            inline void Exchanger<LuaFunctionArgument<R(A...)>>::push(lua_State *luaState, const LuaFunctionArgument<R(A...)> &luaFunctionArgument) {
-                lua_pushvalue(luaState, luaFunctionArgument.getLuaAbsoluteStackIndex());
+            inline void Exchanger<LuaFunctionArgument>::push(lua_State *luaState, const LuaFunctionArgument &luaFunctionArgument) {
+                lua_pushvalue(luaState, luaFunctionArgument.luaAbsoluteStackIndex_);
             }
         }
     }
