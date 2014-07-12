@@ -177,6 +177,7 @@ namespace integral {
             }
             
             // not allowed to throw exception (this function is used in callInheritanceIndexMetamethod)
+            // noexcept modifier is not suited because if lua is compiled with exceptions (c++) its functions can throw exceptions (this is not a problem)
             bool checkInheritanceSearchTag(lua_State *luaState, int index) {
                 lua_pushvalue(luaState, index);
                 // stack: metatable
@@ -195,6 +196,7 @@ namespace integral {
             }
             
             // not allowed to throw exception (this function is used in callInheritanceIndexMetamethod)
+            // noexcept modifier is not suited because if lua is compiled with exceptions (c++) its functions can throw exceptions (this is not a problem)
             void tagInheritanceSearch(lua_State *luaState, int index) {
                 lua_pushvalue(luaState, index);
                 // stack: metatable
@@ -208,6 +210,7 @@ namespace integral {
             }
             
             // not allowed to throw exception (this function is used in callInheritanceIndexMetamethod)
+            // noexcept modifier is not suited because if lua is compiled with exceptions (c++) its functions can throw exceptions (this is not a problem)
             void untagInheritanceSearch(lua_State *luaState, int index) {
                 lua_pushvalue(luaState, index);
                 // stack: metatable
