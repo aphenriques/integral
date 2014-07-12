@@ -47,6 +47,9 @@ namespace integral {
         class FunctionWrapper {
         public:
             template<typename ...E, unsigned ...I>
+            static void pushFunction(lua_State *luaState, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments);
+            
+            template<typename ...E, unsigned ...I>
             static void setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments);
             
         protected:
@@ -66,12 +69,12 @@ namespace integral {
         
         template<typename M, typename R, typename ...A>
         template<typename ...E, unsigned ...I>
-        void FunctionWrapper<M, R, A...>::setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments) {
+        void FunctionWrapper<M, R, A...>::pushFunction(lua_State *luaState, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments) {
             argument::validateDefaultArguments<A...>(std::forward<DefaultArgument<E, I>>(defaultArguments)...);
             basic::pushUserData<UserDataWrapper<FunctionWrapperType>>(luaState, function, std::forward<DefaultArgument<E, I>>(defaultArguments)...);
             type_manager::pushClassMetatable<FunctionWrapperType>(luaState);
             lua_setmetatable(luaState, -2);
-            basic::setLuaFunction(luaState, name, [](lua_State *luaState) -> int {
+            lua_pushcclosure(luaState, [](lua_State *luaState) -> int {
                 try {
                     UserDataWrapper<FunctionWrapperType> *functionWrapper = type_manager::getUserDataWrapper<FunctionWrapperType>(luaState, lua_upvalueindex(1));
                     if (functionWrapper != nullptr) {
@@ -96,6 +99,14 @@ namespace integral {
                 // error return outside catch scope so that the exception destructor can be called
                 return lua_error(luaState);
             }, 1);
+        }
+        
+        template<typename M, typename R, typename ...A>
+        template<typename ...E, unsigned ...I>
+        void FunctionWrapper<M, R, A...>::setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments) {
+            lua_pushstring(luaState, name.c_str());
+            pushFunction(luaState, function, std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+            lua_rawset(luaState, -3);
         }
         
         template<typename M, typename R, typename ...A>
