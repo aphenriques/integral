@@ -111,21 +111,12 @@ namespace integral {
     template<typename T, typename U>
     inline void defineTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
     
-    // Sets a type conversion function of class T to class U.
-    // typename T class metatable need not be on the stack
-    // Class U can be any class, not necessarily a base class
     template<typename T, typename U>
     inline void defineTypeFunction(lua_State *luaState, U *(*typeFunction)(T *));
     
-    // Sets a type conversion function of class T to class U.
-    // typename T class metatable need not be on the stack
-    // Class U can be any class, not necessarily a base class
     template<typename T, typename U>
     inline void defineTypeFunction(lua_State *luaState, U *(T::*typeFunction)());
     
-    // Sets a type conversion function of class T to class U.
-    // typename T class metatable need not be on the stack
-    // Class U can be any class, not necessarily a base class
     template<typename T, typename U>
     void defineTypeFunction(lua_State *luaState, U T::* attribute);
     
@@ -145,27 +136,12 @@ namespace integral {
     template<typename T, typename U>
     inline void defineInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
     
-    // Sets 'synthetic' inheritance between class T to class U using typeFunction conversion function.
-    // typename T class metatable need not be on the stack
-    // Methods are inherited with this function.
-    // Class U can be any class, not necessarily a base class
-    // the __index metamethod of the metatable of the class metatable if overriden
     template<typename T, typename U>
     inline void defineInheritance(lua_State *luaState, U *(*typeFunction)(T *));
     
-    // Sets 'synthetic' inheritance between class T to class U using typeFunction conversion function.
-    // typename T class metatable need not be on the stack
-    // Methods are inherited with this function.
-    // Class U can be any class, not necessarily a base class
-    // the __index metamethod of the metatable of the class metatable if overriden
     template<typename T, typename U>
     inline void defineInheritance(lua_State *luaState, U *(T::*typeFunction)());
     
-    // Sets 'synthetic' inheritance between class T to class U using member attribute pointer.
-    // typename T class metatable need not be on the stack
-    // Methods are inherited with this function.
-    // Class U can be any class, not necessarily a base class
-    // the __index metamethod of the metatable of the class metatable if overriden
     template<typename T, typename U>
     void defineInheritance(lua_State *luaState, U T::* attribute);
     
