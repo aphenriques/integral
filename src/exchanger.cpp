@@ -77,14 +77,6 @@ namespace integral {
                     }
                 }
             }
-            
-            LuaFunctionArgument Exchanger<LuaFunctionArgument>::get(lua_State *luaState, int index) {
-                if (lua_isfunction(luaState, index) != 0) {
-                    return LuaFunctionArgument(luaState, lua_absindex(luaState, index));
-                } else {
-                    throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TFUNCTION));
-                }
-            }
         }
     }
 }

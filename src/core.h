@@ -29,15 +29,22 @@
 #include <typeindex>
 #include <utility>
 #include <lua.hpp>
+#include "Caller.h"
 #include "ConstructorWrapper.h"
 #include "DefaultArgument.h"
 #include "DefaultArgumentManager.h"
 #include "exchanger.h"
 #include "FunctionWrapper.h"
+#include "LuaFunctionArgument.h"
 #include "LuaFunctionWrapper.h"
+#include "LuaIgnoredArgument.h"
 #include "type_manager.h"
 
 namespace integral {
+    // Proxy to any value in lua state.
+    // It is meant to be used as an argument to a C++ function.
+    using LuaIgnoredArgument = detail::LuaIgnoredArgument;
+    
     // Adaptor to std::vector<T> and lua table.
     // LuaVector can be seamlessly converted to std::vector.
     template<typename T>
@@ -60,7 +67,7 @@ namespace integral {
     // To call the function:
     // - R LuaFunctionArgument::call<R>(const A ...&);
     // - 'R' is a non-reference value (it can be void).
-    using LuaFunctionArgument = detail::exchanger::LuaFunctionArgument;
+    using LuaFunctionArgument = detail::LuaFunctionArgument;
     
     // Pushes class metatable of type "T".
     // The class metatable can be converted to base types EVEN when they are NOT especified with defineTypeFunction or defineInheritance.
@@ -219,7 +226,7 @@ namespace integral {
     // Throws a CallerException exception on error.
     // It is not necessary to explicitly specify argument types.
     template<typename R, typename ...A>
-    inline auto call(lua_State *luaState, const A &...arguments) -> decltype(detail::exchanger::Caller<R, A...>::call(luaState, arguments...));
+    inline auto call(lua_State *luaState, const A &...arguments) -> decltype(detail::Caller<R, A...>::call(luaState, arguments...));
     
     //--
     
@@ -346,8 +353,8 @@ namespace integral {
     }
     
     template<typename R, typename ...A>
-    inline auto call(lua_State *luaState, const A &...arguments) -> decltype(detail::exchanger::Caller<R, A...>::call(luaState, arguments...)) {
-        return detail::exchanger::Caller<R, A...>::call(luaState, arguments...);
+    inline auto call(lua_State *luaState, const A &...arguments) -> decltype(detail::Caller<R, A...>::call(luaState, arguments...)) {
+        return detail::Caller<R, A...>::call(luaState, arguments...);
     }
 }
 

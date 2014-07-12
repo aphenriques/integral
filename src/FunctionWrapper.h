@@ -37,6 +37,7 @@
 #include "FunctionCaller.h"
 #include "RuntimeException.h"
 #include "TemplateSequenceGenerator.h"
+#include "type_count.h"
 #include "type_manager.h"
 #include "UserDataWrapper.h"
 
@@ -76,8 +77,8 @@ namespace integral {
                     if (functionWrapper != nullptr) {
                         // replicate code of maximum number of parameters checking in function::callConstructor
                         const unsigned numberOfArgumentsOnStack = static_cast<unsigned>(lua_gettop(luaState));
-                        // exchanger::getTypeCount provides the pack expanded count
-                        constexpr unsigned keLuaNumberOfArguments = exchanger::getTypeCount<A...>();
+                        // type_count::getTypeCount provides the pack expanded count
+                        constexpr unsigned keLuaNumberOfArguments = type_count::getTypeCount<A...>();
                         if (numberOfArgumentsOnStack <= keLuaNumberOfArguments) {
                             functionWrapper->defaultArgumentManager_.processDefaultArguments(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
                             return functionWrapper->call(luaState);

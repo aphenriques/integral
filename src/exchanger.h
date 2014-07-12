@@ -36,7 +36,6 @@
 #include "Adaptor.h"
 #include "ArgumentException.h"
 #include "basic.h"
-#include "CallerException.h"
 #include "generic.h"
 #include "TemplateSequence.h"
 #include "TemplateSequenceGenerator.h"
@@ -168,65 +167,6 @@ namespace integral {
             
             template<typename A, typename ...B>
             void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments);
-            
-            // TypeCounter, Caller, LuaFunctionArgument and exchanger have intricate dependency, so they need to be in the same header
-            
-            template<typename T>
-            class TypeCounter {
-            public:
-                static constexpr unsigned getCount();
-            };
-            
-            template<typename ...T>
-            class TypeCounter<LuaPack<T...>> {
-            public:
-                static constexpr unsigned getCount();
-            };
-            
-            template<typename ...T>
-            constexpr unsigned getTypeCount();
-            
-            template<typename R, typename ...A>
-            class Caller {
-            public:
-                static auto call(lua_State *luaState, const A &...arguments) -> decltype(get<R>(luaState, -1));
-            };
-            
-            template<typename ...A>
-            class Caller<void, A...> {
-            public:
-                static void call(lua_State *luaState, const A &...arguments);
-            };
-            
-            class LuaFunctionArgument {
-                template<typename, typename> friend class Exchanger;
-                
-            private:
-                lua_State * const luaState_;
-                const int luaAbsoluteStackIndex_;
-                
-                inline LuaFunctionArgument(lua_State *luaState, int luaAbsoluteStackIndex);
-                // LuaFunctionArgument cannot not be copied
-                LuaFunctionArgument(const LuaFunctionArgument &) = delete;
-                LuaFunctionArgument & operator=(const LuaFunctionArgument &) = delete;
-                
-            public:
-                LuaFunctionArgument(LuaFunctionArgument &&) = default;
-
-                // definition in class body because GCC reports strange errors from inside decltype when class definition is done separately. There is no such problem in Clang.
-                template<typename R, typename ...A>
-                auto call(const A &...arguments) const -> decltype(Caller<R, A...>::call(luaState_, arguments...)) {
-                    lua_pushvalue(luaState_, luaAbsoluteStackIndex_);
-                    return Caller<R, A...>::call(luaState_, arguments...);
-                }
-            };
-            
-            template<>
-            class Exchanger<LuaFunctionArgument> {
-            public:
-                static LuaFunctionArgument get(lua_State *luaState, int index);
-                inline static void push(lua_State *luaState, const LuaFunctionArgument &luaFunctionArgument);
-            };
             
             //--
             
@@ -549,51 +489,6 @@ namespace integral {
             void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments) {
                 push<generic::BasicType<A>>(luaState, std::forward<A>(firstArgument));
                 pushCopy(luaState, std::forward<B>(remainingArguments)...);
-            }
-            
-            template<typename T>
-            constexpr unsigned TypeCounter<T>::getCount() {
-                return 1;
-            }
-            
-            template<typename ...T>
-            constexpr unsigned TypeCounter<LuaPack<T...>>::getCount() {
-                return sizeof...(T);
-            }
-            
-            template<typename ...T>
-            constexpr unsigned getTypeCount() {
-                return generic::getSum(TypeCounter<generic::BasicType<T>>::getCount()...);
-            }
-            
-            template<typename R, typename ...A>
-            auto Caller<R, A...>::call(lua_State *luaState, const A &...arguments) -> decltype(get<R>(luaState, -1)) {
-                static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
-                pushCopy(luaState, arguments...);
-                if (lua_pcall(luaState, getTypeCount<A...>(), getTypeCount<R>(), 0) == LUA_OK) {
-                    using ReturnType = decltype(get<R>(luaState, -1));
-                    ReturnType returnValue = get<R>(luaState, -1);
-                    lua_pop(luaState, getTypeCount<R>());
-                    return returnValue;
-                } else {
-                    std::string errorMessage(lua_tostring(luaState, -1));
-                    lua_pop(luaState, 1);
-                    throw CallerException(errorMessage);
-                }
-            }
-            
-            template<typename ...A>
-            void Caller<void, A...>::call(lua_State *luaState, const A &...arguments) {
-                static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
-                pushCopy(luaState, arguments...);
-                lua_call(luaState, getTypeCount<A...>(), 0);
-            }
-            
-            inline LuaFunctionArgument::LuaFunctionArgument(lua_State *luaState, int luaAbsoluteStackIndex) : luaState_(luaState), luaAbsoluteStackIndex_(luaAbsoluteStackIndex) {
-            }
-            
-            inline void Exchanger<LuaFunctionArgument>::push(lua_State *luaState, const LuaFunctionArgument &luaFunctionArgument) {
-                lua_pushvalue(luaState, luaFunctionArgument.luaAbsoluteStackIndex_);
             }
         }
     }
