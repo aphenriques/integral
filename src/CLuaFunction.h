@@ -45,7 +45,7 @@ namespace integral {
         
         namespace exchanger {
             inline void Exchanger<CLuaFunction>::push(lua_State *luaState, const CLuaFunction &function) {
-                LuaFunctionWrapper::pushFunction(luaState, function);
+                LuaFunctionWrapper::pushFunction(luaState, function, 0);
             }
         }
     }

@@ -69,14 +69,14 @@ namespace integral {
         template<typename ...E, unsigned ...I>
         void ConstructorWrapper<M, T, A...>::pushConstructor(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments) {
             argument::validateDefaultArguments<A...>(std::forward<DefaultArgument<E, I>>(defaultArguments)...);
-            LuaFunctionWrapper::pushFunction(luaState, std::function<int(lua_State *)>(ConstructorWrapperType(std::forward<DefaultArgument<E, I>>(defaultArguments)...)));
+            LuaFunctionWrapper::pushFunction(luaState, std::function<int(lua_State *)>(ConstructorWrapperType(std::forward<DefaultArgument<E, I>>(defaultArguments)...)), 0);
         }
         
         template<typename M, typename T, typename ...A>
         template<typename ...E, unsigned ...I>
         void ConstructorWrapper<M, T, A...>::setConstructor(lua_State *luaState, const std::string &name, DefaultArgument<E, I> &&...defaultArguments) {
             argument::validateDefaultArguments<A...>(std::forward<DefaultArgument<E, I>>(defaultArguments)...);
-            LuaFunctionWrapper::setFunction(luaState, name, std::function<int(lua_State *)>(ConstructorWrapperType(std::forward<DefaultArgument<E, I>>(defaultArguments)...)));
+            LuaFunctionWrapper::setFunction(luaState, name, std::function<int(lua_State *)>(ConstructorWrapperType(std::forward<DefaultArgument<E, I>>(defaultArguments)...)), 0);
         }
         
         template<typename M, typename T, typename ...A>

@@ -32,10 +32,13 @@ namespace integral {
     namespace detail {
         const char * const LuaFunctionWrapper::kMetatableName_ = "integral_LuaFunctionWrapperMetatableName";
         
-        void LuaFunctionWrapper::pushFunction(lua_State *luaState, const LuaFunctionWrapper &luaFunction) {
+        void LuaFunctionWrapper::pushFunction(lua_State *luaState, const LuaFunctionWrapper &luaFunction, int nUpValues) {
             basic::pushUserData<LuaFunctionWrapper>(luaState, luaFunction);
             basic::pushClassMetatable<LuaFunctionWrapper>(luaState, kMetatableName_);
             lua_setmetatable(luaState, -2);
+            if (nUpValues != 0) {
+                lua_insert(luaState, -1 - nUpValues);
+            }
             lua_pushcclosure(luaState, [](lua_State *luaState) {
                 try {
                     LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(luaL_testudata(luaState,lua_upvalueindex(1), kMetatableName_));
@@ -51,12 +54,13 @@ namespace integral {
                 }
                 // error return outside catch scope so that the exception destructor can be called
                 return lua_error(luaState);
-            }, 1);
+            }, 1 + nUpValues);
         }
         
-        void LuaFunctionWrapper::setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction) {
+        void LuaFunctionWrapper::setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction, int nUpValues) {
+            pushFunction(luaState, luaFunction, nUpValues);
             lua_pushstring(luaState, name.c_str());
-            pushFunction(luaState, luaFunction);
+            lua_insert(luaState, -2);
             lua_rawset(luaState, -3);
         }
     }
