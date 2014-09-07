@@ -30,6 +30,7 @@
 #include <string>
 #include <tuple>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 #include <lua.hpp>
@@ -51,6 +52,9 @@ namespace integral {
             
             template<typename T, std::size_t N>
             using LuaArray = Adaptor<std::array<T, N>>;
+            
+            template<typename T, typename U>
+            using LuaUnorderedMap = Adaptor<std::unordered_map<T, U>>;
             
             template<typename ...T>
             using LuaPack = Adaptor<std::tuple<T...>>;
@@ -132,6 +136,13 @@ namespace integral {
             public:
                 static LuaArray<T, N> get(lua_State *luaState, int index);
                 static void push(lua_State *luaState, const LuaArray<T, N> &luaArray);
+            };
+            
+            template<typename T, typename U>
+            class Exchanger<LuaUnorderedMap<T, U>> {
+            public:
+                static LuaUnorderedMap<T, U> get(lua_State *luaState, int index);
+                static void push(lua_State *luaState, const LuaUnorderedMap<T, U> &unorderedMap);
             };
             
             template<typename ...T>
@@ -427,6 +438,66 @@ namespace integral {
                     }
                 } else {
                     throw RuntimeException(__FILE__, __LINE__, __func__, "LuaArray is too big");
+                }
+            }
+            
+            template<typename T, typename U>
+            LuaUnorderedMap<T, U> Exchanger<LuaUnorderedMap<T, U>>::get(lua_State *luaState, int index) {
+                if (lua_isuserdata(luaState, index) == 0) {
+                    if (lua_istable(luaState, index) != 0) {
+                        lua_pushvalue(luaState, index);
+                        // stack: table
+                        LuaUnorderedMap<T, U> returnUnorderedMap;
+                        lua_pushnil(luaState);
+                        // atention! the key is pushed again on the stack to preserve its type (so 2 values are popped in each iteration)
+                        for (int hasNext = lua_next(luaState, -2); hasNext != 0; lua_pop(luaState, 2), hasNext = lua_next(luaState, -2)) {
+                            // stack: table | key (?) | value (?)
+                            // stack types can be changed by integral::get (for instance, a number type is converted to string in place in the stack by calling lua_tostring). This corrupts the table traversal. To avoid this, the key value is copied.
+                            lua_pushvalue(luaState, -2);
+                            // stack: table | key (?) | value (?) | key (?)
+                            try {
+                                returnUnorderedMap.emplace(ExchangerType<T>::get(luaState, -1), ExchangerType<U>::get(luaState, -2));
+                            } catch (const ArgumentException &argumentException) {
+                                // stack: table | ? | ? | ?
+                                lua_pop(luaState, 4);
+                                throw ArgumentException(luaState, index, std::string("invalid table - LuaUnorderedMap: " ) + argumentException.what());
+                            }
+                        }
+                        // stack: table
+                        lua_pop(luaState, 1);
+                        return returnUnorderedMap;
+
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TTABLE));
+                    }
+                } else {
+                    LuaUnorderedMap<T, U> *userDataBase = type_manager::getConvertibleType<LuaUnorderedMap<T, U>>(luaState, index);
+                    if (userDataBase != nullptr) {
+                        return *userDataBase;
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, "table or LuaUnorderedMap");
+                    }
+                }
+            }
+            
+            template<typename T, typename U>
+            void Exchanger<LuaUnorderedMap<T, U>>::push(lua_State *luaState, const LuaUnorderedMap<T, U> &luaUnorderedMap) {
+                using SizeType = typename LuaUnorderedMap<T, U>::size_type;
+                const SizeType unorderedMapSize = luaUnorderedMap.size();
+                if (unorderedMapSize <= std::numeric_limits<int>::max()) {
+                    lua_createtable(luaState, static_cast<int>(unorderedMapSize), 0);
+                    // stack: table
+                    for (const auto& keyValue : luaUnorderedMap) {
+                        // stack: table
+                        Exchanger<T>::push(luaState, keyValue.first);
+                        // stack: table | key
+                        Exchanger<U>::push(luaState, keyValue.second);
+                        // stack: table | key | value
+                        lua_rawset(luaState, -3);
+                        // stack: table
+                    }
+                } else {
+                    throw RuntimeException(__FILE__, __LINE__, __func__, "LuaUnorderedMap is too big");
                 }
             }
             
