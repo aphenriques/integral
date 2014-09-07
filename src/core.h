@@ -58,6 +58,11 @@ namespace integral {
     template<typename T, std::size_t N>
     using LuaArray = detail::exchanger::LuaArray<T, N>;
     
+    // Adaptor to std::unordered_map<T, U> and lua table.
+    // LuaUnorderedMap can be seamlessly converted to std::unordered_map.
+    template<typename T, typename U>
+    using LuaUnorderedMap = detail::exchanger::LuaUnorderedMap<T, U>;
+    
     // Adaptor to std::tuple<T...> and lua pack (multiple return values).
     // It is used to push multiple (function return) values.
     // LuaPack can be seamlessly converted to std::tuple.
@@ -112,13 +117,31 @@ namespace integral {
     inline void defineTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
     
     template<typename T, typename U>
+    inline void defineTypeFunction(lua_State *luaState, const std::function<U *(const T *)> &typeFunction);
+    
+    template<typename T, typename U>
     inline void defineTypeFunction(lua_State *luaState, U *(*typeFunction)(T *));
+
+    template<typename T, typename U>
+    inline void defineTypeFunction(lua_State *luaState, U *(*typeFunction)(const T *));
     
     template<typename T, typename U>
     inline void defineTypeFunction(lua_State *luaState, U *(T::*typeFunction)());
     
     template<typename T, typename U>
+    void defineTypeFunction(lua_State *luaState, U &(T::*typeFunction)());
+    
+    template<typename T, typename U>
+    inline void defineTypeFunction(lua_State *luaState, U *(T::*typeFunction)() const);
+    
+    template<typename T, typename U>
+    void defineTypeFunction(lua_State *luaState, U &(T::*typeFunction)() const);
+    
+    template<typename T, typename U>
     void defineTypeFunction(lua_State *luaState, U T::* attribute);
+    
+    template<typename T, typename U>
+    void defineTypeFunction(lua_State *luaState, U * T::* attribute);
     
     // Sets inheritance between derived class D to base class B.
     // typename D class metatable need not be on the stack
@@ -137,13 +160,31 @@ namespace integral {
     inline void defineInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
     
     template<typename T, typename U>
+    inline void defineInheritance(lua_State *luaState, const std::function<U *(const T *)> &typeFunction);
+    
+    template<typename T, typename U>
     inline void defineInheritance(lua_State *luaState, U *(*typeFunction)(T *));
+    
+    template<typename T, typename U>
+    inline void defineInheritance(lua_State *luaState, U *(*typeFunction)(const T *));
     
     template<typename T, typename U>
     inline void defineInheritance(lua_State *luaState, U *(T::*typeFunction)());
     
     template<typename T, typename U>
+    void defineInheritance(lua_State *luaState, U &(T::*typeFunction)());
+    
+    template<typename T, typename U>
+    inline void defineInheritance(lua_State *luaState, U *(T::*typeFunction)() const);
+    
+    template<typename T, typename U>
+    void defineInheritance(lua_State *luaState, U &(T::*typeFunction)() const);
+    
+    template<typename T, typename U>
     void defineInheritance(lua_State *luaState, U T::* attribute);
+    
+    template<typename T, typename U>
+    void defineInheritance(lua_State *luaState, U * T::* attribute);
     
     // Pushes a type "T" value (string or number) or object onto the stack.
     // References and pointers (except char *) can not be pushed.
@@ -275,8 +316,18 @@ namespace integral {
     }
     
     template<typename T, typename U>
+    inline void defineTypeFunction(lua_State *luaState, const std::function<U *(const T *)> &typeFunction) {
+        detail::type_manager::defineTypeFunction(luaState, typeFunction);
+    }
+    
+    template<typename T, typename U>
     inline void defineTypeFunction(lua_State *luaState, U *(*typeFunction)(T *)) {
         defineTypeFunction(luaState, std::function<U *(T *)>(typeFunction));
+    }
+    
+    template<typename T, typename U>
+    inline void defineTypeFunction(lua_State *luaState, U *(*typeFunction)(const T *)) {
+        defineTypeFunction(luaState, std::function<U *(const T *)>(typeFunction));
     }
     
     template<typename T, typename U>
@@ -285,9 +336,35 @@ namespace integral {
     }
     
     template<typename T, typename U>
+    void defineTypeFunction(lua_State *luaState, U &(T::*typeFunction)()) {
+        defineTypeFunction(luaState, std::function<U *(T *)>([typeFunction](T *t) -> U * {
+            return &((t->*typeFunction)());
+        }));
+    }
+    
+    template<typename T, typename U>
+    inline void defineTypeFunction(lua_State *luaState, U *(T::*typeFunction)() const) {
+        defineTypeFunction(luaState, std::function<U *(const T *)>(typeFunction));
+    }
+    
+    template<typename T, typename U>
+    void defineTypeFunction(lua_State *luaState, U &(T::*typeFunction)() const) {
+        defineTypeFunction(luaState, std::function<U *(const T *)>([typeFunction](const T *t) -> U * {
+            return &((t->*typeFunction)());
+        }));
+    }
+    
+    template<typename T, typename U>
     void defineTypeFunction(lua_State *luaState, U T::* attribute) {
         defineTypeFunction(luaState, std::function<U *(T *)>([attribute](T * t) -> U * {
             return &(t->*attribute);
+        }));
+    }
+    
+    template<typename T, typename U>
+    void defineTypeFunction(lua_State *luaState, U * T::* attribute) {
+        defineTypeFunction(luaState, std::function<U *(T *)>([attribute](T * t) -> U * {
+            return t->*attribute;
         }));
     }
     
@@ -302,8 +379,18 @@ namespace integral {
     }
     
     template<typename T, typename U>
+    inline void defineInheritance(lua_State *luaState, const std::function<U *(const T *)> &typeFunction) {
+        detail::type_manager::defineInheritance(luaState, typeFunction);
+    }
+    
+    template<typename T, typename U>
     inline void defineInheritance(lua_State *luaState, U *(*typeFunction)(T *)) {
         defineInheritance(luaState, std::function<U *(T *)>(typeFunction));
+    }
+    
+    template<typename T, typename U>
+    inline void defineInheritance(lua_State *luaState, U *(*typeFunction)(const T *)) {
+        defineInheritance(luaState, std::function<U *(const T *)>(typeFunction));
     }
     
     template<typename T, typename U>
@@ -312,9 +399,35 @@ namespace integral {
     }
     
     template<typename T, typename U>
+    void defineInheritance(lua_State *luaState, U &(T::*typeFunction)()) {
+        defineInheritance(luaState, std::function<U *(T *)>([typeFunction](T *t) -> U * {
+            return &((t->*typeFunction)());
+        }));
+    }
+    
+    template<typename T, typename U>
+    inline void defineInheritance(lua_State *luaState, U *(T::*typeFunction)() const) {
+        defineInheritance(luaState, std::function<U *(const T *)>(typeFunction));
+    }
+    
+    template<typename T, typename U>
+    void defineInheritance(lua_State *luaState, U &(T::*typeFunction)() const) {
+        defineInheritance(luaState, std::function<U *(const T *)>([typeFunction](const T *t) -> U * {
+            return &((t->*typeFunction)());
+        }));
+    }
+    
+    template<typename T, typename U>
     void defineInheritance(lua_State *luaState, U T::* attribute) {
         defineInheritance(luaState, std::function<U *(T *)>([attribute](T * t) -> U * {
             return &(t->*attribute);
+        }));
+    }
+    
+    template<typename T, typename U>
+    void defineInheritance(lua_State *luaState, U * T::* attribute) {
+        defineInheritance(luaState, std::function<U *(T *)>([attribute](T * t) -> U * {
+            return t->*attribute;
         }));
     }
     

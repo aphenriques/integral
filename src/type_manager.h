@@ -129,11 +129,18 @@ namespace integral {
             template<typename T, typename U>
             void setTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
             
+            // stack argument: metatable
+            template<typename T, typename U>
+            void setTypeFunction(lua_State *luaState, const std::function<U *(const T *)> &typeFunction);
+            
             template<typename D, typename B>
             void defineTypeFunction(lua_State *luaState);
             
             template<typename T, typename U>
             void defineTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
+            
+            template<typename T, typename U>
+            void defineTypeFunction(lua_State *luaState, const std::function<U *(const T *)> &typeFunction);
             
             // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic'inheritance)
             // index: metatable to be tagged
@@ -181,10 +188,17 @@ namespace integral {
             template<typename T, typename U>
             void setInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
             
+            // stack argument: metatable
+            template<typename T, typename U>
+            void setInheritance(lua_State *luaState, const std::function<U *(const T *)> &typeFunction);
+            
             void defineInheritance(lua_State *luaState);
             
             template<typename T, typename U>
             void defineInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
+            
+            template<typename T, typename U>
+            void defineInheritance(lua_State *luaState, const std::function<U *(const T *)> &typeFunction);
 
             // stack argument: metatable
             template<typename B>
@@ -397,6 +411,32 @@ namespace integral {
                 // stack: metatable
             }
             
+            template<typename T, typename U>
+            void setTypeFunction(lua_State *luaState, const std::function<U *(const T *)> &typeFunction) {
+                std::type_index typeIndex = typeid(U);
+                // stack: metatable
+                pushTypeFunctionHashTable(luaState, typeIndex);
+                // stack: metatable | typeFunctionHashTable
+                pushTypeIndexUserData(luaState, typeIndex);
+                // stack: metatable | typeFunctionHashTable| type_index_udata*
+                basic::pushUserData<std::function<U *(const T *)>>(luaState, typeFunction);
+                basic::pushClassMetatable<std::function<U *(const T *)>>(luaState);
+                lua_setmetatable(luaState, -2);
+                // stack: metatable | typeFunctionHashTable| type_index_udata* | typeFunction_udata
+                lua_pushcclosure(luaState, [](lua_State *luaState) -> int {
+                    // no need for exception checking. Possible exceptions thrown by conversion function will be caught in [Lua]FunctionWrapperCaller. Type functions are only called by exchanger.
+                    if (lua_islightuserdata(luaState, 1) == false) {
+                        throw RuntimeException(__FILE__, __LINE__, __func__, "custom conversion function expected underlying lightuserdata");
+                    }
+                    lua_pushlightuserdata(luaState, static_cast<void *>((*static_cast<std::function<U *(const T *)> *>(lua_touserdata(luaState, lua_upvalueindex(1))))(static_cast<T *>(lua_touserdata(luaState, 1)))));
+                    return 1;
+                }, 1);
+                // stack: metatable | typeFunctionHashTable | type_index_udata* | function*
+                lua_rawset(luaState, -3);
+                lua_pop(luaState, 1);
+                // stack: metatable
+            }
+            
             template<typename D, typename B>
             void defineTypeFunction(lua_State *luaState) {
                 static_assert(std::is_same<D, B>::value == false, "conversion to itself");
@@ -411,6 +451,18 @@ namespace integral {
             
             template<typename T, typename U>
             void defineTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction) {
+                static_assert(std::is_same<T, U>::value == false, "conversion to itself");
+                if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<T>))) == true) {
+                    setTypeFunction(luaState, typeFunction);
+                } else {
+                    pushClassMetatable<T>(luaState);
+                    setTypeFunction(luaState, typeFunction);
+                    lua_pop(luaState, 1);
+                }
+            }
+            
+            template<typename T, typename U>
+            void defineTypeFunction(lua_State *luaState, const std::function<U *(const T *)> &typeFunction) {
                 static_assert(std::is_same<T, U>::value == false, "conversion to itself");
                 if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<T>))) == true) {
                     setTypeFunction(luaState, typeFunction);
@@ -489,6 +541,17 @@ namespace integral {
                 // stack: metatable
             }
             
+            template<typename T, typename U>
+            void setInheritance(lua_State *luaState, const std::function<U *(const T *)> &typeFunction) {
+                static_assert(std::is_same<T, U>::value == false, "Inheritance to itself");
+                // stack: metatable
+                setInheritanceTable<U>(luaState);
+                setTypeFunction<T, U>(luaState, typeFunction);
+                // preserves a previously defined metatable (possibly with other metamethods)
+                setInheritanceIndexMetatable(luaState);
+                // stack: metatable
+            }
+            
             template<typename D, typename B>
             void defineInheritance(lua_State *luaState) {
                 static_assert(std::is_same<D, B>::value == false, "Inheritance to itself");
@@ -503,6 +566,18 @@ namespace integral {
             
             template<typename T, typename U>
             void defineInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction) {
+                static_assert(std::is_same<T, U>::value == false, "Inheritance to itself");
+                if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<T>))) == true) {
+                    setInheritance(luaState, typeFunction);
+                } else {
+                    pushClassMetatable<T>(luaState);
+                    setInheritance(luaState, typeFunction);
+                    lua_pop(luaState, 1);
+                }
+            }
+            
+            template<typename T, typename U>
+            void defineInheritance(lua_State *luaState, const std::function<U *(const T *)> &typeFunction) {
                 static_assert(std::is_same<T, U>::value == false, "Inheritance to itself");
                 if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<T>))) == true) {
                     setInheritance(luaState, typeFunction);
