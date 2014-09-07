@@ -55,6 +55,8 @@ int main(int argc, char * argv[]) {
         std::cout << "unknown exception thrown" << std::endl;
     }
 
-    lua_close(luaState);
+    if (luaState != nullptr) {
+        lua_close(luaState);
+    }
     return 1;
 }
