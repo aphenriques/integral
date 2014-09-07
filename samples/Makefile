@@ -1,6 +1,6 @@
-.PHONY: all class embedded error_handling hello inheritance luafunction regex showcase synthetic_inheritance type_function clean
+.PHONY: all class embedded error_handling hello inheritance luafunction reference regex shared_ptr showcase synthetic_inheritance type_function clean
 
-all: class embedded error_handling hello inheritance luafunction regex showcase synthetic_inheritance type_function
+all: class embedded error_handling hello inheritance luafunction reference regex shared_ptr showcase synthetic_inheritance type_function
 
 class:
 	cd class && $(MAKE) all
@@ -20,8 +20,14 @@ inheritance:
 luafunction:
 	cd luafunction && $(MAKE) all
 
+reference:
+	cd reference && $(MAKE) all
+
 regex:
 	cd regex && $(MAKE) all
+
+showcase: shared_ptr
+	cd shared_ptr && $(MAKE) all
 
 showcase: regex
 	cd showcase && $(MAKE) all
@@ -39,7 +45,9 @@ clean:
 	cd hello && $(MAKE) $@
 	cd inheritance && $(MAKE) $@
 	cd luafunction && $(MAKE) $@
+	cd reference && $(MAKE) $@
 	cd regex && $(MAKE) $@
+	cd shared_ptr && $(MAKE) $@
 	cd showcase && $(MAKE) $@
 	cd synthetic_inheritance && $(MAKE) $@
 	cd type_function && $(MAKE) $@

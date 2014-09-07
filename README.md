@@ -141,21 +141,6 @@ The library interface is comprised of the functions in `core.h`, which has a bri
 Check the `samples` directory for examples.
 
 
-# Samples
-
-First, build the samples from `integral` root directory with:
-
-    $ make samples
-
-For all the samples, except `embedded`, run the lua script in the directory:
-
-    $ lua <name of the sample>.lua
-
-For `embedded`, run the compiled executable `embedded`
-
-    $ ./embedded
-
-
 # integral reserved names in Lua
 
 `integral` uses the following names in Lua registry:
