@@ -39,7 +39,7 @@ o1:getString()
 
 local _, message = pcall(function() o1:createSuffixedObjectLuaFunction(o1) end)
 print("Lua Function argument error message: ", message)
--- correct exceptiosion:
+-- correct expression:
  o1:createSuffixedObjectLuaFunction("_suffix")
 
 local _, message = pcall(function() Object.throwCppException() end)
