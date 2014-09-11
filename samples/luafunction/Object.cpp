@@ -21,6 +21,7 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <iostream>
 #include <string>
 #include <lua.hpp>
 #include "integral.h"
@@ -51,6 +52,29 @@ extern "C" {
                     integral::push<Object>(luaState, object.string_ + suffix);
                 return 1;
             });
+
+            // LuaFunctions accepts upvalues. Though their indices are different then Lua API (as follows)
+            integral::push<std::string>(luaState, "upvalue!");
+            integral::setLuaFunction(luaState, "printUpvalue", [](lua_State *luaState) -> int {
+                // upvalue index is offset by 1 (because of integral internals). integral::LuaUpValuesIndex or lua_upvalueindex(index + 1) should be used to index upvalues
+                std::cout << integral::get<std::string>(luaState, integral::getLuaUpValueIndex(1)) << std::endl;
+                return 0;
+            }, 1); // 1 upvalue
+
+            // LuaFunctions can be pushed onto the stack
+            integral::push<std::string>(luaState, "getPrinter");
+            integral::pushLuaFunction(luaState, [](lua_State *luaState) -> int {
+                // LuaFunctions can be pushed onto the stack to be returned
+                // lambda captures can be used as well as upvalues
+                std::string printerName = integral::get<std::string>(luaState, 1);
+                integral::push<std::string>(luaState, "upvalue_message!");
+                integral::pushLuaFunction(luaState, [printerName](lua_State *luaState) -> int {
+                    std::cout << printerName << ": " << integral::get<std::string>(luaState, integral::getLuaUpValueIndex(1)) << std::endl;
+                    return 0;
+                }, 1);
+                return 1;
+            });
+            lua_rawset(luaState, -3);
 
             return 1;
         } catch (const std::exception &exception) {

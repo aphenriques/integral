@@ -27,3 +27,12 @@ o1 = Object.new("prefix")
 print(o1:getString())
 o2 = o1:createSuffixedObjectLuaFunction("_suffix")
 print(o2:getString())
+
+print("--")
+-- argument checking is performed by integral::get
+print("wrong parameters handling", pcall(function() Object.createSuffixedObjectLuaFunction("wrong parameters") end))
+
+print("--")
+Object.printUpvalue()
+printer = Object.getPrinter("object_printer")
+printer()
