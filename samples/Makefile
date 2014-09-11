@@ -26,7 +26,7 @@ reference:
 regex:
 	cd regex && $(MAKE) all
 
-showcase: shared_ptr
+shared_ptr:
 	cd shared_ptr && $(MAKE) all
 
 showcase: regex
