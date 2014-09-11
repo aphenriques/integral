@@ -217,7 +217,7 @@ namespace integral {
     // "name": name of the bound Lua function.
     // "function": function that takes a lua_State * as argument and return an int (number of return values/objects).
     // The first upvalue in the luacfunction is always the userdata that holds the function (std::function), so the remaining upvalues indexes are offset by 1.
-    // Use getLuaUpValuesIndex or lua_upvalueindex(index + 1) to get an upvalue index.
+    // Use getLuaUpValueIndex or lua_upvalueindex(index + 1) to get an upvalue index.
     inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues = 0);
     
     inline void setLuaFunction(lua_State *luaState, const std::string &name, const std::function<int(lua_State *)> &function, int nUpValues = 0);
@@ -234,7 +234,7 @@ namespace integral {
     
     // Gets the correct upvalue index.
     // setLuaFunction and pushLuaFunction offset the upvalues to insert the bound function userdata (std::function) in the first position.
-    inline int getLuaUpValuesIndex(int index);
+    inline int getLuaUpValueIndex(int index);
     
     // Binds a function in the table or metatable on top of the stack.
     // The function is managed by integral so that if an exception is thrown from it, it is translated to a Lua error
@@ -479,7 +479,7 @@ namespace integral {
         detail::LuaFunctionWrapper::pushFunction(luaState, std::function<int(lua_State *)>(std::forward<const T>(function)), nUpValues);
     }
     
-    inline int getLuaUpValuesIndex(int index) {
+    inline int getLuaUpValueIndex(int index) {
         return lua_upvalueindex(index + 1);
     }
     
