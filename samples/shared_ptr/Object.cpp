@@ -22,6 +22,7 @@
 //
 
 #include <iostream>
+#include <functional>
 #include <memory>
 #include <lua.hpp>
 #include "integral.h"
@@ -44,12 +45,9 @@ extern "C" {
             integral::setFunction(luaState, "getShared", std::make_shared<Object>);
 
             // 'synthetic inheritance' can be viewed as a transformation from composition in c++ to inheritance in lua
-            integral::defineInheritance(luaState, &std::shared_ptr<Object>::get);
-
-            // alternative way:
-            //integral::defineInheritance(luaState, std::function<Object *(const std::shared_ptr<Object> *)>([](const std::shared_ptr<Object> *sharedObject) -> Object * {
-                //return sharedObject->get();
-            //}));
+            integral::defineInheritance(luaState, std::function<Object *(const std::shared_ptr<Object> *)>([](const std::shared_ptr<Object> *sharedObject) -> Object * {
+                return sharedObject->get();
+            }));
 
             return 1;
         } catch (const std::exception &exception) {

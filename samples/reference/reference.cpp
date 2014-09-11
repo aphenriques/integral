@@ -42,7 +42,12 @@ int main(int argc, char * argv[]) {
 
         integral::pushClassMetatable<Object>(luaState);
         integral::setFunction(luaState, "print", &Object::printMessage);
-        integral::defineInheritance(luaState, &std::reference_wrapper<Object>::get);
+
+        // 'synthetic inheritance' can be viewed as a transformation from composition in c++ to inheritance in lua
+        integral::defineInheritance(luaState, std::function<Object * (const std::reference_wrapper<Object> *)>([](const std::reference_wrapper<Object> *objectReference) -> Object * {
+            return &objectReference->get();
+        }));
+
         lua_pop(luaState, 1);
 
         std::cout << "C++:" << std::endl;
