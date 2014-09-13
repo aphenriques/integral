@@ -38,6 +38,7 @@
 #include "ArgumentException.h"
 #include "basic.h"
 #include "generic.h"
+#include "lua_compatibility.h"
 #include "TemplateSequence.h"
 #include "TemplateSequenceGenerator.h"
 #include "type_manager.h"
@@ -237,7 +238,7 @@ namespace integral {
             T Exchanger<T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value>::type>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     int isNumber;
-                    lua_Integer integer = lua_tointegerx(luaState, index, &isNumber);
+                    lua_Integer integer = lua_compatibility::tointegerx(luaState, index, &isNumber);
                     if (isNumber != 0) {
                         return static_cast<T>(integer);
                     } else {
@@ -262,7 +263,8 @@ namespace integral {
             T Exchanger<T, typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value>::type>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     int isNumber;
-                    lua_Unsigned unsignedNumber = lua_tounsignedx(luaState, index, &isNumber);
+                    // "auto" keyword for lua compatibility
+                    auto unsignedNumber = lua_compatibility::tounsignedx(luaState, index, &isNumber);
                     if (isNumber != 0) {
                         return static_cast<T>(unsignedNumber);
                     } else {
@@ -280,7 +282,7 @@ namespace integral {
             
             template<typename T>
             inline void Exchanger<T, typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value>::type>::push(lua_State *luaState, T number) {
-                lua_pushunsigned(luaState, static_cast<lua_Unsigned>(number));
+                lua_compatibility::pushunsigned(luaState, number);
             }
             
             inline void Exchanger<bool>::push(lua_State *luaState, bool boolean) {
@@ -291,7 +293,7 @@ namespace integral {
             T Exchanger< T, typename std::enable_if<std::is_floating_point<T>::value>::type>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     int isNumber;
-                    lua_Number number = lua_tonumberx(luaState, index, &isNumber);
+                    lua_Number number = lua_compatibility::tonumberx(luaState, index, &isNumber);
                     if (isNumber != 0) {
                         return static_cast<T>(number);
                     } else {
@@ -318,12 +320,12 @@ namespace integral {
                     if (lua_istable(luaState, index) != 0) {
                         lua_pushvalue(luaState, index);
                         // stack: table
-                        const std::size_t tableSize = lua_rawlen(luaState, -1);
+                        const std::size_t tableSize = lua_compatibility::rawlen(luaState, -1);
                         LuaVector<T> returnVector;
                         returnVector.reserve(tableSize);
                         for (std::size_t i = 1; i <= tableSize; ++i) {
                             // stack: table
-                            lua_pushunsigned(luaState, i);
+                            lua_compatibility::pushunsigned(luaState, i);
                             // stack: table | i
                             lua_rawget(luaState, -2);
                             // stack: table | luaVectorElement (?)
@@ -363,7 +365,7 @@ namespace integral {
                     // stack: table
                     for (SizeType i = 0; i < vectorSize; ++i) {
                         // stack: table
-                        lua_pushunsigned(luaState, i + 1);
+                        lua_compatibility::pushunsigned(luaState, i + 1);
                         // stack: table | i
                         Exchanger<T>::push(luaState, luaVector.at(i));
                         // stack: table | i | luaVectorElement
@@ -381,12 +383,12 @@ namespace integral {
                     if (lua_istable(luaState, index) != 0) {
                         lua_pushvalue(luaState, index);
                         // stack: table
-                        const std::size_t tableSize = lua_rawlen(luaState, -1);
+                        const std::size_t tableSize = lua_compatibility::rawlen(luaState, -1);
                         if (tableSize == N) {
                             LuaArray<T, N> returnArray;
                             for (std::size_t i = 1; i <= tableSize; ++i) {
                                 // stack: table
-                                lua_pushunsigned(luaState, i);
+                                lua_compatibility::pushunsigned(luaState, i);
                                 // stack: table | i
                                 lua_rawget(luaState, -2);
                                 // stack: table | luaArrayElement (?)
@@ -429,7 +431,7 @@ namespace integral {
                     // stack: table
                     for (std::size_t i = 0; i < N; ++i) {
                         // stack: table
-                        lua_pushunsigned(luaState, i + 1);
+                        lua_compatibility::pushunsigned(luaState, i + 1);
                         // stack: table | i
                         Exchanger<T>::push(luaState, luaArray.at(i));
                         // stack: table | i | luaArrayElement

@@ -25,6 +25,7 @@
 #include <cstring>
 #include <sstream>
 #include <lua.hpp>
+#include "lua_compatibility.h"
 
 namespace integral {
     ArgumentException ArgumentException::createTypeErrorException(lua_State *luaState, int index, const std::string &userDataName) {
@@ -106,9 +107,9 @@ namespace integral {
     bool ArgumentException::pushGlobalFunctionName(lua_State *luaState, lua_Debug *debugInfo) {
         const int top = lua_gettop(luaState);
         lua_getinfo(luaState, "f", debugInfo);
-        lua_pushglobaltable(luaState);
+        detail::lua_compatibility::pushglobaltable(luaState);
         if (findField(luaState, top + 1, 2) == true) {
-            lua_copy(luaState, -1, top + 1);
+            detail::lua_compatibility::copy(luaState, -1, top + 1);
             lua_pop(luaState, 2);
             return true;
         } else {

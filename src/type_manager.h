@@ -31,6 +31,7 @@
 #include <lua.hpp>
 #include "basic.h"
 #include "generic.h"
+#include "lua_compatibility.h"
 #include "RuntimeException.h"
 #include "UserDataWrapper.h"
 
@@ -309,7 +310,7 @@ namespace integral {
                         // stack: typeFunctionHashTable
                         lua_pushnil(luaState);
                         for (int hasNext = lua_next(luaState, -2); hasNext != 0; lua_pop(luaState, 1), hasNext = lua_next(luaState, -2)) {
-                            std::type_index *storedTypeIndex = static_cast<std::type_index *>(luaL_testudata(luaState, -2, gkTypeIndexMetatableName));
+                            std::type_index *storedTypeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -2, gkTypeIndexMetatableName));
                             // stack: typeFunctionHashTable | type_index_udata | rootMetatable
                             if (storedTypeIndex != nullptr) {
                                 if (*storedTypeIndex == typeIndex) {
@@ -610,7 +611,7 @@ namespace integral {
                 // stack: metatable | inheritanceTable
                 lua_createtable(luaState, 2, 0);
                 // stack: metatable | inheritanceTable | baseTable*
-                lua_pushunsigned(luaState, lua_rawlen(luaState, -2) + 1);
+                lua_compatibility::pushunsigned(luaState, lua_compatibility::rawlen(luaState, -2) + 1);
                 // stack: metatable | inheritanceTable | baseTable* | inheritanceTableLength
                 lua_pushvalue(luaState, -2);
                 // stack: metatable | inheritanceTable | baseTable* | inheritanceTableLength | baseTable*

@@ -52,7 +52,7 @@ namespace integral {
         auto Caller<R, A...>::call(lua_State *luaState, const A &...arguments) -> decltype(exchanger::get<R>(luaState, -1)) {
             static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
             exchanger::pushCopy(luaState, arguments...);
-            if (lua_pcall(luaState, type_count::getTypeCount<A...>(), type_count::getTypeCount<R>(), 0) == LUA_OK) {
+            if (lua_pcall(luaState, type_count::getTypeCount<A...>(), type_count::getTypeCount<R>(), 0) == lua_compatibility::keLuaOk) {
                 using ReturnType = decltype(exchanger::get<R>(luaState, -1));
                 ReturnType returnValue = exchanger::get<R>(luaState, -1);
                 lua_pop(luaState, type_count::getTypeCount<R>());

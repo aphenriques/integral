@@ -26,6 +26,7 @@
 #include <exception>
 #include <lua.hpp>
 #include "basic.h"
+#include "lua_compatibility.h"
 #include "RuntimeException.h"
 
 namespace integral {
@@ -41,7 +42,7 @@ namespace integral {
             }
             lua_pushcclosure(luaState, [](lua_State *luaState) {
                 try {
-                    LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(luaL_testudata(luaState,lua_upvalueindex(1), kMetatableName_));
+                    LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState,lua_upvalueindex(1), kMetatableName_));
                     if (luaFunctionWrapper != nullptr) {
                         return luaFunctionWrapper->call(luaState);
                     } else {

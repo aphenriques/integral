@@ -24,10 +24,11 @@
 #include "LuaFunctionArgument.h"
 #include <lua.hpp>
 #include "ArgumentException.h"
+#include "lua_compatibility.h"
 
 namespace integral {
     namespace detail {
-        LuaFunctionArgument::LuaFunctionArgument(lua_State *luaState, int index) : luaState_(luaState), luaAbsoluteStackIndex_(lua_absindex(luaState, index)) {}
+        LuaFunctionArgument::LuaFunctionArgument(lua_State *luaState, int index) : luaState_(luaState), luaAbsoluteStackIndex_(lua_compatibility::absindex(luaState, index)) {}
         
         namespace exchanger {
             LuaFunctionArgument Exchanger<LuaFunctionArgument>::get(lua_State *luaState, int index) {

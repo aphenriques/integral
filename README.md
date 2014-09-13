@@ -1,6 +1,6 @@
 # integral
 
-`integral` is a C++ library for binding C++ code with lua. It utilizes C++ template meta programming to interface both languages.
+`integral` is a C++ library for binding C++ code with Lua 5.1, Lua 5.2 or LuaJIT. It utilizes C++ template meta programming to interface both languages.
 
 ![Lua logo](http://www.lua.org/images/lua-logo.gif)
 
@@ -28,11 +28,11 @@ and cloned with:
 
 * no external library is required in order to build it.
 
-## Small intrusion on the lua state
+## Small intrusion on the Lua state
 
 * `integral` has a few reserved names (see **integral reserved names in Lua** ahead);
 * the library allows integration with other bound libraries (wether using `integral` - statically *or* dynamically linked - or not);
-* the library is thread safe (as per lua state).
+* the library is thread safe (as per Lua state) - `integral` can bind to multiple Lua states independently.
 
 ## Automatic type management
 
@@ -49,12 +49,18 @@ and cloned with:
 
 ## Error safety
 
-* `integral` will not crash the lua state;
-* thrown exceptions in exported functions are converted to lua errors;
-* wrong parameter types in exported functions turn into lua errors;
-* wrong number of parameters in exported functions turn into lua errors;
+* `integral` will not crash the Lua state;
+* thrown exceptions in exported functions are converted to Lua errors;
+* wrong parameter types in exported functions turn into Lua errors;
+* wrong number of parameters in exported functions turn into Lua errors;
 * functions returning pointers (except const char * - string) and references are regarded as unsafe, therefore cannot be exported. Trying to register these functions will cause compilation error;
 * invalid default arguments definition causes compilation error.
+
+## Language features binding
+
+* default arguments;
+* adaptors for C++ vector, array, unordered_map and tuple to Lua table;
+* adaptors for C++ functions to Lua functions and vice-versa.
 
 
 # Example

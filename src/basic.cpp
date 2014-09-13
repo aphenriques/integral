@@ -29,8 +29,10 @@ namespace integral {
             const char * const gkUnknownExceptionMessage = "[integral] unknown exception thrown";
             
             void setLuaFunction(lua_State *luaState, const char *name, lua_CFunction function, int nUpValues) {
-                const luaL_Reg functionRegistry[] = {{name, function}, {NULL, NULL}};
-                luaL_setfuncs(luaState, functionRegistry, nUpValues);
+                lua_pushcclosure(luaState, function, nUpValues);
+                lua_pushstring(luaState, name);
+                lua_insert(luaState, -2);
+                lua_rawset(luaState, -3);
             }
         }
     }
