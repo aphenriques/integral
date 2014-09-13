@@ -53,6 +53,7 @@ Base getSumBase(const Base &base1, const Base &base2) {
 }
 
 extern "C" {
+    // This sample does NOT show all integral features (only part of its capability)
     LUALIB_API int luaopen_libshowcase(lua_State *luaState) {
         try {
             lua_newtable(luaState);
@@ -87,8 +88,6 @@ extern "C" {
             // stack: table (module table) | string (Derived class metatable field name on module table) | metatable (Derived class metatable)
 
             integral::setConstructor<Derived, double, const char *>(luaState, "new");
-            integral::setSetter(luaState, "setNumber", &Derived::number_);
-            integral::setCopyGetter(luaState, "getNumber", &Derived::number_);
             integral::setCopyGetter(luaState, "getString", &Derived::string_);
 
             // Automatic conversion between lua string and "[cv] std::string" or "const char *"

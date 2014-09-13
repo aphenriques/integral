@@ -78,13 +78,16 @@ extern "C" {
 
             // 'synthetic inheritance' can be viewed as a transformation from composition in c++ to inheritance in lua
             // there are alternative ways to define it (just like integral::defineTypeFunction)
-            integral::defineInheritance(luaState, std::function<SyntheticBase *(SyntheticallyDerived *)>([](SyntheticallyDerived *syntheticallyDerived) -> SyntheticBase * {
+            integral::defineInheritance<SyntheticallyDerived, SyntheticBase>(luaState, [](SyntheticallyDerived *syntheticallyDerived) -> SyntheticBase * {
                 return &syntheticallyDerived->syntheticBase_;
-            }));
+            });
 
-            // alternative ways:
-            //integral::defineInheritance(luaState, &SyntheticallyDerived::getSyntheticBasePointer);
+            // alternative expressions:
+            //integral::defineInheritance<SyntheticallyDerived, SyntheticBase>(luaState, &SyntheticallyDerived::getSyntheticBasePointer);
             //integral::defineInheritance(luaState, &SyntheticallyDerived::syntheticBase_);
+            //integral::defineInheritance(luaState, std::function<SyntheticBase *(SyntheticallyDerived *)>([](SyntheticallyDerived *syntheticallyDerived) -> SyntheticBase * {
+                //return &syntheticallyDerived->syntheticBase_;
+            //}));
 
             return 1;
         } catch (const std::exception &exception) {

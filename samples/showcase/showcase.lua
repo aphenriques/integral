@@ -21,6 +21,7 @@
 --  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 --
 
+-- This sample does NOT show all integral features (only part of its capability)
 local showcase = require("libshowcase")
 
 -- no problem loading multiple integral libraries
@@ -50,7 +51,6 @@ print("derivedObject:getNumberAndString(): ", derivedObject:getNumberAndString()
 
 print("\n-> Inheritance and functions:")
 
--- FIXME showcase inheritance
 -- number error due to float c type argument in c function (to avoid it, use double c type)
 -- calling Base metatable class with a Derived object
 print("showcase.Base.getSum(derivedObject, 21.1): ", showcase.Base.getSum(derivedObject, 21.1))
