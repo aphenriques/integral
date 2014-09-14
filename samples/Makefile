@@ -1,9 +1,12 @@
-.PHONY: all class embedded error_handling hello inheritance luafunction reference regex rtti_polymorphism shared_ptr showcase synthetic_inheritance type_function clean
+.PHONY: all class default_argument embedded error_handling hello inheritance luafunction reference regex rtti_polymorphism shared_ptr showcase synthetic_inheritance type_function clean
 
-all: class embedded error_handling hello inheritance luafunction reference regex rtti_polymorphism shared_ptr showcase synthetic_inheritance type_function
+all: class default_argument embedded error_handling hello inheritance luafunction reference regex rtti_polymorphism shared_ptr showcase synthetic_inheritance type_function
 
 class:
 	cd class && $(MAKE) all
+
+default_argument:
+	cd default_argument && $(MAKE) all
 
 embedded:
 	cd embedded && $(MAKE) all
@@ -43,6 +46,7 @@ type_function:
 
 clean:
 	cd class && $(MAKE) $@
+	cd default_argument && $(MAKE) $@
 	cd embedded && $(MAKE) $@
 	cd error_handling && $(MAKE) $@
 	cd hello && $(MAKE) $@
