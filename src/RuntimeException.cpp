@@ -24,5 +24,8 @@
 #include "RuntimeException.h"
 
 namespace integral {
+    const char * const RuntimeException::kUnknownExceptionMessage_ = "[integral] unknown exception thrown";
+    const char * const RuntimeException::kInvalidStackExceptionMessage_ = "invalid Lua stack";
+    
     RuntimeException::RuntimeException(const std::string &fileName, unsigned lineNumber, const std::string &functionName, const std::string &errorMessage) : std::runtime_error(errorMessage + " at " + fileName + ":" + std::to_string(lineNumber) + ":(" + functionName + ")") {}
 }

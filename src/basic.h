@@ -33,8 +33,6 @@
 namespace integral {
     namespace detail {
         namespace basic {
-            extern const char * const gkUnknownExceptionMessage;
-            
             void setLuaFunction(lua_State *luaState, const char *name, lua_CFunction function, int nUpValues);
             
             inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues);

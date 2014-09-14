@@ -51,7 +51,7 @@ namespace integral {
                 } catch (const std::exception &exception) {
                     lua_pushstring(luaState, (std::string("[integral] ") + exception.what()).c_str());
                 } catch (...) {
-                    lua_pushstring(luaState, basic::gkUnknownExceptionMessage);
+                    lua_pushstring(luaState, RuntimeException::kUnknownExceptionMessage_);
                 }
                 // error return outside catch scope so that the exception destructor can be called
                 return lua_error(luaState);
@@ -59,10 +59,14 @@ namespace integral {
         }
         
         void LuaFunctionWrapper::setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction, int nUpValues) {
-            pushFunction(luaState, luaFunction, nUpValues);
-            lua_pushstring(luaState, name.c_str());
-            lua_insert(luaState, -2);
-            lua_rawset(luaState, -3);
+            if (lua_istable(luaState, -1 - nUpValues) != 0) {
+                pushFunction(luaState, luaFunction, nUpValues);
+                lua_pushstring(luaState, name.c_str());
+                lua_insert(luaState, -2);
+                lua_rawset(luaState, -3);
+            } else {
+                throw RuntimeException(__FILE__, __LINE__, __func__, RuntimeException::kInvalidStackExceptionMessage_);
+            }
         }
     }
 }

@@ -30,6 +30,9 @@
 namespace integral {
     class RuntimeException : public std::runtime_error {
     public:
+        static const char * const kUnknownExceptionMessage_;
+        static const char * const kInvalidStackExceptionMessage_;
+        
         RuntimeException(const std::string &fileName, unsigned lineNumber, const std::string &functionName, const std::string &errorMessage);
     };
 }

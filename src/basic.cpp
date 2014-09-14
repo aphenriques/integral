@@ -26,8 +26,6 @@
 namespace integral {
     namespace detail {
         namespace basic {
-            const char * const gkUnknownExceptionMessage = "[integral] unknown exception thrown";
-            
             void setLuaFunction(lua_State *luaState, const char *name, lua_CFunction function, int nUpValues) {
                 lua_pushcclosure(luaState, function, nUpValues);
                 lua_pushstring(luaState, name);
