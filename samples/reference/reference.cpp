@@ -44,15 +44,9 @@ int main(int argc, char * argv[]) {
         integral::setFunction(luaState, "print", &Object::printMessage);
 
         // 'synthetic inheritance' can be viewed as a transformation from composition in c++ to inheritance in lua
-        integral::defineInheritance(luaState, std::function< Object & (const std::reference_wrapper<Object> &)>(&std::reference_wrapper<Object>::get));
-
-        // alternative expressions:
-        //integral::defineInheritance(luaState, std::function<Object * (const std::reference_wrapper<Object> *)>([](const std::reference_wrapper<Object> *objectReference) -> Object * {
-            //return &objectReference->get();
-        //}));
-
-        // the following statement may not work if the get method is from a base class of std::reference_wrapper (may fail in some stdlib implementations)
-        //integral::defineInheritance<std::reference_wrapper<Object>, Object>(luaState, &std::reference_wrapper<Object>::get);
+        integral::defineInheritance(luaState, std::function<Object * (std::reference_wrapper<Object> *)>([](const std::reference_wrapper<Object> *objectReference) -> Object * {
+            return &objectReference->get();
+        }));
 
         lua_pop(luaState, 1);
 

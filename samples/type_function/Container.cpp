@@ -45,7 +45,9 @@ extern "C" {
             integral::setConstructor<Container, double>(luaState, "new");
 
             // type function from Container to Id (similar to C++ type operator)
-            integral::defineTypeFunction<Container, Id>(luaState, &Container::id_);
+            integral::defineTypeFunction<Container, Id>(luaState, [](Container *container) -> Id * {
+                return &container->id_;
+            });
 
             // this function takes an Id object as parameter
             integral::setFunction(luaState, "getNumberFromId", std::function<double(const Id &)>([](const Id &id) {
