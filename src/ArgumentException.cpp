@@ -50,7 +50,7 @@ namespace integral {
                 return;
             }
         }
-        if (debugInfo.name == NULL) { 
+        if (debugInfo.name == nullptr) {
             debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
         }
         std::stringstream messageStream;
@@ -73,7 +73,7 @@ namespace integral {
             message_ = messageStream.str();
             return;
         }
-        if (debugInfo.name == NULL) {
+        if (debugInfo.name == nullptr) {
             debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
         }
         std::stringstream messageStream;

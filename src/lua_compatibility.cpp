@@ -29,17 +29,18 @@ namespace integral {
             
 #if LUA_VERSION_NUM == 501
             void * testudata(lua_State *luaState, int index, const char *metatableName) {
-                void *p = lua_touserdata(luaState, index);
-                if (p != NULL) {  // value is a userdata?
-                    if (lua_getmetatable(luaState, index)) {  // does it have a metatable?
-                        luaL_getmetatable(luaState, metatableName);  // get correct metatable
-                        if (!lua_rawequal(luaState, -1, -2))  // not the same?
-                            p = NULL;  // value is a userdata with wrong metatable
-                        lua_pop(luaState, 2);  // remove both metatables
-                        return p;
+                void *userData = lua_touserdata(luaState, index);
+                if (userData != nullptr) {
+                    if (lua_getmetatable(luaState, index) != 0) {
+                        luaL_getmetatable(luaState, metatableName);
+                        if (lua_rawequal(luaState, -1, -2) == 0) {
+                            userData = nullptr;
+                        }
+                        lua_pop(luaState, 2);
+                        return userData;
                     }
                 }
-                return NULL;  // value is not a userdata with a metatable
+                return nullptr;
             }
 #endif
             
