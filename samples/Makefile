@@ -1,61 +1,14 @@
-.PHONY: all class default_argument embedded error_handling hello inheritance luafunction reference regex rtti_polymorphism shared_ptr showcase synthetic_inheritance type_function clean
+# http://stackoverflow.com/a/11206700
 
-all: class default_argument embedded error_handling hello inheritance luafunction reference regex rtti_polymorphism shared_ptr showcase synthetic_inheritance type_function
+SUBDIRS := $(wildcard */.)
+TARGETS := all clean  # must not contain '/'
 
-class:
-	cd class && $(MAKE) all
+SUBDIRS_TARGETS := $(foreach t,$(TARGETS),$(addsuffix $t,$(SUBDIRS)))
 
-default_argument:
-	cd default_argument && $(MAKE) all
+.PHONY : $(TARGETS) $(SUBDIRS_TARGETS)
 
-embedded:
-	cd embedded && $(MAKE) all
+$(TARGETS) : % : $(addsuffix %,$(SUBDIRS))
+	@echo 'Done "$*" target'
 
-error_handling:
-	cd error_handling && $(MAKE) all
-
-hello:
-	cd hello && $(MAKE) all
-
-inheritance:
-	cd inheritance && $(MAKE) all
-
-luafunction:
-	cd luafunction && $(MAKE) all
-
-reference:
-	cd reference && $(MAKE) all
-
-regex:
-	cd regex && $(MAKE) all
-
-rtti_polymorphism:
-	cd rtti_polymorphism && $(MAKE) all
-
-shared_ptr:
-	cd shared_ptr && $(MAKE) all
-
-showcase: regex
-	cd showcase && $(MAKE) all
-
-synthetic_inheritance:
-	cd synthetic_inheritance && $(MAKE) all
-
-type_function:
-	cd type_function && $(MAKE) all
-
-clean:
-	cd class && $(MAKE) $@
-	cd default_argument && $(MAKE) $@
-	cd embedded && $(MAKE) $@
-	cd error_handling && $(MAKE) $@
-	cd hello && $(MAKE) $@
-	cd inheritance && $(MAKE) $@
-	cd luafunction && $(MAKE) $@
-	cd reference && $(MAKE) $@
-	cd regex && $(MAKE) $@
-	cd rtti_polymorphism && $(MAKE) $@
-	cd shared_ptr && $(MAKE) $@
-	cd showcase && $(MAKE) $@
-	cd synthetic_inheritance && $(MAKE) $@
-	cd type_function && $(MAKE) $@
+$(SUBDIRS_TARGETS) :
+	$(MAKE) -C $(@D) $(@F:.%=%)
