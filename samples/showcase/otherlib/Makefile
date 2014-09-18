@@ -1,30 +1,26 @@
-include ../../common.mk
+include ../../../common.mk
 
 SRC_DIRS:=.
 
-SAMPLE_SHARED_LIB:=libshowcase.so
+SAMPLE_SHARED_LIB:=libotherlib.so
 
 SRCS=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
 OBJS=$(addsuffix .o, $(basename $(SRCS)))
 DEPS=$(addsuffix .d, $(basename $(SRCS)))
 
-INTEGRAL_STATIC_LIB:=../../src/$(INTEGRAL_STATIC_LIB_NAME)
+INTEGRAL_STATIC_LIB:=../../../src/$(INTEGRAL_STATIC_LIB_NAME)
 
-CPPFLAGS+=-I../../src
+CPPFLAGS+=-I../../../src
 
 .PHONY: all clean
 
 all: $(SAMPLE_SHARED_LIB)
-	cd otherlib && $(MAKE) all
-
-otherlib/libotherlib.so:
 
 $(SAMPLE_SHARED_LIB): $(OBJS)
 	$(CXX) $(OBJS) $(INTEGRAL_STATIC_LIB) $(SHARED_LIB_FLAGS) -o $@
 
 clean:
 	rm -f $(DEPS) $(OBJS) $(SAMPLE_SHARED_LIB)
-	cd otherlib && $(MAKE) $@
 
 %.d: %.cpp
 	$(CXX) $(CPPFLAGS) -MP -MM -MF $@ -MT '$@ $(addsuffix .o, $(basename $<))' $<
