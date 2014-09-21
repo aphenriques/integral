@@ -76,6 +76,14 @@ extern "C" {
             });
             lua_rawset(luaState, -3);
 
+            // alternative way to push LuaFunctions
+            lua_pushstring(luaState, "printMessage");
+            integral::push<integral::CLuaFunction>(luaState, [](lua_State *luaState) -> int {
+                std::cout << "message from CLuaFunction" << std::endl;
+                return 0;
+            });
+            lua_rawset(luaState, -3);
+
             return 1;
         } catch (const std::exception &exception) {
             lua_pushstring(luaState, (std::string("[luafunction sample setup] ") + exception.what()).c_str());

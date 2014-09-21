@@ -36,3 +36,6 @@ print("--")
 Object.printUpvalue()
 printer = Object.getPrinter("object_printer")
 printer()
+
+print("--")
+Object.printMessage()
