@@ -12,20 +12,20 @@ INTEGRAL_STATIC_LIB:=../../src/$(INTEGRAL_STATIC_LIB_NAME)
 
 LDLIBS+=$(LIB_LUA_FLAG)
 
-CPPFLAGS+=-I../../src
+CXXFLAGS+=-I../../src
 
 .PHONY: all clean
 
 all: $(SAMPLE_EXECUTALBE)
 
-$(SAMPLE_EXECUTALBE): $(OBJS)
+$(SAMPLE_EXECUTALBE): $(OBJS) $(INTEGRAL_STATIC_LIB)
 	$(CXX) $(OBJS) $(INTEGRAL_STATIC_LIB) $(LDFLAGS) $(LDLIBS) -o $@
 
 clean:
-	rm -f $(DEPS) $(OBJS) $(SAMPLE_EXECUTALBE)
+	$(RM) $(DEPS) $(OBJS) $(SAMPLE_EXECUTALBE)
 
 %.d: %.cpp
-	$(CXX) $(CPPFLAGS) -MP -MM -MF $@ -MT '$@ $(addsuffix .o, $(basename $<))' $<
+	$(CXX) $(CXXFLAGS) -MP -MM -MF $@ -MT '$@ $(addsuffix .o, $(basename $<))' $<
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)
