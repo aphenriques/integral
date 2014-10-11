@@ -2,8 +2,8 @@ INSTALL_TOP= /usr/local
 INSTALL_INC= $(INSTALL_TOP)/include/integral
 INSTALL_LIB= $(INSTALL_TOP)/lib
 
-INTEGRAL_STATIC_LIB_NAME:=libintegral.a
-INTEGRAL_SHARED_LIB_NAME:=libintegral.so
+PROJECT_STATIC_LIB_NAME:=libintegral.a
+PROJECT_SHARED_LIB_NAME:=libintegral.so
 
 CXXFLAGS:=-std=c++11 -O3 -I/usr/local/include -I/usr/include/lua5.2
 #CXXFLAGS:=-std=c++11 -O3 -I/usr/local/include/luajit-2.0

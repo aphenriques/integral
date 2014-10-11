@@ -12,21 +12,21 @@ DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 
 all: static shared
 
-static: $(INTEGRAL_STATIC_LIB_NAME)
+static: $(PROJECT_STATIC_LIB_NAME)
 
-shared: $(INTEGRAL_SHARED_LIB_NAME)
+shared: $(PROJECT_SHARED_LIB_NAME)
 
-$(INTEGRAL_STATIC_LIB_NAME): $(OBJS)
+$(PROJECT_STATIC_LIB_NAME): $(OBJS)
 	$(AR) $(ARFLAGS) $@ $^
 
-$(INTEGRAL_SHARED_LIB_NAME): $(OBJS)
+$(PROJECT_SHARED_LIB_NAME): $(OBJS)
 	$(CXX) $(SHARED_LIB_FLAGS) $^ -o $@
 
 %.d: %.cpp
 	$(CXX) $(CXXFLAGS) -MP -MM -MF $@ -MT '$@ $(addsuffix .o, $(basename $<))' $<
 
 clean:
-	$(RM) $(DEPS) $(OBJS) $(INTEGRAL_STATIC_LIB_NAME) $(INTEGRAL_SHARED_LIB_NAME)
+	$(RM) $(DEPS) $(OBJS) $(PROJECT_STATIC_LIB_NAME) $(PROJECT_SHARED_LIB_NAME)
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)

@@ -8,7 +8,7 @@ SRCS=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
 OBJS=$(addsuffix .o, $(basename $(SRCS)))
 DEPS=$(addsuffix .d, $(basename $(SRCS)))
 
-INTEGRAL_STATIC_LIB:=../../src/$(INTEGRAL_STATIC_LIB_NAME)
+PROJECT_STATIC_LIB:=../../src/$(PROJECT_STATIC_LIB_NAME)
 
 LDLIBS+=$(LIB_LUA_FLAG)
 
@@ -18,8 +18,8 @@ CXXFLAGS+=-I../../src
 
 all: $(SAMPLE_EXECUTALBE)
 
-$(SAMPLE_EXECUTALBE): $(OBJS) $(INTEGRAL_STATIC_LIB)
-	$(CXX) $(OBJS) $(INTEGRAL_STATIC_LIB) $(LDFLAGS) $(LDLIBS) -o $@
+$(SAMPLE_EXECUTALBE): $(OBJS) $(PROJECT_STATIC_LIB)
+	$(CXX) $(OBJS) $(PROJECT_STATIC_LIB) $(LDFLAGS) $(LDLIBS) -o $@
 
 clean:
 	$(RM) $(DEPS) $(OBJS) $(SAMPLE_EXECUTALBE)
