@@ -39,6 +39,7 @@
 #include "basic.h"
 #include "generic.h"
 #include "lua_compatibility.h"
+#include "LuaPack.h"
 #include "TemplateSequence.h"
 #include "TemplateSequenceGenerator.h"
 #include "type_manager.h"
@@ -56,9 +57,6 @@ namespace integral {
             
             template<typename T, typename U>
             using LuaUnorderedMap = Adaptor<std::unordered_map<T, U>>;
-            
-            template<typename ...T>
-            using LuaPack = Adaptor<std::tuple<T...>>;
             
             template<typename T>
             T & getObject(lua_State *luaState, int index);

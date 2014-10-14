@@ -41,6 +41,7 @@
 #include "LuaFunctionArgument.h"
 #include "LuaFunctionWrapper.h"
 #include "LuaIgnoredArgument.h"
+#include "LuaPack.h"
 #include "type_manager.h"
 
 namespace integral {
@@ -67,7 +68,7 @@ namespace integral {
     // It is used to push multiple (function return) values.
     // LuaPack can be seamlessly converted to std::tuple.
     template<typename ...T>
-    using LuaPack = detail::exchanger::LuaPack<T...>;
+    using LuaPack = detail::LuaPack<T...>;
     
     // Proxy to a (either C++ or lua) function in lua state.
     // The object of this class cannot be stored, it only points to a function in the stack.

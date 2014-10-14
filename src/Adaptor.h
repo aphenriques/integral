@@ -27,18 +27,20 @@
 #include <utility>
 
 namespace integral {
-    template<typename T>
-    class Adaptor : public T {
-    public:
+    namespace detail {
+        template<typename T>
+        class Adaptor : public T {
+        public:
+            template<typename ...A>
+            inline Adaptor(A &&...arguments);
+        };
+        
+        //--
+        
+        template<typename T>
         template<typename ...A>
-        inline Adaptor(A &&...arguments);
-    };
-    
-    //--
-    
-    template<typename T>
-    template<typename ...A>
-    inline Adaptor<T>::Adaptor(A &&...arguments) : T(std::forward<A>(arguments)...) {}
+        inline Adaptor<T>::Adaptor(A &&...arguments) : T(std::forward<A>(arguments)...) {}
+    }
 }
 
 #endif

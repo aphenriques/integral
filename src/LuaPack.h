@@ -1,5 +1,5 @@
 //
-//  TypeCounter.h
+//  LuaPack.h
 //  integral
 //
 //  Copyright (C) 2013, 2014  André Pereira Henriques
@@ -21,37 +21,26 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef integral_LuaPack_h
+#define integral_LuaPack_h
 
-#ifndef integral_TypeCounter_h
-#define integral_TypeCounter_h
-
-#include "exchanger.h"
+#include <tuple>
+#include <utility>
 
 namespace integral {
     namespace detail {
-        template<typename T>
-        class TypeCounter {
-        public:
-            static constexpr unsigned getCount();
-        };
-        
         template<typename ...T>
-        class TypeCounter<LuaPack<T...>> {
+        class LuaPack : public std::tuple<T...> {
         public:
-            static constexpr unsigned getCount();
+            template<typename ...A>
+            inline LuaPack(A &&...arguments);
         };
         
         //--
         
-        template<typename T>
-        constexpr unsigned TypeCounter<T>::getCount() {
-            return 1;
-        }
-        
         template<typename ...T>
-        constexpr unsigned TypeCounter<LuaPack<T...>>::getCount() {
-            return sizeof...(T);
-        }
+        template<typename ...A>
+        inline LuaPack<T...>::LuaPack(A &&...arguments) : std::tuple<T...>(std::forward<A>(arguments)...) {}
     }
 }
 
