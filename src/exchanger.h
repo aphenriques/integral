@@ -58,6 +58,9 @@ namespace integral {
             template<typename T, typename U>
             using LuaUnorderedMap = Adaptor<std::unordered_map<T, U>>;
             
+            template<typename ...T>
+            using LuaTuple = Adaptor<std::tuple<T...>>;
+            
             template<typename T>
             T & getObject(lua_State *luaState, int index);
             
@@ -145,31 +148,40 @@ namespace integral {
             };
             
             template<typename ...T>
-            class Exchanger<LuaPack<T...>> {
+            class Exchanger<LuaTuple<T...>> {
             public:
-                inline static LuaPack<T...> get(lua_State *luaState, int index);
-                inline static void push(lua_State *luaState, const LuaPack<T...> &luaPack);
-                static void push(lua_State *luaState, T &&...luaPack);
+                inline static LuaTuple<T...> get(lua_State *luaState, int index);
+                inline static void push(lua_State *luaState, const LuaTuple<T...> &tuple);
+                inline static void push(lua_State *luaState, T &&...t);
                 
             private:
                 template<unsigned ...S>
-                static LuaPack<T...> get(lua_State *luaState, int index, TemplateSequence<S...>);
-
-                template<unsigned ...S>
-                inline static void push(lua_State *luaState, const LuaPack<T...> &luaPack, TemplateSequence<S...>);
-
-                inline static void push_(lua_State *luaState);
+                static LuaTuple<T...> get(lua_State *luaState, int index, TemplateSequence<S...>);
                 
-                template<typename U, typename ...V>
-                static void push_(lua_State *luaState, U &&value, V &&...remainingPack);
+                template<unsigned I, typename U>
+                static U getElementFromTable(lua_State *luaState, int index);
+                
+                template<unsigned ...S>
+                static void push(lua_State *luaState, const LuaTuple<T...> &tuple, TemplateSequence<S...>);
+                
+                template<unsigned ...S>
+                static void push(lua_State *luaState, T &&...t, TemplateSequence<S...>);
+                
+                template<unsigned I, typename U>
+                static void setElementInTable(lua_State *luaState, U &&element, int index);
+                
+                template<unsigned I, typename U>
+                static void setElementInTable(lua_State *luaState, const U &element, int index);
             };
 
             template<typename T>
             using ExchangerType = Exchanger<generic::BasicType<T>>;
             
+            // defined as friend function of Exchanger<LuaPack<T...>>
             template<typename T>
             inline auto get(lua_State *luaState, int index) -> decltype(ExchangerType<T>::get(luaState, index));
             
+            // defined as friend function of Exchanger<LuaPack<T...>>
             template<typename T, typename ...A>
             inline void push(lua_State *luaState, A &&...arguments);
             
@@ -177,6 +189,32 @@ namespace integral {
             
             template<typename A, typename ...B>
             void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments);
+            
+            // All member functions are private to avoid interaction with other Exchanger specializations. This could lead to undefiened behaviour, specially when constructing tables and extracting elements from it. All specializations use ExchangerType<T>::get or ExchangerType<T>::push
+            template<typename ...T>
+            class Exchanger<LuaPack<T...>> {
+                template<typename U>
+                friend auto get(lua_State *luaState, int index) -> decltype(ExchangerType<U>::get(luaState, index));
+                
+                template<typename U, typename ...A>
+                friend void push(lua_State *luaState, A &&...arguments);
+                
+            private:
+                inline static LuaPack<T...> get(lua_State *luaState, int index);
+                inline static void push(lua_State *luaState, const LuaPack<T...> &luaPack);
+                static void push(lua_State *luaState, T &&...luaPack);
+                
+                template<unsigned ...S>
+                static LuaPack<T...> get(lua_State *luaState, int index, TemplateSequence<S...>);
+                
+                template<unsigned ...S>
+                inline static void push(lua_State *luaState, const LuaPack<T...> &luaPack, TemplateSequence<S...>);
+                
+                inline static void push_(lua_State *luaState);
+                
+                template<typename U, typename ...V>
+                static void push_(lua_State *luaState, U &&value, V &&...remainingPack);
+            };
             
             //--
             
@@ -243,9 +281,9 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TNUMBER));
                     }
                 } else {
-                    T *userDataBase = type_manager::getConvertibleType<T>(luaState, index);
-                    if (userDataBase != nullptr) {
-                        return *userDataBase;
+                    T *userData = type_manager::getConvertibleType<T>(luaState, index);
+                    if (userData != nullptr) {
+                        return *userData;
                     } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TNUMBER));
                     }
@@ -269,9 +307,9 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TNUMBER));
                     }
                 } else {
-                    T *userDataBase = type_manager::getConvertibleType<T>(luaState, index);
-                    if (userDataBase != nullptr) {
-                        return *userDataBase;
+                    T *userData = type_manager::getConvertibleType<T>(luaState, index);
+                    if (userData != nullptr) {
+                        return *userData;
                     } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TNUMBER));
                     }
@@ -298,9 +336,9 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TNUMBER));
                     }
                 } else {
-                    T *userDataBase = type_manager::getConvertibleType<T>(luaState, index);
-                    if (userDataBase != nullptr) {
-                        return *userDataBase;
+                    T *userData = type_manager::getConvertibleType<T>(luaState, index);
+                    if (userData != nullptr) {
+                        return *userData;
                     } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TNUMBER));
                     }
@@ -345,9 +383,9 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TTABLE));
                     }
                 } else {
-                    LuaVector<T> *userDataBase = type_manager::getConvertibleType<LuaVector<T>>(luaState, index);
-                    if (userDataBase != nullptr) {
-                        return *userDataBase;
+                    LuaVector<T> *userData = type_manager::getConvertibleType<LuaVector<T>>(luaState, index);
+                    if (userData != nullptr) {
+                        return *userData;
                     } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, "table or LuaVector");
                     }
@@ -365,7 +403,7 @@ namespace integral {
                         // stack: table
                         lua_compatibility::pushunsigned(luaState, i + 1);
                         // stack: table | i
-                        Exchanger<T>::push(luaState, luaVector.at(i));
+                        ExchangerType<T>::push(luaState, luaVector.at(i));
                         // stack: table | i | luaVectorElement
                         lua_rawset(luaState, -3);
                         // stack: table
@@ -413,9 +451,9 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TTABLE));
                     }
                 } else {
-                    LuaArray<T, N> *userDataBase = type_manager::getConvertibleType<LuaArray<T, N>>(luaState, index);
-                    if (userDataBase != nullptr) {
-                        return *userDataBase;
+                    LuaArray<T, N> *userData = type_manager::getConvertibleType<LuaArray<T, N>>(luaState, index);
+                    if (userData != nullptr) {
+                        return *userData;
                     } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, "table or LuaArray");
                     }
@@ -431,7 +469,7 @@ namespace integral {
                         // stack: table
                         lua_compatibility::pushunsigned(luaState, i + 1);
                         // stack: table | i
-                        Exchanger<T>::push(luaState, luaArray.at(i));
+                        ExchangerType<T>::push(luaState, luaArray.at(i));
                         // stack: table | i | luaArrayElement
                         lua_rawset(luaState, -3);
                         // stack: table
@@ -471,9 +509,9 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TTABLE));
                     }
                 } else {
-                    LuaUnorderedMap<T, U> *userDataBase = type_manager::getConvertibleType<LuaUnorderedMap<T, U>>(luaState, index);
-                    if (userDataBase != nullptr) {
-                        return *userDataBase;
+                    LuaUnorderedMap<T, U> *userData = type_manager::getConvertibleType<LuaUnorderedMap<T, U>>(luaState, index);
+                    if (userData != nullptr) {
+                        return *userData;
                     } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, "table or LuaUnorderedMap");
                     }
@@ -489,9 +527,9 @@ namespace integral {
                     // stack: table
                     for (const auto& keyValue : luaUnorderedMap) {
                         // stack: table
-                        Exchanger<T>::push(luaState, keyValue.first);
+                        ExchangerType<T>::push(luaState, keyValue.first);
                         // stack: table | key
-                        Exchanger<U>::push(luaState, keyValue.second);
+                        ExchangerType<U>::push(luaState, keyValue.second);
                         // stack: table | key | value
                         lua_rawset(luaState, -3);
                         // stack: table
@@ -499,6 +537,147 @@ namespace integral {
                 } else {
                     throw RuntimeException(__FILE__, __LINE__, __func__, "LuaUnorderedMap is too big");
                 }
+            }
+            
+            template<typename ...T>
+            inline LuaTuple<T...> Exchanger<LuaTuple<T...>>::get(lua_State *luaState, int index) {
+                return Exchanger<LuaTuple<T...>>::get(luaState, index, typename TemplateSequenceGenerator<sizeof...(T)>::TemplateSequenceType());
+            }
+            
+            template<typename ...T>
+            inline void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, const LuaTuple<T...> &tuple) {
+                Exchanger<LuaTuple<T...>>::push(luaState, tuple, typename TemplateSequenceGenerator<sizeof...(T)>::TemplateSequenceType());
+            }
+            
+            template<typename ...T>
+            inline void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, T &&...t) {
+                Exchanger<LuaTuple<T...>>::push(luaState, std::forward<T>(t)..., typename TemplateSequenceGenerator<sizeof...(T)>::TemplateSequenceType());
+            }
+            
+            template<typename ...T>
+            template<unsigned ...S>
+            LuaTuple<T...> Exchanger<LuaTuple<T...>>::get(lua_State *luaState, int index, TemplateSequence<S...>) {
+                if (lua_isuserdata(luaState, index) == 0) {
+                    if (lua_istable(luaState, index) != 0) {
+                        const std::size_t tableSize = lua_compatibility::rawlen(luaState, index);
+                        constexpr unsigned keTupleSize = sizeof...(T);
+                        if (tableSize == keTupleSize) {
+                            try {
+                                return LuaTuple<T...>(getElementFromTable<S + 1, T>(luaState, index)...);
+                            } catch (const ArgumentException &argumentException) {
+                                throw ArgumentException(luaState, index, std::string("invalid table - LuaTuple: " ) + argumentException.what());
+                            }
+                        } else {
+                            std::stringstream errorMessage;
+                            errorMessage << "wrong table - LuaTuple - size: expected " <<  keTupleSize << ", got " << tableSize;
+                            throw ArgumentException(luaState, index, errorMessage.str());
+                        }
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TTABLE));
+                    }
+                } else {
+                    LuaTuple<T...> *userData = type_manager::getConvertibleType<LuaTuple<T...>>(luaState, index);
+                    if (userData != nullptr) {
+                        return *userData;
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, "table or LuaTuple");
+                    }
+                }
+            }
+            
+            template<typename ...T>
+            template<unsigned I, typename U>
+            U Exchanger<LuaTuple<T...>>::getElementFromTable(lua_State *luaState, int index) {
+                if (lua_istable(luaState, index) != 0) {
+                    lua_pushvalue(luaState, index);
+                    // stack: table
+                    lua_compatibility::pushunsigned(luaState, I);
+                    // stack: table | i
+                    lua_rawget(luaState, -2);
+                    // stack: table | luaArrayElement (?)
+                    auto returnElement = ExchangerType<U>::get(luaState, -1);
+                    // stack: table | luaArrayElement
+                    lua_pop(luaState, 2);
+                    return returnElement;
+                } else {
+                    throw RuntimeException(__FILE__, __LINE__, __func__, std::string("expected table at index ") + std::to_string(index));
+                }
+            }
+            
+            template<typename ...T>
+            template<unsigned ...S>
+            void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, const LuaTuple<T...> &tuple, TemplateSequence<S...>) {
+                constexpr unsigned keTupleSize = sizeof...(T);
+                if (keTupleSize <= std::numeric_limits<int>::max() || static_cast<int>(keTupleSize) < 0) {
+                    lua_createtable(luaState, static_cast<int>(keTupleSize), 0);
+                    // stack: table
+                    generic::expandDummyTemplatePack((setElementInTable<S + 1, T>(luaState, std::get<S>(tuple), -1), 0)...);
+                } else {
+                    throw RuntimeException(__FILE__, __LINE__, __func__, "LuaTuple is too big");
+                }
+            }
+            
+            template<typename ...T>
+            template<unsigned ...S>
+            void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, T &&...t, TemplateSequence<S...>) {
+                constexpr unsigned keTupleSize = sizeof...(T);
+                if (keTupleSize <= std::numeric_limits<int>::max() || static_cast<int>(keTupleSize) < 0) {
+                    lua_createtable(luaState, static_cast<int>(keTupleSize), 0);
+                    // stack: table
+                    generic::expandDummyTemplatePack((setElementInTable<S + 1, T>(luaState, std::forward<T>(t), -1), 0)...);
+                } else {
+                    throw RuntimeException(__FILE__, __LINE__, __func__, "LuaTuple is too big");
+                }
+            }
+            
+            
+            // code replication of: void Exchanger<LuaTuple<T...>>::setElementInTable(lua_State *luaState, const U &element, int index);
+            template<typename ...T>
+            template<unsigned I, typename U>
+            void Exchanger<LuaTuple<T...>>::setElementInTable(lua_State *luaState, U &&element, int index) {
+                lua_pushvalue(luaState, index);
+                // stack: table
+                lua_compatibility::pushunsigned(luaState, I);
+                // stack: table | I
+                ExchangerType<U>::push(luaState, element);
+                // stack: table | I | element
+                lua_rawset(luaState, -3);
+                // stack: table
+                lua_pop(luaState, 1);
+            }
+            
+            // code replication of: void Exchanger<LuaTuple<T...>>::setElementInTable(lua_State *luaState, U &&element, int index);
+            template<typename ...T>
+            template<unsigned I, typename U>
+            void Exchanger<LuaTuple<T...>>::setElementInTable(lua_State *luaState, const U &element, int index) {
+                lua_pushvalue(luaState, index);
+                // stack: table
+                lua_compatibility::pushunsigned(luaState, I);
+                // stack: table | I
+                ExchangerType<U>::push(luaState, element);
+                // stack: table | I | element
+                lua_rawset(luaState, -3);
+                // stack: table
+                lua_pop(luaState, 1);
+            }
+            
+            template<typename T>
+            inline auto get(lua_State *luaState, int index) -> decltype(ExchangerType<T>::get(luaState, index)) {
+                return ExchangerType<T>::get(luaState, index);
+            }
+            
+            template<typename T, typename ...A>
+            inline void push(lua_State *luaState, A &&...arguments) {
+                static_assert(std::is_reference<T>::value == false, "cannot push reference");
+                ExchangerType<T>::push(luaState, std::forward<A>(arguments)...);
+            }
+            
+            inline void pushCopy(lua_State *luaState) {}
+            
+            template<typename A, typename ...B>
+            void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments) {
+                push<generic::BasicType<A>>(luaState, std::forward<A>(firstArgument));
+                pushCopy(luaState, std::forward<B>(remainingArguments)...);
             }
             
             template<typename ...T>
@@ -520,9 +699,9 @@ namespace integral {
             template<unsigned ...S>
             LuaPack<T...> Exchanger<LuaPack<T...>>::get(lua_State *luaState, int index, TemplateSequence<S...>) {
                 if (index >= 0) {
-                    return LuaPack<T...>(Exchanger<T>::get(luaState, index + S)...);
+                    return LuaPack<T...>(ExchangerType<T>::get(luaState, index + S)...);
                 } else {
-                    return LuaPack<T...>(Exchanger<T>::get(luaState, index - (sizeof...(S) - 1) + S)...);
+                    return LuaPack<T...>(ExchangerType<T>::get(luaState, index - (sizeof...(S) - 1) + S)...);
                 }
             }
             
@@ -531,7 +710,7 @@ namespace integral {
             inline void Exchanger<LuaPack<T...>>::push(lua_State *luaState, const LuaPack<T...> &luaPack, TemplateSequence<S...>) {
                 Exchanger<LuaPack<T...>>::push_(luaState, std::get<S>(luaPack)...);
             }
-
+            
             template<typename ...T>
             inline void Exchanger<LuaPack<T...>>::push_(lua_State *luaState) {}
             
@@ -541,25 +720,6 @@ namespace integral {
                 // push in order
                 ExchangerType<U>::push(luaState, std::forward<U>(value));
                 Exchanger<LuaPack<T...>>::push_(luaState, std::forward<V>(remainingPack)...);
-            }
-            
-            template<typename T>
-            inline auto get(lua_State *luaState, int index) -> decltype(ExchangerType<T>::get(luaState, index)) {
-                return ExchangerType<T>::get(luaState, index);
-            }
-            
-            template<typename T, typename ...A>
-            inline void push(lua_State *luaState, A &&...arguments) {
-                static_assert(std::is_reference<T>::value == false, "cannot push reference");
-                ExchangerType<T>::push(luaState, std::forward<A>(arguments)...);
-            }
-            
-            inline void pushCopy(lua_State *luaState) {}
-            
-            template<typename A, typename ...B>
-            void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments) {
-                push<generic::BasicType<A>>(luaState, std::forward<A>(firstArgument));
-                pushCopy(luaState, std::forward<B>(remainingArguments)...);
             }
         }
     }

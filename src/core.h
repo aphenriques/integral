@@ -64,6 +64,11 @@ namespace integral {
     template<typename T, typename U>
     using LuaUnorderedMap = detail::exchanger::LuaUnorderedMap<T, U>;
     
+    // Adaptor to std::tuple<T...> and lua table.
+    // LuaTuple can be seamlessly converted to std::tuple.
+    template<typename ...T>
+    using LuaTuple = detail::exchanger::LuaTuple<T...>;
+    
     // Adaptor to std::tuple<T...> and lua pack (multiple return values).
     // It is used to push multiple (function return) values.
     // LuaPack can be seamlessly converted to std::tuple.

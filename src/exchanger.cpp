@@ -34,9 +34,9 @@ namespace integral {
                     }
                     return string;
                 } else {
-                    const char **userDataBase = type_manager::getConvertibleType<const char *>(luaState, index);
-                    if (userDataBase != nullptr) {
-                        return *userDataBase;
+                    const char **userData = type_manager::getConvertibleType<const char *>(luaState, index);
+                    if (userData != nullptr) {
+                        return *userData;
                     } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
                     }
@@ -52,9 +52,9 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
                     }
                 } else {
-                    std::string *userDataBase = type_manager::getConvertibleType<std::string>(luaState, index);
-                    if (userDataBase != nullptr) {
-                        return *userDataBase;
+                    std::string *userData = type_manager::getConvertibleType<std::string>(luaState, index);
+                    if (userData != nullptr) {
+                        return *userData;
                     } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
                     }
@@ -69,9 +69,9 @@ namespace integral {
                 if (lua_isuserdata(luaState, index) == 0) {
                     return lua_toboolean(luaState, index);
                 } else {
-                    bool *userDataBase = type_manager::getConvertibleType<bool>(luaState, index);
-                    if (userDataBase != nullptr) {
-                        return *userDataBase;
+                    bool *userData = type_manager::getConvertibleType<bool>(luaState, index);
+                    if (userData != nullptr) {
+                        return *userData;
                     } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TBOOLEAN));
                     }
