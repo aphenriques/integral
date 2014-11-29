@@ -68,7 +68,11 @@ namespace integral {
         void Caller<void, A...>::call(lua_State *luaState, const A &...arguments) {
             static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
             exchanger::pushCopy(luaState, arguments...);
-            lua_call(luaState, type_count::getTypeCount<A...>(), 0);
+            if (lua_pcall(luaState, type_count::getTypeCount<A...>(), 0, 0) != lua_compatibility::keLuaOk) {
+                std::string errorMessage(lua_tostring(luaState, -1));
+                lua_pop(luaState, 1);
+                throw CallerException(errorMessage);
+            }
         }
     }
 }
