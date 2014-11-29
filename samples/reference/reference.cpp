@@ -38,6 +38,9 @@ int main(int argc, char * argv[]) {
 
     try {
         luaState = luaL_newstate();
+        if (luaState == nullptr) {
+            return 1;
+        }
         luaL_openlibs(luaState);
 
         integral::pushClassMetatable<Object>(luaState);
@@ -63,13 +66,11 @@ int main(int argc, char * argv[]) {
         lua_close(luaState);
         return 0;
     } catch (const std::exception &exception) {
-        std::cout << exception.what() << std::endl;
+        std::cout << "[reference sample] " << exception.what() << std::endl;
     } catch (...) {
         std::cout << "unknown exception thrown" << std::endl;
     }
 
-    if (luaState != nullptr) {
-        lua_close(luaState);
-    }
+    lua_close(luaState);
     return 1;
 }
