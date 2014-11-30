@@ -60,7 +60,7 @@ print("showcase.getSumBase(showcase.Base.new(-2), derivedObject):getNumber():", 
 
 print("\n-> Error handling:")
 local _, message = pcall(function() showcase.throwCppException("c++ exception test message") end)
-print("Exception and lua interaction:", message)
+print("C++ exception and lua interaction:", message)
 local _, message = pcall(function() showcase.getSumBase(42) end)
 print("Wrong function parameter:", message)
 local _, message = pcall(function() showcase.Derived.getString(baseObject) end)

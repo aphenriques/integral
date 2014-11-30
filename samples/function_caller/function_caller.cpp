@@ -52,6 +52,7 @@ int main(int argc, char * argv[]) {
         try {
             lua_getglobal(luaState, "luaMultiply");
             // integral::call is done in protected mode. Throws and exception in case of error
+            std::cout << "[equivalent] luaMultiply(-21):" << std::endl;
             integral::call<int>(luaState, -21);
         } catch (const integral::CallerException &exception) {
             std::cout << "expected error: " << exception.what() << std::endl;
@@ -61,6 +62,7 @@ int main(int argc, char * argv[]) {
         try {
             lua_getglobal(luaState, "cppDouble");
             // integral::call is done in protected mode. Throws and exception in case of error
+            std::cout << "[equivalent] cppDouble(\"asd\"):" << std::endl;
             integral::call<int>(luaState, "asd");
         } catch (const integral::CallerException &exception) {
             std::cout << "expected error: " << exception.what() << std::endl;

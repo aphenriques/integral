@@ -24,10 +24,12 @@
 Object = require("libObject")
 
 object = Object.new()
-print("object:getString() (default constructor):")
+print("object = Object.new() -- default constructor")
+print("object:getString():")
 print(object:getString())
 print("--")
 object = Object.new("object_string")
+print([[object = Object.new("object_string")]])
 print("object:getString():")
 print(object:getString())
 print("--")
