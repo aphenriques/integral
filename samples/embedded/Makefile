@@ -4,9 +4,9 @@ SRC_DIRS:=.
 
 SAMPLE_EXECUTALBE:=embedded
 
-SRCS=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
-OBJS=$(addsuffix .o, $(basename $(SRCS)))
-DEPS=$(addsuffix .d, $(basename $(SRCS)))
+SRCS:=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
+OBJS:=$(addsuffix .o, $(basename $(SRCS)))
+DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 
 PROJECT_STATIC_LIB:=../../src/$(PROJECT_STATIC_LIB_NAME)
 

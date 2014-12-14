@@ -21,6 +21,9 @@
 --  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 --
 
+-- MacOX specific shared library extension
+package.cpath = package.cpath .. ";?.dylib"
+
 local Regex = require("libRegex")
 
 local pattern = Regex.new([[(.)\.(.)]]) -- literal string to avoid dealing with escape characters

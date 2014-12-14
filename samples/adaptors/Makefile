@@ -2,21 +2,21 @@ include ../../common.mk
 
 SRC_DIRS:=.
 
-SAMPLE_SHARED_LIB:=libadaptors.so
+SAMPLE_SHARED_LIB:=libadaptors.$(SHARED_LIB_EXTENSION)
 
-SRCS=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
-OBJS=$(addsuffix .o, $(basename $(SRCS)))
-DEPS=$(addsuffix .d, $(basename $(SRCS)))
+SRCS:=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
+OBJS:=$(addsuffix .o, $(basename $(SRCS)))
+DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 
 PROJECT_STATIC_LIB:=../../src/$(PROJECT_STATIC_LIB_NAME)
 
-CXXFLAGS+=-I../../src
+CXXFLAGS+=-fPIC -I../../src
 
 .PHONY: all clean
 
 all: $(SAMPLE_SHARED_LIB)
 
-otherlib/libotherlib.so:
+otherlib/libotherlib.$(SHARED_LIB_EXTENSION):
 
 $(SAMPLE_SHARED_LIB): $(OBJS) $(PROJECT_STATIC_LIB)
 	$(CXX) $(OBJS) $(PROJECT_STATIC_LIB) $(SHARED_LIB_FLAGS) -o $@

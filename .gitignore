@@ -9,6 +9,7 @@
 *.d
 *.o
 *.so
+*.dylib
 *.a
 
 # OS generated files #

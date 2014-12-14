@@ -21,6 +21,9 @@
 --  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 --
 
+-- MacOX specific shared library extension
+package.cpath = package.cpath .. ";?.dylib"
+
 Object = require("libObject")
 
 o1 = Object.new("prefix")

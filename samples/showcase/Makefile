@@ -2,15 +2,15 @@ include ../../common.mk
 
 SRC_DIRS:=.
 
-SAMPLE_SHARED_LIB:=libshowcase.so
+SAMPLE_SHARED_LIB:=libshowcase.$(SHARED_LIB_EXTENSION)
 
-SRCS=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
-OBJS=$(addsuffix .o, $(basename $(SRCS)))
-DEPS=$(addsuffix .d, $(basename $(SRCS)))
+SRCS:=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
+OBJS:=$(addsuffix .o, $(basename $(SRCS)))
+DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 
 PROJECT_STATIC_LIB:=../../src/$(PROJECT_STATIC_LIB_NAME)
 
-CXXFLAGS+=-I../../src
+CXXFLAGS+=-fPIC -I../../src
 
 .PHONY: all clean
 

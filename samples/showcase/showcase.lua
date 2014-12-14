@@ -21,10 +21,14 @@
 --  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 --
 
+-- MacOX specific shared library extension
+package.cpath = package.cpath .. ";?.dylib"
+
 -- This sample does NOT show all integral features (only part of its capability)
 local showcase = require("libshowcase")
 -- no problem loading multiple integral libraries (no problem loading _any_ other library)
-package.cpath = package.cpath .. ";otherlib/?.so"
+
+package.cpath = package.cpath .. ";otherlib/?.so;otherlib/?.dylib"
 local otherlib = require("libotherlib")
 print("-> libotherlib:")
 print("otherlib.getMessage()", otherlib.getMessage())
