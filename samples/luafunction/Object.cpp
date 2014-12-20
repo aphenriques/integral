@@ -53,7 +53,7 @@ extern "C" {
                 return 1;
             });
 
-            // LuaFunctions accepts upvalues. Though their indices are different then Lua API (as follows)
+            // LuaFunctions accepts upvalues. Though their indices are different than Lua API (as follows)
             integral::push<std::string>(luaState, "upvalue!");
             integral::setLuaFunction(luaState, "printUpvalue", [](lua_State *luaState) -> int {
                 // upvalue index is offset by 1 (because of integral internals). integral::LuaUpValuesIndex or lua_upvalueindex(index + 1) should be used to index upvalues
