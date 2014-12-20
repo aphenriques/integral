@@ -2,7 +2,7 @@
 
 `integral` is a C++ library for binding C++ code with Lua (Lua 5.1, Lua 5.2 or LuaJIT). It utilizes C++ template meta programming to interface both languages.
 
-![Lua logo](http://www.lua.org/images/lua-logo.gif)
+![Lua logo](http://www.lua.org/images/powered-by-lua.gif)
 
 
 # Source
