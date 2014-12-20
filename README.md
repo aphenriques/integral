@@ -32,7 +32,7 @@ and cloned with:
 
 * `integral` has a few reserved names (see **integral reserved names in Lua** ahead);
 * the library allows integration with other bound libraries (wether using `integral` - statically *or* dynamically linked - or not);
-* the library is thread safe (as per Lua state) - `integral` can bind to multiple Lua states independently.
+* the library is thread safe (as per Lua state) - `integral` binds to multiple Lua states independently.
 
 ## Automatic type management
 
