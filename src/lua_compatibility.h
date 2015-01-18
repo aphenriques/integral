@@ -2,7 +2,7 @@
 //  lua_compatibility.h
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -85,10 +85,15 @@ namespace integral {
             inline void pushunsigned(lua_State *luaState, T number) {
                 lua_pushinteger(luaState, static_cast<lua_Integer>(number));
             }
-#else
+#elif LUA_VERSION_NUM == 502
             template<typename T>
             inline void pushunsigned(lua_State *luaState, T number) {
                 lua_pushunsigned(luaState, static_cast<lua_Unsigned>(number));
+            }
+#else
+            template<typename T>
+            inline void pushunsigned(lua_State *luaState, T number) {
+                lua_pushinteger(luaState, static_cast<lua_Unsigned>(number));
             }
 #endif
             
@@ -102,9 +107,13 @@ namespace integral {
             
 #if LUA_VERSION_NUM == 501
             unsigned long tounsignedx(lua_State *luaState, int index, int *isNumber);
-#else
+#elif LUA_VERSION_NUM == 502
             inline lua_Unsigned tounsignedx(lua_State *luaState, int index, int *isNumber) {
                 return lua_tounsignedx(luaState, index, isNumber);
+            }
+#else
+            inline lua_Unsigned tounsignedx(lua_State *luaState, int index, int *isNumber) {
+                return static_cast<lua_Unsigned>(lua_tointegerx(luaState, index, isNumber));
             }
 #endif
             
