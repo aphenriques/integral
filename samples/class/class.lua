@@ -2,7 +2,7 @@
 --  class.lua
 --  integral
 --
---  Copyright (C) 2013, 2014  André Pereira Henriques
+--  Copyright (C) 2014  André Pereira Henriques
 --  aphenriques (at) outlook (dot) com
 --
 --  This file is part of integral.
