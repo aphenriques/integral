@@ -30,7 +30,7 @@ and cloned with:
 
 ## Small intrusion on the Lua state
 
-* `integral` has a few reserved names (see **integral reserved names in Lua** ahead);
+* `integral` has a few reserved names (see [integral reserved names in Lua](#integral-reserved-names-in-lua));
 * the library allows integration with other bound libraries (wether using `integral` - statically *or* dynamically linked - or not);
 * the library is thread safe (as per Lua state) - `integral` binds to multiple Lua states independently.
 
