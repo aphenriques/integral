@@ -143,7 +143,7 @@ Set the compiler standard to C++11, include `integral` headers in the search pat
 
 Include the library header `integral.h` (`namespace integral`). This header includes `core.h` and `DefaultArgument.h`.
 
-The library interface is comprised of the functions in `core.h`, which has a brief description for each of them.
+The library interface is composed of the functions in `core.h`, which has a brief description for each of them.
 
 Check the `samples` directory for examples.
 
