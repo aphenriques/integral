@@ -2,7 +2,7 @@
 //  core.h
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -246,7 +246,7 @@ namespace integral {
     // - lua types (number, table and strings) are returned by value.
     // The function is popped from stack
     // Throws a CallerException exception on error.
-    // It is not necessary to explicitly specify argument types.
+    // It is not necessary to explicitly specify argument template types.
     template<typename R, typename ...A>
     inline auto call(lua_State *luaState, const A &...arguments) -> decltype(detail::Caller<R, A...>::call(luaState, arguments...));
     
