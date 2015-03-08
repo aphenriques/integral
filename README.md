@@ -89,7 +89,7 @@ int main(int argc, char * argv[]) {
     integral::pushClassMetatable<Object>(luaState);
     integral::setConstructor<Object, const char *>(luaState, "new");
     integral::setFunction(luaState, "print", &Object::printMessage);
-    // setting functions and constructors does not change the stack (like Lua API)
+    // setting functions and constructors does not change the stack (like setting funtions in Lua API)
     lua_setglobal(luaState, "Object");
     luaL_dostring(luaState, "local object = Object.new(\"MEPHI\")\n"
                             "object:print(\"destroy the Green Wall!\")");

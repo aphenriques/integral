@@ -53,6 +53,7 @@ namespace integral {
             static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
             exchanger::pushCopy(luaState, arguments...);
             if (lua_pcall(luaState, type_count::getTypeCount<A...>(), type_count::getTypeCount<R>(), 0) == lua_compatibility::keLuaOk) {
+                // it is not possible to use "auto" instead of "decltype" here, because they have different behaviour. "auto" alone is is always a value type (for reference, "auto &" must be used). ReturnType can be both value or reference, depending on "R". So "decltype" must be utilized in this case.
                 using ReturnType = decltype(exchanger::get<R>(luaState, -1));
                 ReturnType returnValue = exchanger::get<R>(luaState, -1);
                 lua_pop(luaState, type_count::getTypeCount<R>());
