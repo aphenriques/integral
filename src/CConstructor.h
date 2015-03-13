@@ -25,7 +25,6 @@
 #define integral_CConstructor_h
 
 #include <functional>
-#include "Adaptor.h"
 #include "exchanger.h"
 #include "ConstructorWrapper.h"
 
