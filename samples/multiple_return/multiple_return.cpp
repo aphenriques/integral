@@ -26,11 +26,17 @@
 #include <lua.hpp>
 #include "integral.h"
 
+integral::LuaPack<std::string, double, unsigned> getSamplePack1() {
+    return {"foo", -1.2, 42};
+}
+
 extern "C" {
     LUALIB_API int luaopen_libmultiple_return(lua_State *luaState) {
         try {
             lua_newtable(luaState);
-            integral::setFunction(luaState, "getSamplePack", std::function<integral::LuaPack<int, int, int>()>([]() -> integral::LuaPack<int, int, int> {
+            integral::setFunction(luaState, "getSamplePack1", getSamplePack1);
+
+            integral::setFunction(luaState, "getSamplePack2", std::function<integral::LuaPack<int, int, int>()>([]() -> integral::LuaPack<int, int, int> {
                 return {1, 2, 3};
             }));
 

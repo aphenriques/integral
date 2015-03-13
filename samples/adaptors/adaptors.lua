@@ -48,6 +48,7 @@ print("# LuaVector")
 local vectorTable = adaptors.getVectorSample()
 print(type(vectorTable))
 print(getStringFromTable(vectorTable))
+print("double vector: " .. getStringFromTable(adaptors.getDoubleVector(vectorTable)))
 adaptors.printVectorOfVectors({{11, 12, 13}, {21, 22}, {31}})
 -- wrong element type error handling
 local _, message = pcall(function() adaptors.printVectorOfVectors({{1}, 2}) end)

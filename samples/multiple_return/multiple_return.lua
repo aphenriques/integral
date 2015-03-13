@@ -26,4 +26,7 @@ package.cpath = package.cpath .. ";?.dylib"
 
 multiple_return = require("libmultiple_return")
 
-print(multiple_return.getSamplePack())
+print("sample pack 1:")
+print(multiple_return.getSamplePack1())
+print("sample pack 2:")
+print(multiple_return.getSamplePack2())

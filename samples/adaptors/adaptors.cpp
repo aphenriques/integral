@@ -21,6 +21,7 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
 #include <array>
 #include <iostream>
 #include <functional>
@@ -31,6 +32,29 @@
 #include <lua.hpp>
 #include "integral.h"
 
+std::vector<int> getVectorSample() {
+    return {1, 2, 3};
+}
+
+std::vector<int> getDoubleVector(std::vector<int> vectorCopy) {
+    std::for_each(vectorCopy.begin(), vectorCopy.end(), [](int &x) -> void {
+        x *= 2;
+    });
+    return vectorCopy;
+}
+
+void printVectorOfVectors(const integral::LuaVector<integral::LuaVector<int>> &luaVectorOfVectors) {
+    std::cout << "vector of vectors (C++): {";
+    for (const auto &element : luaVectorOfVectors) {
+        std::cout << " {";
+        for (const auto &j : element) {
+            std::cout << " " << j;
+        }
+        std::cout << " }";
+    }
+    std::cout << " }" << std::endl;
+}
+
 extern "C" {
     LUALIB_API int luaopen_libadaptors(lua_State *luaState) {
         try {
@@ -38,21 +62,11 @@ extern "C" {
             // stack: table (module table)
 
             // LuaVector
-            integral::setFunction(luaState, "getVectorSample", std::function<integral::LuaVector<int>()>([]() -> integral::LuaVector<int> {
-                return std::vector<int>({1, 2, 3});
-            }));
+            // a integral::LuaVector is seamlessly converted to (upcast to base class) and from a std::vector (it is still efficient because of move semantics). This is also true for other types of adaptors
+            integral::setFunction(luaState, "getVectorSample", std::function<integral::LuaVector<int>()>(getVectorSample));
+            integral::setFunction(luaState, "getDoubleVector", std::function<integral::LuaVector<int>(integral::LuaVector<int>)>(getDoubleVector));
             // nested LuaVectors work as expected
-            integral::setFunction(luaState, "printVectorOfVectors", std::function<void(integral::LuaVector<integral::LuaVector<int>>)>([](integral::LuaVector<integral::LuaVector<int>> luaVectorOfVectors) -> void {
-                std::cout << "vector of vectors (C++): {";
-                for (const auto &element : luaVectorOfVectors) {
-                    std::cout << " {";
-                    for (const auto &j : element) {
-                        std::cout << " " << j;
-                    }
-                    std::cout << " }";
-                }
-                std::cout << " }" << std::endl;
-            }));
+            integral::setFunction(luaState, "printVectorOfVectors", printVectorOfVectors);
 
             // LuaArray
             // adaptors with integral::get/integral::push
