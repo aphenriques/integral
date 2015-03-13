@@ -139,7 +139,7 @@ namespace integral {
     inline void defineInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
     
     // Pushes a type "T" value (string or number) or object onto the stack.
-    // References and pointers (except char *) can not be pushed.
+    // References and pointers (except const char *) can not be pushed.
     // The class metatable is automatically registered if needed.
     // "arguments": parameters for value initialization or object construction.
     template<typename T, typename ...A>
@@ -190,8 +190,8 @@ namespace integral {
     
     // Binds a function in the table or metatable on top of the stack.
     // The function is managed by integral so that if an exception is thrown from it, it is translated to a Lua error
-    // Functions that return reference or pointer (except char *) will cause compilation error.
-    // Returnning references and pointers in bound functions is regarded as unsafe, therefore not supported.
+    // Functions that return reference or pointer (except const char *) will cause compilation error.
+    // Returning references and pointers in bound functions is regarded as unsafe, therefore not supported.
     // "name": name of the bound Lua function.
     // "function": function to be bound
     // "defaultArguments...": pack of default arguments. Each with its own specific type E at index I (every type is deduced from the function arguments). DefaultArgument Index I starts with 1 (like lua). Static checking is performed, so the invalid type or/and index causes compilation error. DefaultArgument<E, I> constructor arguments are forwarded for T type object constructor (check DefaultConstructor.h for details)
