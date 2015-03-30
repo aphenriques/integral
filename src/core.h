@@ -40,15 +40,10 @@
 #include "FunctionWrapper.h"
 #include "LuaFunctionArgument.h"
 #include "LuaFunctionWrapper.h"
-#include "LuaIgnoredArgument.h"
 #include "LuaPack.h"
 #include "type_manager.h"
 
 namespace integral {
-    // Proxy to any value in lua state.
-    // It is meant to be used as an argument to a C++ function.
-    using LuaIgnoredArgument = detail::LuaIgnoredArgument;
-    
     // Adaptor to std::vector<T> and lua table.
     // LuaVector can be seamlessly converted to std::vector.
     template<typename T>
