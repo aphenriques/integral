@@ -70,7 +70,7 @@ namespace integral {
         template<typename M, typename R, typename ...A>
         template<typename ...E, unsigned ...I>
         void FunctionWrapper<M, R, A...>::pushFunction(lua_State *luaState, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments) {
-            argument::validateDefaultArguments<A...>(std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+            argument::validateDefaultArguments<A...>(defaultArguments...);
             basic::pushUserData<UserDataWrapper<FunctionWrapperType>>(luaState, function, std::forward<DefaultArgument<E, I>>(defaultArguments)...);
             type_manager::pushClassMetatable<FunctionWrapperType>(luaState);
             lua_setmetatable(luaState, -2);
