@@ -2,7 +2,7 @@
 //  LuaFunctionWrapper.cpp
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -22,8 +22,8 @@
 //
 
 #include "LuaFunctionWrapper.h"
-#include <string>
 #include <exception>
+#include <string>
 #include <lua.hpp>
 #include "basic.h"
 #include "lua_compatibility.h"

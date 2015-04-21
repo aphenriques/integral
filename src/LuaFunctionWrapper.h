@@ -2,7 +2,7 @@
 //  LuaFunctionWrapper.h
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -24,8 +24,8 @@
 #ifndef integral_LuaFunctionWrapper_h
 #define integral_LuaFunctionWrapper_h
 
-#include <string>
 #include <functional>
+#include <string>
 #include <lua.hpp>
 
 namespace integral {
@@ -37,6 +37,7 @@ namespace integral {
             
             static void setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction, int nUpValues);
             
+            // Public constructors must be used because of basic::pushUserData<LuaFunctionWrapper> in LuaFunctionWrapper::pushFunction definition
             inline LuaFunctionWrapper(const std::function<int(lua_State *)> &luaFunction);
             inline LuaFunctionWrapper(std::function<int(lua_State *)> &&luaFunction);
             inline LuaFunctionWrapper(lua_CFunction luaFunction);
@@ -53,7 +54,7 @@ namespace integral {
         
         inline LuaFunctionWrapper::LuaFunctionWrapper(const std::function<int(lua_State *)> &luaFunction) : luaFunction_(luaFunction) {}
         
-        inline LuaFunctionWrapper::LuaFunctionWrapper(std::function<int(lua_State *)> &&luaFunction) : luaFunction_(luaFunction) {}
+        inline LuaFunctionWrapper::LuaFunctionWrapper(std::function<int(lua_State *)> &&luaFunction) : luaFunction_(std::move(luaFunction)) {}
 
         inline LuaFunctionWrapper::LuaFunctionWrapper(lua_CFunction luaFunction) : LuaFunctionWrapper(std::function<int(lua_State *)>(luaFunction)) {}
 

@@ -170,19 +170,13 @@ namespace integral {
     // "function": function that takes a lua_State * as argument and return an int (number of return values/objects).
     // The first upvalue in the luacfunction is always the userdata that holds the function (std::function), so the remaining upvalues indexes are offset by 1.
     // Use getLuaUpValueIndex or lua_upvalueindex(index + 1) to get an upvalue index.
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues = 0);
-    
     inline void setLuaFunction(lua_State *luaState, const std::string &name, const std::function<int(lua_State *)> &function, int nUpValues = 0);
     
-    template<typename T>
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, T &&function, int nUpValues = 0);
-    
-    inline void pushLuaFunction(lua_State *luaState, lua_CFunction function, int nUpValues = 0);
+    inline void setLuaFunction(lua_State *luaState, const std::string &name, std::function<int(lua_State *)> &&function, int nUpValues = 0);
     
     inline void pushLuaFunction(lua_State *luaState, const std::function<int(lua_State *)> &function, int nUpValues = 0);
     
-    template<typename T>
-    inline void pushLuaFunction(lua_State *luaState, T &&function, int nUpValues = 0);
+    inline void pushLuaFunction(lua_State *luaState, std::function<int(lua_State *)> &&function, int nUpValues = 0);
     
     // Gets the correct upvalue index.
     // setLuaFunction and pushLuaFunction offset the upvalues to insert the bound function userdata (std::function) in the first position.
@@ -200,6 +194,9 @@ namespace integral {
     inline void setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments);
     
     template<typename R, typename ...A, typename ...E, unsigned ...I>
+    inline void setFunction(lua_State *luaState, const std::string &name, std::function<R(A...)> &&function, DefaultArgument<E, I> &&...defaultArguments);
+    
+    template<typename R, typename ...A, typename ...E, unsigned ...I>
     inline void setFunction(lua_State *luaState, const std::string &name, R(*function)(A...), DefaultArgument<E, I> &&...defaultArguments);
     
     template<typename R, typename T, typename ...A, typename ...E, unsigned ...I>
@@ -210,6 +207,9 @@ namespace integral {
     
     template<typename R, typename ...A, typename ...E, unsigned ...I>
     inline void pushFunction(lua_State *luaState, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments);
+    
+    template<typename R, typename ...A, typename ...E, unsigned ...I>
+    inline void pushFunction(lua_State *luaState, std::function<R(A...)> &&function, DefaultArgument<E, I> &&...defaultArguments);
     
     template<typename R, typename ...A, typename ...E, unsigned ...I>
     inline void pushFunction(lua_State *luaState, R(*function)(A...), DefaultArgument<E, I> &&...defaultArguments);
@@ -289,40 +289,28 @@ namespace integral {
     
     template<typename T, typename ...A, typename ...E, unsigned ...I>
     inline void setConstructor(lua_State *luaState, const std::string &name, DefaultArgument<E, I> &&...defaultArguments) {
-        detail::ConstructorWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, T, A...>::setConstructor(luaState, name, std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+        detail::ConstructorWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, T, A...>::setConstructor(luaState, name, std::move(defaultArguments)...);
     }
     
     template<typename T, typename ...A, typename ...E, unsigned ...I>
     inline void pushConstructor(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments) {
-        detail::ConstructorWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, T, A...>::pushConstructor(luaState, std::forward<DefaultArgument<E, I>>(defaultArguments)...);
-    }
-    
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues) {
-        detail::LuaFunctionWrapper::setFunction(luaState, name, function, nUpValues);
+        detail::ConstructorWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, T, A...>::pushConstructor(luaState, std::move(defaultArguments)...);
     }
     
     inline void setLuaFunction(lua_State *luaState, const std::string &name, const std::function<int(lua_State *)> &function, int nUpValues) {
         detail::LuaFunctionWrapper::setFunction(luaState, name, function, nUpValues);
     }
     
-    template<typename T>
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, T &&function, int nUpValues) {
-        // explicit call to detail::LuaFunctionWrapper::setFunction is necessary to avoid infinite recursion
-        detail::LuaFunctionWrapper::setFunction(luaState, name, std::function<int(lua_State *)>(std::forward<const T>(function)), nUpValues);
-    }
-    
-    inline void pushLuaFunction(lua_State *luaState,lua_CFunction function, int nUpValues) {
-        detail::LuaFunctionWrapper::pushFunction(luaState, function, nUpValues);
+    inline void setLuaFunction(lua_State *luaState, const std::string &name, std::function<int(lua_State *)> &&function, int nUpValues) {
+        detail::LuaFunctionWrapper::setFunction(luaState, name, std::move(function), nUpValues);
     }
     
     inline void pushLuaFunction(lua_State *luaState, const std::function<int(lua_State *)> &function, int nUpValues) {
         detail::LuaFunctionWrapper::pushFunction(luaState, function, nUpValues);
     }
     
-    template<typename T>
-    inline void pushLuaFunction(lua_State *luaState, T &&function, int nUpValues) {
-        // explicit call to detail::LuaFunctionWrapper::setFunction is necessary to avoid infinite recursion
-        detail::LuaFunctionWrapper::pushFunction(luaState, std::function<int(lua_State *)>(std::forward<const T>(function)), nUpValues);
+    inline void pushLuaFunction(lua_State *luaState, std::function<int(lua_State *)> &&function, int nUpValues) {
+        detail::LuaFunctionWrapper::pushFunction(luaState, std::move(function), nUpValues);
     }
     
     inline int getLuaUpValueIndex(int index) {
@@ -331,42 +319,52 @@ namespace integral {
     
     template<typename R, typename ...A, typename ...E, unsigned ...I>
     inline void setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments) {
-        detail::FunctionWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, R, A...>::setFunction(luaState, name, function, std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+        detail::FunctionWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, R, A...>::setFunction(luaState, name, function, std::move(defaultArguments)...);
+    }
+    
+    template<typename R, typename ...A, typename ...E, unsigned ...I>
+    inline void setFunction(lua_State *luaState, const std::string &name, std::function<R(A...)> &&function, DefaultArgument<E, I> &&...defaultArguments) {
+        detail::FunctionWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, R, A...>::setFunction(luaState, name, std::move(function), std::move(defaultArguments)...);
     }
     
     template<typename R, typename ...A, typename ...E, unsigned ...I>
     inline void setFunction(lua_State *luaState, const std::string &name, R(*function)(A...), DefaultArgument<E, I> &&...defaultArguments) {
-        setFunction(luaState, name, std::function<R(A...)>(function), std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+        setFunction(luaState, name, std::function<R(A...)>(function), std::move(defaultArguments)...);
     }
     
     template<typename R, typename T, typename ...A, typename ...E, unsigned ...I>
     inline void setFunction(lua_State *luaState, const std::string &name, R(T::*function)(A...), DefaultArgument<E, I> &&...defaultArguments) {
-        setFunction(luaState, name, std::function<R(T &, A...)>(function), std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+        setFunction(luaState, name, std::function<R(T &, A...)>(function), std::move(defaultArguments)...);
     }
     
     template<typename R, typename T, typename ...A, typename ...E, unsigned ...I>
     inline void setFunction(lua_State *luaState, const std::string &name, R(T::*function)(A...) const, DefaultArgument<E, I> &&...defaultArguments) {
-        setFunction(luaState, name, std::function<R(const T &, A...)>(function), std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+        setFunction(luaState, name, std::function<R(const T &, A...)>(function), std::move(defaultArguments)...);
     }
     
     template<typename R, typename ...A, typename ...E, unsigned ...I>
     inline void pushFunction(lua_State *luaState, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments) {
-        detail::FunctionWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, R, A...>::pushFunction(luaState, function, std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+        detail::FunctionWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, R, A...>::pushFunction(luaState, function, std::move(defaultArguments)...);
+    }
+    
+    template<typename R, typename ...A, typename ...E, unsigned ...I>
+    inline void pushFunction(lua_State *luaState, std::function<R(A...)> &&function, DefaultArgument<E, I> &&...defaultArguments) {
+        detail::FunctionWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, R, A...>::pushFunction(luaState, std::move(function), std::move(defaultArguments)...);
     }
     
     template<typename R, typename ...A, typename ...E, unsigned ...I>
     inline void pushFunction(lua_State *luaState, R(*function)(A...), DefaultArgument<E, I> &&...defaultArguments) {
-        pushFunction(luaState, std::function<R(A...)>(function), std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+        pushFunction(luaState, std::function<R(A...)>(function), std::move(defaultArguments)...);
     }
     
     template<typename R, typename T, typename ...A, typename ...E, unsigned ...I>
     inline void pushFunction(lua_State *luaState, R(T::*function)(A...), DefaultArgument<E, I> &&...defaultArguments) {
-        pushFunction(luaState, std::function<R(T &, A...)>(function), std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+        pushFunction(luaState, std::function<R(T &, A...)>(function), std::move(defaultArguments)...);
     }
     
     template<typename R, typename T, typename ...A, typename ...E, unsigned ...I>
     inline void pushFunction(lua_State *luaState, R(T::*function)(A...) const, DefaultArgument<E, I> &&...defaultArguments) {
-        pushFunction(luaState, std::function<R(const T &, A...)>(function), std::forward<DefaultArgument<E, I>>(defaultArguments)...);
+        pushFunction(luaState, std::function<R(const T &, A...)>(function), std::move(defaultArguments)...);
     }
     
     template<typename R, typename T>

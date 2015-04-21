@@ -2,7 +2,7 @@
 //  DefaultArgumentManager.h
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -57,7 +57,7 @@ namespace integral {
         
         template<typename ...F>
         template<typename ...E, unsigned ...I>
-        inline DefaultArgumentManager<F...>::DefaultArgumentManager(DefaultArgument<E, I> &&...defaultArguments) : defaultArguments_(std::forward<DefaultArgument<E, I>>(defaultArguments)...) {}
+        inline DefaultArgumentManager<F...>::DefaultArgumentManager(DefaultArgument<E, I> &&...defaultArguments) : defaultArguments_(std::move(defaultArguments)...) {}
         
         template<typename ...F>
         void DefaultArgumentManager<F...>::processDefaultArguments(lua_State *luaState, const unsigned numberOfFunctionArguments, const unsigned numberOfArgumentsOnStack) const {
