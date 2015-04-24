@@ -2,7 +2,7 @@
 --  showcase.lua
 --  integral
 --
---  Copyright (C) 2013, 2014  André Pereira Henriques
+--  Copyright (C) 2013, 2014, 2015  André Pereira Henriques
 --  aphenriques (at) outlook (dot) com
 --
 --  This file is part of integral.
@@ -64,14 +64,14 @@ print("showcase.getSumBase(showcase.Base.new(-2), derivedObject):getNumber():", 
 
 print("\n-> Error handling:")
 local _, message = pcall(function() showcase.throwCppException("c++ exception test message") end)
-print("C++ exception and lua interaction:", message)
+print("Expected C++ exception and lua interaction:", message)
 local _, message = pcall(function() showcase.getSumBase(42) end)
-print("Wrong function parameter:", message)
+print("Expected wrong function parameter:", message)
 local _, message = pcall(function() showcase.Derived.getString(baseObject) end)
-print("Incompatible userdata (class) function parameter:", message)
+print("Expected incompatible userdata (class) function parameter:", message)
 local _, message = pcall(function() showcase.Derived.getNumberAndString(nil) end)
-print("Safe lua function argument with integral::get<T>:", message)
+print("Expected integral::get<T> error:", message)
 local _, message = pcall(function() showcase.Derived.getNumberAndString(otherlib.getDummyObject()) end)
-print("Incompatible usedata from other library:", message)
+print("Expected incompatible usedata from other library:", message)
 
 print("\nEnd of showcase")
