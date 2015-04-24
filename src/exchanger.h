@@ -2,7 +2,7 @@
 //  exchanger.h
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -210,10 +210,10 @@ namespace integral {
                 template<unsigned ...S>
                 inline static void push(lua_State *luaState, const LuaPack<T...> &luaPack, TemplateSequence<S...>);
                 
-                inline static void push_(lua_State *luaState);
+                inline static void pushGeneric(lua_State *luaState);
                 
                 template<typename U, typename ...V>
-                static void push_(lua_State *luaState, U &&value, V &&...remainingPack);
+                static void pushGeneric(lua_State *luaState, U &&value, V &&...remainingPack);
             };
             
             //--
@@ -692,7 +692,7 @@ namespace integral {
             
             template<typename ...T>
             inline void Exchanger<LuaPack<T...>>::push(lua_State *luaState, T &&...luaPack) {
-                Exchanger<LuaPack<T...>>::push_(luaState, std::forward<T>(luaPack)...);
+                Exchanger<LuaPack<T...>>::pushGeneric(luaState, std::forward<T>(luaPack)...);
             }
             
             template<typename ...T>
@@ -708,18 +708,18 @@ namespace integral {
             template<typename ...T>
             template<unsigned ...S>
             inline void Exchanger<LuaPack<T...>>::push(lua_State *luaState, const LuaPack<T...> &luaPack, TemplateSequence<S...>) {
-                Exchanger<LuaPack<T...>>::push_(luaState, std::get<S>(luaPack)...);
+                Exchanger<LuaPack<T...>>::pushGeneric(luaState, std::get<S>(luaPack)...);
             }
             
             template<typename ...T>
-            inline void Exchanger<LuaPack<T...>>::push_(lua_State *luaState) {}
+            inline void Exchanger<LuaPack<T...>>::pushGeneric(lua_State *luaState) {}
             
             template<typename ...T>
             template<typename U, typename ...V>
-            void Exchanger<LuaPack<T...>>::push_(lua_State *luaState, U &&value, V &&...remainingPack) {
+            void Exchanger<LuaPack<T...>>::pushGeneric(lua_State *luaState, U &&value, V &&...remainingPack) {
                 // push in order
                 ExchangerType<U>::push(luaState, std::forward<U>(value));
-                Exchanger<LuaPack<T...>>::push_(luaState, std::forward<V>(remainingPack)...);
+                Exchanger<LuaPack<T...>>::pushGeneric(luaState, std::forward<V>(remainingPack)...);
             }
         }
     }
