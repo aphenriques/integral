@@ -2,7 +2,7 @@
 //  utility.cpp
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -29,7 +29,7 @@ namespace integral {
         int printStack(lua_State *luaState) {
             int top = lua_gettop(luaState);
             std::cout << "stack dump: ";
-            for (int i = 1; i <= top; i++) {
+            for (int i = 1; i <= top; ++i) {
                 int t = lua_type(luaState, i);
                 switch (t) {
                     case LUA_TSTRING:
