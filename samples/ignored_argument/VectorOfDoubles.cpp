@@ -33,11 +33,11 @@ extern "C" {
             integral::pushClassMetatable<VectorOfDoubles>(luaState);
             integral::setConstructor<VectorOfDoubles>(luaState, "new");
             // because of some legacy lua implementation details, __len receives two arguments, the second argument can be safely ignored
-            integral::setFunction(luaState, "__len", std::function<std::size_t(const VectorOfDoubles &, integral::LuaIgnoredArgument)>([](const VectorOfDoubles &vector, integral::LuaIgnoredArgument) -> std::size_t {
+            integral::setFunction(luaState, "__len", [](const VectorOfDoubles &vector, integral::LuaIgnoredArgument) -> std::size_t {
                 return vector.size();
-            }));
+            });
             // explicit cast is necessary to avoid ambiguity because std::vector<T>::push_back is an overloaded function
-            integral::setFunction(luaState, "pushBack", std::function<void(VectorOfDoubles &, double)>(static_cast<void(VectorOfDoubles::*)(const double &)>(&VectorOfDoubles::push_back)));
+            integral::setFunction(luaState, "pushBack", static_cast<void(VectorOfDoubles::*)(const double &)>(&VectorOfDoubles::push_back));
             return 1;
         } catch (const std::exception &exception) {
             lua_pushstring(luaState, (std::string("[ignored_argument sample setup] ") + exception.what()).c_str());

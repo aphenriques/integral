@@ -50,19 +50,19 @@ extern "C" {
             });
 
             // this function takes an Id object as parameter
-            integral::setFunction(luaState, "getNumberFromId", std::function<double(const Id &)>([](const Id &id) {
+            integral::setFunction(luaState, "getNumberFromId", [](const Id &id) {
                 return id.number_;
-            }));
+            });
 
             // type function from Container to double
-            integral::defineTypeFunction<Container, double>(luaState, std::function<double *(Container *)>([](Container *container) {
+            integral::defineTypeFunction(luaState, [](Container *container) {
                 return &container->id_.number_;
-            }));
+            });
 
             // this function takes a double as parameter
-            integral::setFunction(luaState, "getNegativeNumber", std::function<double(double)>([](double number) {
+            integral::setFunction(luaState, "getNegativeNumber", [](double number) {
                 return -number;
-            }));
+            });
 
             return 1;
         } catch (const std::exception &exception) {

@@ -2,7 +2,7 @@
 //  adaptors.cpp
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -87,35 +87,35 @@ extern "C" {
             });
 
             // LuaUnorderedMap
-            integral::setFunction(luaState, "getUnorderedMapSample", std::function<integral::LuaUnorderedMap<std::string, int>()>([]() -> integral::LuaUnorderedMap<std::string, int> {
+            integral::setFunction(luaState, "getUnorderedMapSample", []() -> integral::LuaUnorderedMap<std::string, int> {
                 return std::unordered_map<std::string, int>({{"um", 1}, {"dois", 2}, {"tres", 3}});
-            }));
+            });
 
-            integral::setFunction(luaState, "printStringDoubleUnorderedMap", std::function<void(integral::LuaUnorderedMap<std::string, double>)>([](integral::LuaUnorderedMap<std::string, double> map) -> void {
+            integral::setFunction(luaState, "printStringDoubleUnorderedMap", [](integral::LuaUnorderedMap<std::string, double> map) -> void {
                 std::cout << "unordered_map<string, double> (C++): {";
                 for (const auto &keyValue : map) {
                     std::cout << " [\"" << keyValue.first << "\"]=" << keyValue.second;
                 }
                 std::cout << " }" << std::endl;
-            }));
+            });
 
             // LuaTuple
-            integral::setFunction(luaState, "getTupleSample", std::function<integral::LuaTuple<std::string, double>()>([]() -> integral::LuaTuple<std::string, double> {
+            integral::setFunction(luaState, "getTupleSample", []() -> integral::LuaTuple<std::string, double> {
                 return integral::LuaTuple<std::string, double>("first", 2.0);
-            }));
+            });
 
-            integral::setFunction(luaState, "printBoolBoolTuple", std::function<void(integral::LuaTuple<bool, bool>)>([](integral::LuaTuple<bool, bool> tuple) -> void {
+            integral::setFunction(luaState, "printBoolBoolTuple", [](integral::LuaTuple<bool, bool> tuple) -> void {
                 std::cout << "tuple<bool, bool> (C++): ( " << std::get<0>(tuple) << ", " << std::get<1>(tuple) << " )" << std::endl;
-            }));
+            });
 
             // LuaPack
-            integral::setFunction(luaState, "getPackSample", std::function<integral::LuaPack<int, bool, std::string>()>([]() -> integral::LuaPack<int, bool, std::string> {
+            integral::setFunction(luaState, "getPackSample", []() -> integral::LuaPack<int, bool, std::string> {
                 return integral::LuaPack<int, bool, std::string>(42, false, "test_string");
-            }));
+            });
 
-            integral::setFunction(luaState, "printBoolBoolPack", std::function<void(integral::LuaPack<bool, bool>)>([](integral::LuaPack<bool, bool> pack) -> void {
+            integral::setFunction(luaState, "printBoolBoolPack", [](integral::LuaPack<bool, bool> pack) -> void {
                 std::cout << "pack<bool, bool> (C++): " << std::get<0>(pack) << ", " << std::get<1>(pack) << std::endl;
-            }));
+            });
 
             return 1;
         } catch (const std::exception &exception) {

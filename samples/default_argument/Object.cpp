@@ -2,7 +2,7 @@
 //  Object.cpp
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -59,9 +59,9 @@ extern "C" {
             // default argument in function
             integral::setFunction(luaState, "testDefault", &Object::testDefault, integral::DefaultArgument<Object, 1>("default Object.testDefault Object argument"), integral::DefaultArgument<int, 2>(42));
 
-            integral::setFunction(luaState, "testDefault2", std::function<void(double, const std::string &)>([](double number, const std::string &string) -> void {
+            integral::setFunction(luaState, "testDefault2", [](double number, const std::string &string) -> void {
                 std::cout << "Object.testDefault2 - number: " << number << "; string: \"" << string << "\"" << std::endl;
-            }), integral::DefaultArgument<double, 1>(0.42));
+            }, integral::DefaultArgument<double, 1>(0.42));
 
             return 1;
         } catch (const std::exception &exception) {

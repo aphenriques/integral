@@ -29,8 +29,12 @@ local library = require("liblibrary")
 local getPrefixed = library.getPrefixFunction("prefix-")
 print(getPrefixed("word"))
 
-local getSuffixed = library.getSuffixFunction("-suffix")
-print(getSuffixed("palavra"))
+local getSuffixed1 = library.getSuffixFunction1("-suffix1")
+print(getSuffixed1("palavra"))
+
+-- getSuffixFunction2 does the same as getSuffixFunction
+local getSuffixed2 = library.getSuffixFunction2("-suffix2")
+print(getSuffixed2("palavra"))
 
 local object = library.newObject("object")
 print(object)

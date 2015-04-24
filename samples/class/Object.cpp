@@ -2,7 +2,7 @@
 //  Object.cpp
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -62,11 +62,11 @@ extern "C" {
             integral::pushClassMetatable<Object>(luaState);
 
             // functions can be lambdas
-            integral::setFunction(luaState, "toString", std::function<std::string(const Object &)>([](const Object &object) -> std::string {
+            integral::setFunction(luaState, "toString", [](const Object &object) -> std::string {
                 std::stringstream ss;
                 ss << "Object " << &object << ": string_ = \"" << object.string_ << "\"; number_ = " << object.number_;
                 return ss.str();
-            }));
+            });
 
             // overloading is not supported, so diferent constructors names must be provided
             // assigning a registered constructor name will override it

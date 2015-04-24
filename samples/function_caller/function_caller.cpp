@@ -2,7 +2,7 @@
 //  function_caller.cpp
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -34,9 +34,9 @@ int main(int argc, char * argv[]) {
             return 1;
         }
 
-        integral::pushFunction(luaState, std::function<int(int)>([](int x) -> int {
+        integral::pushFunction(luaState, [](int x) -> int {
             return 2*x;
-        }));
+        });
         lua_setglobal(luaState, "cppDouble");
 
         luaL_dostring(luaState, "function luaMultiply(x, y) return x*y end");

@@ -2,7 +2,7 @@
 //  Object.cpp
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -48,11 +48,11 @@ extern "C" {
             integral::defineInheritance(luaState, std::function<Object *(std::shared_ptr<Object> *)>(&std::shared_ptr<Object>::get));
 
             // alternative expressions:
-            //integral::defineInheritance(luaState, std::function<Object *(std::shared_ptr<Object> *)>([](const std::shared_ptr<Object> *sharedObject) -> Object * {
+            //integral::defineInheritance(luaState, [](std::shared_ptr<Object> *sharedObject) -> Object * {
                 //return sharedObject->get();
-            //}));
+            //});
 
-             // the following statement may not work if the get method is from a base class of std::shared_ptr (may fail in some stdlib implementations)
+            // the following statement may not work if the get method is from a base class of std::shared_ptr (may fail in some stdlib implementations)
             //integral::defineInheritance<std::shared_ptr<Object>, Object>(luaState, &std::shared_ptr<Object>::get);
 
             return 1;

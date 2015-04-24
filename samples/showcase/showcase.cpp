@@ -2,7 +2,7 @@
 //  showcase.cpp
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -94,9 +94,9 @@ extern "C" {
             integral::setFunction(luaState, "getConcatenated", &Derived::getConcatenated);
 
             // Method definition with lambda:
-            integral::setFunction(luaState, "__tostring", std::function<std::string(const Derived &)>([](const Derived &derived) -> std::string {
+            integral::setFunction(luaState, "__tostring", [](const Derived &derived) -> std::string {
                 return std::to_string(derived.number_) + " | " + derived.string_;
-            }));
+            });
 
             // Lua functions can be registered. Similarly to luaL_setfuncs (lua_CFunction). But, in integral, they can also be functors, and handle exceptions and invalid arguments (with integral::get) graciously
             integral::setLuaFunction(luaState, "getNumberAndString", [](lua_State * luaState) -> int {
@@ -116,9 +116,9 @@ extern "C" {
             // Module functions
             integral::setFunction(luaState, "getSumBase", &getSumBase);
 
-            integral::setFunction(luaState, "throwCppException", std::function<void(const char *)>([](const char * message) {
+            integral::setFunction(luaState, "throwCppException", [](const char * message) {
                 throw std::runtime_error(message);
-            }));
+            });
 
             // Do not forget the return value (number of values to be returned from stack)!
             return 1;

@@ -36,9 +36,9 @@ extern "C" {
             lua_newtable(luaState);
             integral::setFunction(luaState, "getSamplePack1", getSamplePack1);
 
-            integral::setFunction(luaState, "getSamplePack2", std::function<integral::LuaPack<int, int, int>()>([]() -> integral::LuaPack<int, int, int> {
+            integral::setFunction(luaState, "getSamplePack2", []() -> integral::LuaPack<int, int, int> {
                 return {1, 2, 3};
-            }));
+            });
 
             return 1;
         } catch (const std::exception &exception) {

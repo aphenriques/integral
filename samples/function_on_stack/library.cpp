@@ -52,21 +52,21 @@ extern "C" {
                 return 1;
             });
 
-            integral::setLuaFunction(luaState, "getSuffixFunction", [](lua_State *luaState) -> int {
+            integral::setLuaFunction(luaState, "getSuffixFunction1", [](lua_State *luaState) -> int {
                 std::string suffix = integral::get<std::string>(luaState, 1);
-                integral::pushFunction(luaState, std::function<std::string(const std::string &)>([suffix](const std::string &string) -> std::string {
+                integral::pushFunction(luaState, [suffix](const std::string &string) -> std::string {
                     return string + suffix;
-                }));
+                });
                 return 1;
             });
 
             // using function adaptor "integral::CFunction<T>":
-            //using SuffixFunctionType = integral::CFunction<std::string(const std::string &)>;
-            //integral::setFunction(luaState, "getSuffixFunction", std::function<SuffixFunctionType(const std::string &)>([](const std::string &suffix) -> SuffixFunctionType {
-            //    return [suffix](const std::string &string) -> std::string {
-            //        return string + suffix;
-            //    };
-            //}));
+            using SuffixFunctionType = integral::CFunction<std::string(const std::string &)>;
+            integral::setFunction(luaState, "getSuffixFunction2", [](const std::string &suffix) -> SuffixFunctionType {
+                return [suffix](const std::string &string) -> std::string {
+                    return string + suffix;
+                };
+            });
 
             integral::pushClassMetatable<Object>(luaState);
             integral::setFunction(luaState, "__tostring", &Object::getName);

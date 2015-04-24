@@ -2,7 +2,7 @@
 //  otherlib.cpp
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -35,14 +35,14 @@ extern "C" {
             lua_newtable(luaState);
             // stack: table (module table)
 
-            integral::setFunction(luaState, "getMessage", std::function<std::string()>([]() -> std::string {
+            integral::setFunction(luaState, "getMessage", []() -> std::string {
                 return "message from otherlib";
-            }));
+            });
 
             // DummyObject is automatically registered
-            integral::setFunction(luaState, "getDummyObject", std::function<DummyObject()>([]() -> DummyObject {
+            integral::setFunction(luaState, "getDummyObject", []() -> DummyObject {
                 return DummyObject();
-            }));
+            });
 
             // Do not forget the return value (number of values to be returned from stack)!
             return 1;

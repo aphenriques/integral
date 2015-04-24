@@ -48,9 +48,9 @@ extern "C" {
             lua_pop(luaState, 1);
 
             using ObjectConstructorAdaptorType = integral::CConstructor<Object, const std::string &>;
-            integral::setFunction(luaState, "getObjectConstructor", std::function<ObjectConstructorAdaptorType()>([]() -> ObjectConstructorAdaptorType {
+            integral::setFunction(luaState, "getObjectConstructor", []() -> ObjectConstructorAdaptorType {
                 return ObjectConstructorAdaptorType();
-            }));
+            });
 
             lua_pushstring(luaState, "getInverse");
             integral::push<integral::CFunction<double(double)>>(luaState, [](double x) -> double {
@@ -58,12 +58,12 @@ extern "C" {
             });
             lua_rawset(luaState, -3);
 
-            integral::setFunction(luaState, "getConstantFunction", std::function<integral::CLuaFunction(double)>([](double constant) -> integral::CLuaFunction {
+            integral::setFunction(luaState, "getConstantFunction", [](double constant) -> integral::CLuaFunction {
                 return [constant](lua_State *luaState) -> int {
                     integral::push<double>(luaState, constant);
                     return 1;
                 };
-            }));
+            });
 
             return 1;
         } catch (const std::exception &exception) {

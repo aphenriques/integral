@@ -88,9 +88,9 @@ extern "C" {
 
             // alternative expressions:
             integral::defineInheritance(luaState, &getSyntheticInheritance);
-            integral::defineInheritance(luaState, std::function<SyntheticBase *(SyntheticallyDerived *)>([](SyntheticallyDerived *syntheticallyDerived) -> SyntheticBase * {
+            integral::defineInheritance(luaState, [](SyntheticallyDerived *syntheticallyDerived) -> SyntheticBase * {
                 return &syntheticallyDerived->syntheticBase_;
-            }));
+            });
 
             return 1;
         } catch (const std::exception &exception) {

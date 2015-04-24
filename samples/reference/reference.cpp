@@ -2,7 +2,7 @@
 //  reference.cpp
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -47,9 +47,9 @@ int main(int argc, char * argv[]) {
         integral::setFunction(luaState, "print", &Object::printMessage);
 
         // 'synthetic inheritance' can be viewed as a transformation from composition in c++ to inheritance in lua
-        integral::defineInheritance(luaState, std::function<Object * (std::reference_wrapper<Object> *)>([](const std::reference_wrapper<Object> *objectReference) -> Object * {
+        integral::defineInheritance(luaState, [](std::reference_wrapper<Object> *objectReference) -> Object * {
             return &objectReference->get();
-        }));
+        });
 
         lua_pop(luaState, 1);
 
