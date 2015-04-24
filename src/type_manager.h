@@ -522,6 +522,7 @@ namespace integral {
             
             template<typename D, typename B>
             void setInheritance(lua_State *luaState) {
+                static_assert(std::is_const<D>::value == false || std::is_const<B>::value == false, "types can not be constant");
                 static_assert(std::is_same<D, B>::value == false, "Inheritance to itself");
                 // stack: metatable
                 setInheritanceTable<B>(luaState);
@@ -533,6 +534,7 @@ namespace integral {
             
             template<typename T, typename U, typename F>
             void setInheritanceGeneric(lua_State *luaState, F &&typeFunction) {
+                static_assert(std::is_const<T>::value == false || std::is_const<U>::value == false, "types can not be constant");
                 static_assert(std::is_same<typename std::decay<F>::type, std::function<U *(T *)>>::value == true, "invalid typeFunction type");
                 static_assert(std::is_same<T, U>::value == false, "Inheritance to itself");
                 // stack: metatable
@@ -555,6 +557,7 @@ namespace integral {
             
             template<typename D, typename B>
             void defineInheritance(lua_State *luaState) {
+                static_assert(std::is_const<D>::value == false || std::is_const<B>::value == false, "types can not be constant");
                 static_assert(std::is_same<D, B>::value == false, "Inheritance to itself");
                 if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<D>))) == true) {
                     setInheritance<D, B>(luaState);
@@ -567,6 +570,7 @@ namespace integral {
             
             template<typename T, typename U, typename F>
             void defineInheritanceGeneric(lua_State *luaState, F &&typeFunction) {
+                static_assert(std::is_const<T>::value == false || std::is_const<U>::value == false, "types can not be constant");
                 static_assert(std::is_same<typename std::decay<F>::type, std::function<U *(T *)>>::value == true, "invalid typeFunction type");
                 static_assert(std::is_same<T, U>::value == false, "Inheritance to itself");
                 if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<T>))) == true) {
