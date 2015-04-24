@@ -2,7 +2,7 @@
 //  SyntheticallyDerived.cpp
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -55,6 +55,10 @@ public:
     SyntheticBase syntheticBase_;
 };
 
+SyntheticBase * getSyntheticInheritance(SyntheticallyDerived *syntheticallyDerived) {
+    return &syntheticallyDerived->syntheticBase_;
+}
+
 extern "C" {
     LUALIB_API int luaopen_libSyntheticallyDerived(lua_State *luaState) {
         try {
@@ -78,16 +82,15 @@ extern "C" {
 
             // 'synthetic inheritance' can be viewed as a transformation from composition in c++ to inheritance in lua
             // there are alternative ways to define it (just like integral::defineTypeFunction)
-            integral::defineInheritance<SyntheticallyDerived, SyntheticBase>(luaState, [](SyntheticallyDerived *syntheticallyDerived) -> SyntheticBase * {
+            integral::defineInheritance(luaState, [](SyntheticallyDerived *syntheticallyDerived) -> SyntheticBase * {
                 return &syntheticallyDerived->syntheticBase_;
             });
 
             // alternative expressions:
-            //integral::defineInheritance<SyntheticallyDerived, SyntheticBase>(luaState, &SyntheticallyDerived::getSyntheticBasePointer);
-            //integral::defineInheritance(luaState, &SyntheticallyDerived::syntheticBase_);
-            //integral::defineInheritance(luaState, std::function<SyntheticBase *(SyntheticallyDerived *)>([](SyntheticallyDerived *syntheticallyDerived) -> SyntheticBase * {
-                //return &syntheticallyDerived->syntheticBase_;
-            //}));
+            integral::defineInheritance(luaState, &getSyntheticInheritance);
+            integral::defineInheritance(luaState, std::function<SyntheticBase *(SyntheticallyDerived *)>([](SyntheticallyDerived *syntheticallyDerived) -> SyntheticBase * {
+                return &syntheticallyDerived->syntheticBase_;
+            }));
 
             return 1;
         } catch (const std::exception &exception) {

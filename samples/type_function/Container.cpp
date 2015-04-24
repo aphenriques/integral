@@ -2,7 +2,7 @@
 //  Container.cpp
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2015  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -45,7 +45,7 @@ extern "C" {
             integral::setConstructor<Container, double>(luaState, "new");
 
             // type function from Container to Id (similar to C++ type operator)
-            integral::defineTypeFunction<Container, Id>(luaState, [](Container *container) -> Id * {
+            integral::defineTypeFunction(luaState, [](Container *container) -> Id * {
                 return &container->id_;
             });
 
