@@ -64,14 +64,14 @@ print("showcase.getSumBase(showcase.Base.new(-2), derivedObject):getNumber():", 
 
 print("\n-> Error handling:")
 local _, message = pcall(function() showcase.throwCppException("c++ exception test message") end)
-print("Expected C++ exception and lua interaction:", message)
+print("Expected C++ exception error:", message)
 local _, message = pcall(function() showcase.getSumBase(42) end)
-print("Expected wrong function parameter:", message)
+print("Expected wrong function parameter error:", message)
 local _, message = pcall(function() showcase.Derived.getString(baseObject) end)
-print("Expected incompatible userdata (class) function parameter:", message)
+print("Expected incompatible userdata (class) function parameter error:", message)
 local _, message = pcall(function() showcase.Derived.getNumberAndString(nil) end)
 print("Expected integral::get<T> error:", message)
 local _, message = pcall(function() showcase.Derived.getNumberAndString(otherlib.getDummyObject()) end)
-print("Expected incompatible usedata from other library:", message)
+print("Expected incompatible usedata from other library error:", message)
 
 print("\nEnd of showcase")

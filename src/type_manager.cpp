@@ -451,7 +451,7 @@ namespace integral {
                         const std::type_index *typeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -1, gkTypeIndexMetatableName));
                         if (typeIndex != nullptr) {
                             // stack: userdata | metatable | userDataWrapperBaseTable | userDataWrapperBaseTypeIndex
-                            if (*typeIndex == std::type_index(typeid(UserDataWrapperBase)) == true) {
+                            if (*typeIndex == std::type_index(typeid(UserDataWrapperBase))) {
                                 // stack: userdata | metatable | userDataWrapperBaseTable | userDataWrapperBaseTypeIndex
                                 lua_pop(luaState, 1);
                                 // stack: userdata | metatable | userDataWrapperBaseTable
@@ -505,7 +505,7 @@ namespace integral {
                 // stack: metatable | userdata | gkUnderlyingTypeFunctionKey
                 lua_rawget(luaState, -3);
                 // stack: metatable | userdata | function (?)
-                if (lua_iscfunction(luaState, -1) == true) {
+                if (lua_iscfunction(luaState, -1) != 0) {
                     // stack: metatable | userdata | function
                     lua_insert(luaState, -2);
                     // stack: metatable | function | userdata

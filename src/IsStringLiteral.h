@@ -24,19 +24,15 @@
 #ifndef integral_IsStringLiteral_h
 #define integral_IsStringLiteral_h
 
+#include <type_traits>
+
 namespace integral {
     namespace detail {
         template<typename T>
-        class IsStringLiteral {
-        public:
-            static constexpr bool value = false;
-        };
+        class IsStringLiteral : public std::false_type {};
         
         template<unsigned N>
-        class IsStringLiteral<const char (&) [N]> {
-        public:
-            static constexpr bool value = true;
-        };
+        class IsStringLiteral<const char (&) [N]> : public std::true_type {};
     }
 }
 

@@ -390,11 +390,12 @@ namespace integral {
                 // stack: metatable | typeFunctionHashTable| type_index_udata*
                 lua_pushcclosure(luaState, [](lua_State *luaState) -> int {
                     // no need for exception checking. Possible exceptions thrown by conversion function will be caught in [Lua]FunctionWrapperCaller. Type functions are only called by exchanger.
-                    if (lua_islightuserdata(luaState, 1) == false) {
+                    if (lua_islightuserdata(luaState, 1) != 0) {
+                        lua_pushlightuserdata(luaState, static_cast<void *>(static_cast<B *>(static_cast<D *>(lua_touserdata(luaState, 1)))));
+                        return 1;
+                    } else {
                         throw RuntimeException(__FILE__, __LINE__, __func__, "conversion function expected underlying lightuserdata");
                     }
-                    lua_pushlightuserdata(luaState, static_cast<void *>(static_cast<B *>(static_cast<D *>(lua_touserdata(luaState, 1)))));
-                    return 1;
                 }, 0);
                 // stack: metatable | typeFunctionHashTable | type_index_udata* | function*
                 lua_rawset(luaState, -3);
@@ -417,11 +418,12 @@ namespace integral {
                 // stack: metatable | typeFunctionHashTable| type_index_udata* | typeFunction_udata
                 lua_pushcclosure(luaState, [](lua_State *luaState) -> int {
                     // no need for exception checking. Possible exceptions thrown by conversion function will be caught in [Lua]FunctionWrapperCaller. Type functions are only called by exchanger.
-                    if (lua_islightuserdata(luaState, 1) == false) {
+                    if (lua_islightuserdata(luaState, 1) != 0) {
+                        lua_pushlightuserdata(luaState, static_cast<void *>((*static_cast<std::function<U *(T *)> *>(lua_touserdata(luaState, lua_upvalueindex(1))))(static_cast<T *>(lua_touserdata(luaState, 1)))));
+                        return 1;
+                    } else {
                         throw RuntimeException(__FILE__, __LINE__, __func__, "custom conversion function expected underlying lightuserdata");
                     }
-                    lua_pushlightuserdata(luaState, static_cast<void *>((*static_cast<std::function<U *(T *)> *>(lua_touserdata(luaState, lua_upvalueindex(1))))(static_cast<T *>(lua_touserdata(luaState, 1)))));
-                    return 1;
                 }, 1);
                 // stack: metatable | typeFunctionHashTable | type_index_udata* | function*
                 lua_rawset(luaState, -3);

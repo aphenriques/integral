@@ -49,7 +49,7 @@ namespace integral {
                         break;
                         
                     default:
-                        if (lua_iscfunction(luaState, i) == true) {
+                        if (lua_iscfunction(luaState, i) != 0) {
                             std::cout << "cfunction";
                         } else {
                             std::cout << lua_typename(luaState, t);
