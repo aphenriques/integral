@@ -78,15 +78,15 @@ namespace integral {
             
             extern const char * const gkInheritanceIndexMetamethodKey;
             
-            // FIXME change this constants to enums
-            
-            constexpr int keInheritanceTypeIndexIndex = 1;
-            
-            constexpr int keInheritanceMetatableIndex = 2;
-            
-            constexpr int keUserDataWrapperBaseTypeIndexIndex = 1;
-            
-            constexpr int keUserDataWrapperBaseFunctionIndex = 2;
+            enum class InheritanceTable : int {
+                kTypeIndexIndex = 1,
+                kMetatableIndex = 2
+            };
+                
+            enum class UserDataWrapperBaseTable : int {
+                kTypeIndexIndex = 1,
+                kFunctionIndex = 2
+            };
             
             // stack argument: metatable
             const std::type_index * getClassMetatableType(lua_State *luaState);
@@ -487,14 +487,14 @@ namespace integral {
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable*
                 pushTypeIndexUserData<UserDataWrapperBase>(luaState);
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable* | userDataWrapperBaseTypeIndex*
-                lua_rawseti(luaState, -2, keUserDataWrapperBaseTypeIndexIndex);
+                lua_rawseti(luaState, -2, static_cast<int>(UserDataWrapperBaseTable::kTypeIndexIndex));
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable*
                 lua_pushcclosure(luaState, [](lua_State *luaState) -> int {
                     lua_pushlightuserdata(luaState, static_cast<UserDataWrapperBase *>(static_cast<UserDataWrapper<T> *>(lua_touserdata(luaState, 1))));
                     return 1;
                 }, 0);
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable* | userDataWrapperBaseFunction*
-                lua_rawseti(luaState, -2, keUserDataWrapperBaseFunctionIndex);
+                lua_rawseti(luaState, -2, static_cast<int>(UserDataWrapperBaseTable::kFunctionIndex));
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable*
                 lua_rawset(luaState, -3);
                 // stack: metatable
@@ -624,11 +624,11 @@ namespace integral {
                 // stack: metatable | inheritanceTable | baseTable
                 pushTypeIndexUserData<B>(luaState);
                 // stack: metatable | inheritanceTable | baseTable | baseTypeIndex*
-                lua_rawseti(luaState, -2, keInheritanceTypeIndexIndex);
+                lua_rawseti(luaState, -2, static_cast<int>(InheritanceTable::kTypeIndexIndex));
                 // stack: metatable | inheritanceTable | baseTable
                 pushClassMetatable<B>(luaState);
                 // stack: metatable | inheritanceTable | baseTable | baseMetatable*
-                lua_rawseti(luaState, -2, keInheritanceMetatableIndex);
+                lua_rawseti(luaState, -2, static_cast<int>(InheritanceTable::kMetatableIndex));
                 // stack: metatable | inheritanceTable | baseTable
                 lua_pop(luaState, 2);
                 // stack: metatable
