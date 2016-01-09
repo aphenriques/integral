@@ -2,7 +2,7 @@
 //  LuaFunctionWrapper.cpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2015  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -25,9 +25,10 @@
 #include <exception>
 #include <string>
 #include <lua.hpp>
+#include "exception/Exception.h"
 #include "basic.h"
 #include "lua_compatibility.h"
-#include "RuntimeException.h"
+#include "message.h"
 
 namespace integral {
     namespace detail {
@@ -42,16 +43,16 @@ namespace integral {
             }
             lua_pushcclosure(luaState, [](lua_State *luaState) {
                 try {
-                    LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState,lua_upvalueindex(1), kMetatableName_));
+                    LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState, lua_upvalueindex(1), kMetatableName_));
                     if (luaFunctionWrapper != nullptr) {
                         return luaFunctionWrapper->call(luaState);
                     } else {
-                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted LuaFunctionWrapper");
+                        throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted LuaFunctionWrapper");
                     }
                 } catch (const std::exception &exception) {
                     lua_pushstring(luaState, (std::string("[integral] ") + exception.what()).c_str());
                 } catch (...) {
-                    lua_pushstring(luaState, RuntimeException::kUnknownExceptionMessage_);
+                    lua_pushstring(luaState, message::gkUnknownExceptionMessage);
                 }
                 // error return outside catch scope so that the exception destructor can be called
                 return lua_error(luaState);
@@ -65,7 +66,7 @@ namespace integral {
                 lua_insert(luaState, -2);
                 lua_rawset(luaState, -3);
             } else {
-                throw RuntimeException(__FILE__, __LINE__, __func__, RuntimeException::kInvalidStackExceptionMessage_);
+                throw exception::LogicException(__FILE__, __LINE__, __func__, message::gkInvalidStackExceptionMessage);
             }
         }
     }

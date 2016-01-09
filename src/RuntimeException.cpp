@@ -2,7 +2,7 @@
 //  RuntimeException.cpp
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -24,8 +24,5 @@
 #include "RuntimeException.h"
 
 namespace integral {
-    const char * const RuntimeException::kUnknownExceptionMessage_ = "[integral] unknown exception thrown";
-    const char * const RuntimeException::kInvalidStackExceptionMessage_ = "[integral] invalid Lua stack";
-    
     RuntimeException::RuntimeException(const std::string &fileName, unsigned lineNumber, const std::string &functionName, const std::string &errorMessage) : std::runtime_error(errorMessage + " at " + fileName + ":" + std::to_string(lineNumber) + ":(" + functionName + ")") {}
 }

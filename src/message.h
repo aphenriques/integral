@@ -1,8 +1,8 @@
 //
-//  RuntimeException.h
+//  message.h
 //  integral
 //
-//  Copyright (C) 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -21,17 +21,16 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_RuntimeException_h
-#define integral_RuntimeException_h
-
-#include <stdexcept>
-#include <string>
+#ifndef integral_message_h
+#define integral_message_h
 
 namespace integral {
-    class RuntimeException : public std::runtime_error {
-    public:
-        RuntimeException(const std::string &fileName, unsigned lineNumber, const std::string &functionName, const std::string &errorMessage);
-    };
+    namespace detail {
+        namespace message {
+            extern const char * const gkUnknownExceptionMessage;
+            extern const char * const gkInvalidStackExceptionMessage;
+        }
+    }
 }
 
-#endif
+#endif /* integral_message_h */

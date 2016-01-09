@@ -2,7 +2,7 @@
 //  type_manager.cpp
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -24,9 +24,9 @@
 #include "type_manager.h"
 #include <typeindex>
 #include <lua.hpp>
+#include "exception/Exception.h"
 #include "basic.h"
 #include "lua_compatibility.h"
-#include "RuntimeException.h"
 
 namespace integral {
     namespace detail {
@@ -59,7 +59,7 @@ namespace integral {
                     } else {
                         //stack: metatable | ???
                         lua_pop(luaState, 1);
-                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted userdata type_index");
+                        throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted userdata type_index");
                     }
                 } else {
                     //stack: metatable | ???
@@ -104,7 +104,7 @@ namespace integral {
                                 }
                             } else {
                                 lua_pop(luaState, 3);
-                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeManager");
+                                throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted TypeManager");
                             }
                             // stack: typeFunctionHashTable | type_index_udata | rootMetatable
                         }
@@ -268,7 +268,7 @@ namespace integral {
                                             } else {
                                                 // stack: userdata | function
                                                 lua_pop(luaState, 2);
-                                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted UnderlyingTypeFunction");
+                                                throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted UnderlyingTypeFunction");
                                             }
                                         } else {
                                             // stack: underlyingLightUserData | metatable | function
@@ -286,18 +286,18 @@ namespace integral {
                                         } else {
                                             // stack: ???
                                             lua_pop(luaState, 1);
-                                            throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeFunction typeFunctionHashTable - 1");
+                                            throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted TypeFunction typeFunctionHashTable - 1");
                                         }
                                     } else {
                                         // stack: [UnderlyingLight]UserData | metatable | ???
                                         lua_pop(luaState, 3);
-                                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeFunction typeFunctionHashTable - 2");
+                                        throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted TypeFunction typeFunctionHashTable - 2");
                                     }
                                 }
                             } else {
                                 // stack: underlyingLightUserData | metatable | typeFunctionHashTable | ? | function (?)
                                 lua_pop(luaState, 5);
-                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeFunction typeFunctionHashTable - 3");
+                                throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted TypeFunction typeFunctionHashTable - 3");
                             }
                             // stack: underlyingLightUserData | metatable | typeFunctionHashTable | type_index_udata | function
                         }
@@ -354,7 +354,7 @@ namespace integral {
                                 } else {
                                     // stack: userdata | metatable | inheritanceTable
                                     lua_pop(luaState, 3);
-                                    throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted UnderlyingTypeFunction");
+                                    throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted UnderlyingTypeFunction");
                                 }
                             }
                             // [-]
@@ -404,23 +404,23 @@ namespace integral {
                                                 // stack: underlyingLightUserData | metatable | inheritanceTable | baseMetatable
                                                 lua_pop(luaState, 4);
                                                 // there should be a conversion function for a inherited type
-                                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - 1");
+                                                throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - 1");
                                             }
                                         } else {
                                             // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable | baseMetatable | ???
                                             lua_pop(luaState, 6);
-                                            throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - 2");
+                                            throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - 2");
                                         }
                                     } else {
                                         // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable | ???
                                         lua_pop(luaState, 5);
-                                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - 3");
+                                        throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - 3");
 
                                     }
                                 } else {
                                     // stack: underlyingLightUserData | metatable | inheritanceTable | ???
                                     lua_pop(luaState, 4);
-                                    throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - 4");
+                                    throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted inheritanceTable - 4");
                                 }
                             }
                             // stack: underlyingLightUserData | metatable | inheritanceTable
@@ -471,12 +471,12 @@ namespace integral {
                                     } else {
                                         // stack: userdata | metatable | userDataWrapperBaseTable | ???
                                         lua_pop(luaState, 4);
-                                        throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted userDataWrapperBaseTable - 1");
+                                        throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted userDataWrapperBaseTable - 1");
                                     }
                                 } else {
                                     // stack: userdata | metatable | userDataWrapperBaseTable | ???
                                     lua_pop(luaState, 4);
-                                    throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted userDataWrapperBaseTable - 2");
+                                    throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted userDataWrapperBaseTable - 2");
                                 }
                             } else {
                                 // stack: userdata | metatable | userDataWrapperBaseTable | ??? (wrongTypeIndex - incompatible integral library?)

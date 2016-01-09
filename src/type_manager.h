@@ -2,7 +2,7 @@
 //  type_manager.h
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -30,10 +30,10 @@
 #include <type_traits>
 #include <utility>
 #include <lua.hpp>
+#include "exception/Exception.h"
 #include "basic.h"
 #include "generic.h"
 #include "lua_compatibility.h"
-#include "RuntimeException.h"
 #include "UserDataWrapper.h"
 
 // typeid(T).name() cannot be used as an automatic indentifier for metatables. It is not safe: different classes might have the same typeid(T).name() (c++ standard)
@@ -337,7 +337,7 @@ namespace integral {
                                 }
                             } else {
                                 lua_pop(luaState, 3);
-                                throw RuntimeException(__FILE__, __LINE__, __func__, "corrupted TypeManager");
+                                throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted TypeManager");
                             }
                             // stack: typeFunctionHashTable | type_index_udata | rootMetatable
                         }
@@ -394,7 +394,7 @@ namespace integral {
                         lua_pushlightuserdata(luaState, static_cast<void *>(static_cast<B *>(static_cast<D *>(lua_touserdata(luaState, 1)))));
                         return 1;
                     } else {
-                        throw RuntimeException(__FILE__, __LINE__, __func__, "conversion function expected underlying lightuserdata");
+                        throw exception::LogicException(__FILE__, __LINE__, __func__, "conversion function expected underlying lightuserdata");
                     }
                 }, 0);
                 // stack: metatable | typeFunctionHashTable | type_index_udata* | function*
@@ -422,7 +422,7 @@ namespace integral {
                         lua_pushlightuserdata(luaState, static_cast<void *>((*static_cast<std::function<U *(T *)> *>(lua_touserdata(luaState, lua_upvalueindex(1))))(static_cast<T *>(lua_touserdata(luaState, 1)))));
                         return 1;
                     } else {
-                        throw RuntimeException(__FILE__, __LINE__, __func__, "custom conversion function expected underlying lightuserdata");
+                        throw exception::LogicException(__FILE__, __LINE__, __func__, "custom conversion function expected underlying lightuserdata");
                     }
                 }, 1);
                 // stack: metatable | typeFunctionHashTable | type_index_udata* | function*

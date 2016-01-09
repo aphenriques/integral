@@ -2,7 +2,7 @@
 //  integral.h
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -28,6 +28,5 @@
 #include "CallerException.h"
 #include "core.h"
 #include "DefaultArgument.h"
-#include "RuntimeException.h"
 
 #endif

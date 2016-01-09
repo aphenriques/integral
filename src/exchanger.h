@@ -409,7 +409,7 @@ namespace integral {
                         // stack: table
                     }
                 } else {
-                    throw RuntimeException(__FILE__, __LINE__, __func__, "LuaVector is too big");
+                    throw exception::RuntimeException(__FILE__, __LINE__, __func__, "LuaVector is too big");
                 }
             }
             
@@ -475,7 +475,7 @@ namespace integral {
                         // stack: table
                     }
                 } else {
-                    throw RuntimeException(__FILE__, __LINE__, __func__, "LuaArray is too big");
+                    throw exception::RuntimeException(__FILE__, __LINE__, __func__, "LuaArray is too big");
                 }
             }
             
@@ -535,7 +535,7 @@ namespace integral {
                         // stack: table
                     }
                 } else {
-                    throw RuntimeException(__FILE__, __LINE__, __func__, "LuaUnorderedMap is too big");
+                    throw exception::RuntimeException(__FILE__, __LINE__, __func__, "LuaUnorderedMap is too big");
                 }
             }
             
@@ -600,7 +600,7 @@ namespace integral {
                     lua_pop(luaState, 2);
                     return returnElement;
                 } else {
-                    throw RuntimeException(__FILE__, __LINE__, __func__, std::string("expected table at index ") + std::to_string(index));
+                    throw exception::LogicException(__FILE__, __LINE__, __func__, std::string("expected table at index ") + std::to_string(index));
                 }
             }
             
@@ -613,7 +613,7 @@ namespace integral {
                     // stack: table
                     generic::expandDummyTemplatePack((setElementInTable<S + 1, T>(luaState, std::get<S>(tuple), -1), 0)...);
                 } else {
-                    throw RuntimeException(__FILE__, __LINE__, __func__, "LuaTuple is too big");
+                    throw exception::RuntimeException(__FILE__, __LINE__, __func__, "LuaTuple is too big");
                 }
             }
             
@@ -626,7 +626,7 @@ namespace integral {
                     // stack: table
                     generic::expandDummyTemplatePack((setElementInTable<S + 1, T>(luaState, std::forward<T>(t), -1), 0)...);
                 } else {
-                    throw RuntimeException(__FILE__, __LINE__, __func__, "LuaTuple is too big");
+                    throw exception::RuntimeException(__FILE__, __LINE__, __func__, "LuaTuple is too big");
                 }
             }
             
