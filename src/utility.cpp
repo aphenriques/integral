@@ -2,7 +2,7 @@
 //  utility.cpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2015  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -22,10 +22,19 @@
 //
 
 #include "utility.h"
+#include <functional>
+#include <initializer_list>
 #include <iostream>
+#include <sstream>
+#include <tuple>
+#include "core.h"
 
 namespace integral {
     namespace utility {
+        namespace {
+            const char * const gkHelpKey = "help";
+        }
+
         int printStack(lua_State *luaState) {
             int top = lua_gettop(luaState);
             std::cout << "stack dump: ";
@@ -61,6 +70,57 @@ namespace integral {
             }
             std::cout << std::endl;
             return 0;
+        }
+        
+        void setHelp(lua_State *luaState, const char *field, const char *fieldDescription) {
+            lua_pushstring(luaState, gkHelpKey);
+            lua_rawget(luaState, -2);
+            if (lua_isnil(luaState, -1) != 0) {
+                lua_pop(luaState, 1);
+                lua_newtable(luaState);
+                lua_pushvalue(luaState, -1);
+                lua_pushstring(luaState, gkHelpKey);
+                lua_insert(luaState, -2);
+                lua_rawset(luaState, -4);
+            }
+            lua_pushstring(luaState, field);
+            lua_pushstring(luaState, fieldDescription);
+            lua_rawset(luaState, -3);
+            lua_pop(luaState, 1);
+        }
+        
+        void setWithHelp(lua_State *luaState, const char *field, const char *fieldDescription, const std::function<void(lua_State *)> &pushFunction) {
+            lua_pushstring(luaState, field);
+            pushFunction(luaState);
+            lua_rawset(luaState, -3);
+            setHelp(luaState, field, fieldDescription);
+        }
+        
+        void pushNameAndValueList(lua_State *luaState, std::initializer_list<std::tuple<const char *, int>> nameAndValueList) {
+            lua_newtable(luaState);
+            for (auto &nameAndValue : nameAndValueList) {
+                integral::push<const char *>(luaState, std::get<0>(nameAndValue));
+                integral::push<int>(luaState, std::get<1>(nameAndValue));
+                lua_rawset(luaState, -3);
+            }
+        }
+        
+        void setNameAndValueListWithHelp(lua_State *luaState, const char *field, std::initializer_list<std::tuple<const char *, int>> nameAndValueList) {
+            std::ostringstream fieldDescription;
+            fieldDescription << '{';
+            if (nameAndValueList.size() != 0) {
+                auto nameAndValueListIterator = nameAndValueList.begin();
+                const auto nameAndValueListIteratorEndMinus1 = nameAndValueList.end() - 1;
+                while (nameAndValueListIterator != nameAndValueListIteratorEndMinus1) {
+                    fieldDescription << std::get<0>(*nameAndValueListIterator) << ", ";
+                    ++nameAndValueListIterator;
+                }
+                fieldDescription << std::get<0>(*nameAndValueListIteratorEndMinus1);
+            }
+            fieldDescription << '}';
+            setWithHelp(luaState, field, fieldDescription.str().c_str(), [&nameAndValueList](lua_State *luaState) {
+                pushNameAndValueList(luaState, nameAndValueList);
+            });
         }
     }
 }

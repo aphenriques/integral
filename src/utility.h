@@ -2,7 +2,7 @@
 //  utility.h
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -24,11 +24,18 @@
 #ifndef integral_utility_h
 #define integral_utility_h
 
+#include <functional>
+#include <initializer_list>
+#include <tuple>
 #include <lua.hpp>
 
 namespace integral {
     namespace utility {
         int printStack(lua_State *luaState);
+        void setHelp(lua_State *luaState, const char *field, const char *fieldDescription);
+        void setWithHelp(lua_State *luaState, const char *field, const char *fieldDescription, const std::function<void(lua_State *)> &pushFunction);
+        void pushNameAndValueList(lua_State *luaState, std::initializer_list<std::tuple<const char *, int>> nameAndValueList);
+        void setNameAndValueListWithHelp(lua_State *luaState, const char *field, std::initializer_list<std::tuple<const char *, int>> nameAndValueList);
     }
 }
 
