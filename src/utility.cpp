@@ -28,6 +28,8 @@
 #include <sstream>
 #include <tuple>
 #include "core.h"
+#include "exception/Exception.h"
+#include "message.h"
 
 namespace integral {
     namespace utility {
@@ -90,10 +92,14 @@ namespace integral {
         }
         
         void setWithHelp(lua_State *luaState, const char *field, const char *fieldDescription, const std::function<void(lua_State *)> &pushFunction) {
-            lua_pushstring(luaState, field);
-            pushFunction(luaState);
-            lua_rawset(luaState, -3);
-            setHelp(luaState, field, fieldDescription);
+            if (lua_istable(luaState, -1) != 0) {
+                lua_pushstring(luaState, field);
+                pushFunction(luaState);
+                lua_rawset(luaState, -3);
+                setHelp(luaState, field, fieldDescription);
+            } else {
+                throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
+            }
         }
         
         void pushNameAndValueList(lua_State *luaState, std::initializer_list<std::tuple<const char *, int>> nameAndValueList) {
