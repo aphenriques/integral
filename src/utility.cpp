@@ -75,20 +75,24 @@ namespace integral {
         }
         
         void setHelp(lua_State *luaState, const char *field, const char *fieldDescription) {
-            lua_pushstring(luaState, gkHelpKey);
-            lua_rawget(luaState, -2);
-            if (lua_isnil(luaState, -1) != 0) {
-                lua_pop(luaState, 1);
-                lua_newtable(luaState);
-                lua_pushvalue(luaState, -1);
+            if (lua_istable(luaState, -1) != 0) {
                 lua_pushstring(luaState, gkHelpKey);
-                lua_insert(luaState, -2);
-                lua_rawset(luaState, -4);
+                lua_rawget(luaState, -2);
+                if (lua_isnil(luaState, -1) != 0) {
+                    lua_pop(luaState, 1);
+                    lua_newtable(luaState);
+                    lua_pushvalue(luaState, -1);
+                    lua_pushstring(luaState, gkHelpKey);
+                    lua_insert(luaState, -2);
+                    lua_rawset(luaState, -4);
+                }
+                lua_pushstring(luaState, field);
+                lua_pushstring(luaState, fieldDescription);
+                lua_rawset(luaState, -3);
+                lua_pop(luaState, 1);
+            } else {
+                throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
             }
-            lua_pushstring(luaState, field);
-            lua_pushstring(luaState, fieldDescription);
-            lua_rawset(luaState, -3);
-            lua_pop(luaState, 1);
         }
         
         void setWithHelp(lua_State *luaState, const char *field, const char *fieldDescription, const std::function<void(lua_State *)> &pushFunction) {
@@ -102,6 +106,22 @@ namespace integral {
             }
         }
         
+        void setWithHelp(lua_State *luaState, const char *field, const char *fieldDescription) {
+            // stack argument: ? | ?
+            if (lua_istable(luaState, -2) != 0) {
+                // stack argument: table | ?
+                lua_pushstring(luaState, field);
+                // stack argument: table | ? | field
+                lua_insert(luaState, -2);
+                // stack argument: table | field | ?
+                lua_rawset(luaState, -3);
+                // stack argument: table
+                setHelp(luaState, field, fieldDescription);
+            } else {
+                throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
+            }
+        }
+
         void pushNameAndValueList(lua_State *luaState, std::initializer_list<std::tuple<const char *, int>> nameAndValueList) {
             lua_newtable(luaState);
             for (auto &nameAndValue : nameAndValueList) {
@@ -112,21 +132,25 @@ namespace integral {
         }
         
         void setNameAndValueListWithHelp(lua_State *luaState, const char *field, std::initializer_list<std::tuple<const char *, int>> nameAndValueList) {
-            std::ostringstream fieldDescription;
-            fieldDescription << '{';
-            if (nameAndValueList.size() != 0) {
-                auto nameAndValueListIterator = nameAndValueList.begin();
-                const auto nameAndValueListIteratorEndMinus1 = nameAndValueList.end() - 1;
-                while (nameAndValueListIterator != nameAndValueListIteratorEndMinus1) {
-                    fieldDescription << std::get<0>(*nameAndValueListIterator) << ", ";
-                    ++nameAndValueListIterator;
+            if (lua_istable(luaState, -1) != 0) {
+                std::ostringstream fieldDescription;
+                fieldDescription << '{';
+                if (nameAndValueList.size() != 0) {
+                    auto nameAndValueListIterator = nameAndValueList.begin();
+                    const auto nameAndValueListIteratorEndMinus1 = nameAndValueList.end() - 1;
+                    while (nameAndValueListIterator != nameAndValueListIteratorEndMinus1) {
+                        fieldDescription << std::get<0>(*nameAndValueListIterator) << ", ";
+                        ++nameAndValueListIterator;
+                    }
+                    fieldDescription << std::get<0>(*nameAndValueListIteratorEndMinus1);
                 }
-                fieldDescription << std::get<0>(*nameAndValueListIteratorEndMinus1);
+                fieldDescription << '}';
+                setWithHelp(luaState, field, fieldDescription.str().c_str(), [&nameAndValueList](lua_State *luaState) {
+                    pushNameAndValueList(luaState, nameAndValueList);
+                });
+            } else {
+                throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
             }
-            fieldDescription << '}';
-            setWithHelp(luaState, field, fieldDescription.str().c_str(), [&nameAndValueList](lua_State *luaState) {
-                pushNameAndValueList(luaState, nameAndValueList);
-            });
         }
     }
 }
