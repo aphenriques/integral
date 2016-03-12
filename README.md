@@ -93,7 +93,7 @@ int main(int argc, char * argv[]) {
     lua_setglobal(luaState, "Object");
     luaL_dostring(luaState, "local object = Object.new(\"MEPHI\")\n"
                             "object:print(\"destroy the Green Wall!\")");
-    // prints: Message of Object "MEPHI": destroy the Green Wall!
+    // prints: Message of Object 'MEPHI': destroy the Green Wall!
     lua_close(luaState);
     return 0;
 }
