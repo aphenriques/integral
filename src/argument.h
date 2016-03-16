@@ -2,7 +2,7 @@
 //  argument.h
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -25,18 +25,17 @@
 #define integral_argument_h
 
 #include <type_traits>
+#include <utility>
 #include "ArgumentTag.h"
 #include "DefaultArgument.h"
 #include "generic.h"
 #include "MultipleInheritancePack.h"
-#include "TemplateSequence.h"
-#include "TemplateSequenceGenerator.h"
 
 namespace integral {
     namespace detail {
         namespace argument {
             template<typename ...T, unsigned ...S>
-            constexpr auto createArgumentTagPack(TemplateSequence<S...>) -> decltype(MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>());
+            constexpr auto createArgumentTagPack(std::integer_sequence<unsigned, S...>) -> decltype(MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>());
             
             template<typename ...T, unsigned ...I>
             inline void checkDefaultArgumentTypeAndIndex(const MultipleInheritancePack<ArgumentTag<T, I>...> &);
@@ -50,7 +49,7 @@ namespace integral {
             //--
             
             template<typename ...T, unsigned ...S>
-            constexpr auto createArgumentTagPack(TemplateSequence<S...>) -> decltype(MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>()) {
+            constexpr auto createArgumentTagPack(std::integer_sequence<unsigned, S...>) -> decltype(MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>()) {
                 return MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>();
             }
             
@@ -66,7 +65,7 @@ namespace integral {
             inline void validateDefaultArguments(const DefaultArgument<T, I> &...defaultArguments) {
                 // comma operator in "(checkDefaultArgumentTypeAndIndex<E>(...), 0)" is used for function call expansion
                 // check if each default argument type and index is valid
-                generic::expandDummyTemplatePack((checkDefaultArgumentTypeAndIndex<DefaultArgument<T, I>>(createArgumentTagPack<A...>(typename TemplateSequenceGenerator<sizeof...(A)>::TemplateSequenceType())), 0)...);
+                generic::expandDummyTemplatePack((checkDefaultArgumentTypeAndIndex<DefaultArgument<T, I>>(createArgumentTagPack<A...>(std::make_integer_sequence<unsigned, sizeof...(A)>())), 0)...);
                 // check if there is only one default argument for each index
                 MultipleInheritancePack<typename DefaultArgument<T, I>::ArgumentTag...>();
             }

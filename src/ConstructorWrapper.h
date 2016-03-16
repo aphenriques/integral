@@ -2,7 +2,7 @@
 //  ConstructorWrapper.h
 //  integral
 //
-//  Copyright (C) 2014, 2015  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -34,8 +34,6 @@
 #include "DefaultArgumentManager.h"
 #include "exchanger.h"
 #include "LuaFunctionWrapper.h"
-#include "TemplateSequence.h"
-#include "TemplateSequenceGenerator.h"
 #include "type_count.h"
 
 namespace integral {
@@ -60,7 +58,7 @@ namespace integral {
             inline ConstructorWrapper(DefaultArgument<E, I> &&...defaultArguments);
             
             template<unsigned ...S>
-            void call(lua_State *luaState, TemplateSequence<S...>) const;
+            void call(lua_State *luaState, std::integer_sequence<unsigned, S...>) const;
         };
         
         //--
@@ -88,7 +86,7 @@ namespace integral {
             if (numberOfArgumentsOnStack <= keLuaNumberOfArguments) {
                 defaultArgumentManager_.processDefaultArguments(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
                 constexpr unsigned keCppNumberOfArguments = sizeof...(A);
-                call(luaState, typename TemplateSequenceGenerator<keCppNumberOfArguments>::TemplateSequenceType());
+                call(luaState, std::make_integer_sequence<unsigned, keCppNumberOfArguments>());
                 return 1;
             } else {
                 throw ArgumentException(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
@@ -101,7 +99,7 @@ namespace integral {
         
         template<typename M, typename T, typename ...A>
         template<unsigned ...S>
-        void ConstructorWrapper<M, T, A...>::call(lua_State *luaState, TemplateSequence<S...>) const {
+        void ConstructorWrapper<M, T, A...>::call(lua_State *luaState, std::integer_sequence<unsigned, S...>) const {
             exchanger::push<T>(luaState, exchanger::get<A>(luaState, S + 1)...);
         }
     }

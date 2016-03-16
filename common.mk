@@ -15,8 +15,8 @@ endif
 PROJECT_STATIC_LIB_NAME:=lib$(PROJECT_NAME).a
 PROJECT_SHARED_LIB_NAME:=lib$(PROJECT_NAME).$(SHARED_LIB_EXTENSION)
 
-CXXFLAGS:=-std=c++11 -O3 -I/usr/local/include -I/usr/include/lua5.3
-#CXXFLAGS:=-std=c++11 -O3 -I/usr/local/include/luajit-2.0
+CXXFLAGS:=-std=c++14 -O3 -I/usr/local/include -I/usr/include/lua5.3
+#CXXFLAGS:=-std=c++14 -O3 -I/usr/local/include/luajit-2.0
 LDFLAGS:=-L/usr/local/lib -L/usr/lib/x86_64-linux-gnu/ -L/usr/lib
 
 LIB_LUA_FLAG:=-llua

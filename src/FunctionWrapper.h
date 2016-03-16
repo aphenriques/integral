@@ -37,7 +37,6 @@
 #include "DefaultArgumentManager.h"
 #include "FunctionCaller.h"
 #include "message.h"
-#include "TemplateSequenceGenerator.h"
 #include "type_count.h"
 #include "type_manager.h"
 #include "UserDataWrapper.h"
@@ -164,7 +163,7 @@ namespace integral {
         template<typename M, typename R, typename ...A>
         inline int FunctionWrapper<M, R, A...>::call(lua_State *luaState) const {
             constexpr unsigned keCppNumberOfArguments = sizeof...(A);
-            return static_cast<int>(FunctionCaller<R, A...>::call(luaState, function_, typename TemplateSequenceGenerator<keCppNumberOfArguments>::TemplateSequenceType()));
+            return static_cast<int>(FunctionCaller<R, A...>::call(luaState, function_, std::make_integer_sequence<unsigned, keCppNumberOfArguments>()));
         }
     }
 }
