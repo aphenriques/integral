@@ -38,6 +38,7 @@
 #include "ArgumentException.h"
 #include "basic.h"
 #include "generic.h"
+#include "IsTemplateClass.h"
 #include "lua_compatibility.h"
 #include "LuaPack.h"
 #include "type_manager.h"
@@ -175,11 +176,15 @@ namespace integral {
             template<typename T>
             using ExchangerType = Exchanger<generic::BasicType<T>>;
             
-            // defined as friend function of Exchanger<LuaPack<T...>>
             template<typename T>
-            inline auto get(lua_State *luaState, int index) -> decltype(ExchangerType<T>::get(luaState, index));
+            inline decltype(auto) singleGet(lua_State *luaState, int index);
             
-            // defined as friend function of Exchanger<LuaPack<T...>>
+            template<typename T, typename ...A>
+            inline void singlePush(lua_State *luaState, A &&...arguments);
+            
+            template<typename T>
+            inline decltype(auto) get(lua_State *luaState, int index);
+            
             template<typename T, typename ...A>
             inline void push(lua_State *luaState, A &&...arguments);
             
@@ -188,20 +193,15 @@ namespace integral {
             template<typename A, typename ...B>
             void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments);
             
-            // All member functions are private to avoid interaction with other Exchanger specializations. This could lead to undefiened behaviour, specially when constructing tables and extracting elements from it. All specializations use ExchangerType<T>::get or ExchangerType<T>::push
+            // Exchanger<LuaPack<T...>> is not like other Exchanger specializations because it can push and get more than 1 element from the lua stack, so it must be used with caution. LuaPack cannot be an element of LuaVector, LuaArray, LuaUnorderedMap or LuaTuple, because their Exchangers are designed to work with single elements. These adaptors use singleGet(...) and singlePush(...) to assert that LuaPack is not a type of one of their elements.
             template<typename ...T>
             class Exchanger<LuaPack<T...>> {
-                template<typename U>
-                friend auto get(lua_State *luaState, int index) -> decltype(ExchangerType<U>::get(luaState, index));
-                
-                template<typename U, typename ...A>
-                friend void push(lua_State *luaState, A &&...arguments);
-                
-            private:
+            public:
                 inline static LuaPack<T...> get(lua_State *luaState, int index);
                 inline static void push(lua_State *luaState, const LuaPack<T...> &luaPack);
                 static void push(lua_State *luaState, T &&...luaPack);
                 
+            private:
                 template<unsigned ...S>
                 static LuaPack<T...> get(lua_State *luaState, int index, std::integer_sequence<unsigned, S...>);
                 
@@ -364,7 +364,7 @@ namespace integral {
                             lua_rawget(luaState, -2);
                             // stack: table | luaVectorElement (?)
                             try {
-                                returnVector.push_back(ExchangerType<T>::get(luaState, -1));
+                                returnVector.push_back(singleGet<T>(luaState, -1));
                             } catch (const ArgumentException &argumentException) {
                                 // stack: table | ?
                                 lua_pop(luaState, 2);
@@ -401,7 +401,7 @@ namespace integral {
                         // stack: table
                         lua_compatibility::pushunsigned(luaState, i + 1);
                         // stack: table | i
-                        ExchangerType<T>::push(luaState, luaVector.at(i));
+                        singlePush<T>(luaState, luaVector.at(i));
                         // stack: table | i | luaVectorElement
                         lua_rawset(luaState, -3);
                         // stack: table
@@ -427,7 +427,7 @@ namespace integral {
                                 lua_rawget(luaState, -2);
                                 // stack: table | luaArrayElement (?)
                                 try {
-                                    returnArray.at(i - 1) = ExchangerType<T>::get(luaState, -1);
+                                    returnArray.at(i - 1) = singleGet<T>(luaState, -1);
                                 } catch (const ArgumentException &argumentException) {
                                     // stack: table | ?
                                     lua_pop(luaState, 2);
@@ -467,7 +467,7 @@ namespace integral {
                         // stack: table
                         lua_compatibility::pushunsigned(luaState, i + 1);
                         // stack: table | i
-                        ExchangerType<T>::push(luaState, luaArray.at(i));
+                        singlePush<T>(luaState, luaArray.at(i));
                         // stack: table | i | luaArrayElement
                         lua_rawset(luaState, -3);
                         // stack: table
@@ -492,7 +492,7 @@ namespace integral {
                             lua_pushvalue(luaState, -2);
                             // stack: table | key (?) | value (?) | key (?)
                             try {
-                                returnUnorderedMap.emplace(ExchangerType<T>::get(luaState, -1), ExchangerType<U>::get(luaState, -2));
+                                returnUnorderedMap.emplace(singleGet<T>(luaState, -1), singleGet<U>(luaState, -2));
                             } catch (const ArgumentException &argumentException) {
                                 // stack: table | ? | ? | ?
                                 lua_pop(luaState, 4);
@@ -525,9 +525,9 @@ namespace integral {
                     // stack: table
                     for (const auto& keyValue : luaUnorderedMap) {
                         // stack: table
-                        ExchangerType<T>::push(luaState, keyValue.first);
+                        singlePush<T>(luaState, keyValue.first);
                         // stack: table | key
-                        ExchangerType<U>::push(luaState, keyValue.second);
+                        singlePush<U>(luaState, keyValue.second);
                         // stack: table | key | value
                         lua_rawset(luaState, -3);
                         // stack: table
@@ -593,7 +593,7 @@ namespace integral {
                     // stack: table | i
                     lua_rawget(luaState, -2);
                     // stack: table | luaArrayElement (?)
-                    auto returnElement = ExchangerType<U>::get(luaState, -1);
+                    auto returnElement = singleGet<U>(luaState, -1);
                     // stack: table | luaArrayElement
                     lua_pop(luaState, 2);
                     return returnElement;
@@ -637,7 +637,7 @@ namespace integral {
                 // stack: table
                 lua_compatibility::pushunsigned(luaState, I);
                 // stack: table | I
-                ExchangerType<U>::push(luaState, element);
+                singlePush<U>(luaState, element);
                 // stack: table | I | element
                 lua_rawset(luaState, -3);
                 // stack: table
@@ -652,7 +652,7 @@ namespace integral {
                 // stack: table
                 lua_compatibility::pushunsigned(luaState, I);
                 // stack: table | I
-                ExchangerType<U>::push(luaState, element);
+                singlePush<U>(luaState, element);
                 // stack: table | I | element
                 lua_rawset(luaState, -3);
                 // stack: table
@@ -660,7 +660,7 @@ namespace integral {
             }
             
             template<typename T>
-            inline auto get(lua_State *luaState, int index) -> decltype(ExchangerType<T>::get(luaState, index)) {
+            inline decltype(auto) get(lua_State *luaState, int index) {
                 return ExchangerType<T>::get(luaState, index);
             }
             
@@ -668,6 +668,18 @@ namespace integral {
             inline void push(lua_State *luaState, A &&...arguments) {
                 static_assert(std::is_reference<T>::value == false, "cannot push reference");
                 ExchangerType<T>::push(luaState, std::forward<A>(arguments)...);
+            }
+            
+            template<typename T>
+            inline decltype(auto) singleGet(lua_State *luaState, int index) {
+                static_assert(IsTemplateClass<LuaPack, generic::BasicType<T>>::value == false, "integral::LuaPack cannot be gotten in this circumstance");
+                return get<T>(luaState, index);
+            }
+            
+            template<typename T, typename ...A>
+            inline void singlePush(lua_State *luaState, A &&...arguments) {
+                static_assert(IsTemplateClass<LuaPack, generic::BasicType<T>>::value == false, "integral::LuaPack cannot be pushed in this circumstance");
+                push<T>(luaState, std::forward<A>(arguments)...);
             }
             
             inline void pushCopy(lua_State *luaState) {}

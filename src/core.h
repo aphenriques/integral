@@ -2,7 +2,7 @@
 //  core.h
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2015  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -169,7 +169,7 @@ namespace integral {
     // Lua types (number, table and strings) are returned by value.
     // If the type is incorrect, an ArgumentException is thrown.
     template<typename T>
-    inline auto get(lua_State *luaState, int index) -> decltype(detail::exchanger::get<T>(luaState, index));
+    inline decltype(auto) get(lua_State *luaState, int index);
     
     // Sets a constructor function in the table or metatable on top of the stack.
     // "typename T": type of the class of the constructor.
@@ -273,7 +273,7 @@ namespace integral {
     // Throws a CallerException exception on error.
     // It is not necessary to explicitly specify argument template types.
     template<typename R, typename ...A>
-    inline auto call(lua_State *luaState, const A &...arguments) -> decltype(detail::Caller<R, A...>::call(luaState, arguments...));
+    inline decltype(auto) call(lua_State *luaState, const A &...arguments);
     
     //--
     
@@ -338,7 +338,7 @@ namespace integral {
     }
     
     template<typename T>
-    inline auto get(lua_State *luaState, int index) -> decltype(detail::exchanger::get<T>(luaState, index)) {
+    inline decltype(auto) get(lua_State *luaState, int index) {
         return detail::exchanger::get<T>(luaState, index);
     }
     
@@ -461,7 +461,7 @@ namespace integral {
     }
     
     template<typename R, typename ...A>
-    inline auto call(lua_State *luaState, const A &...arguments) -> decltype(detail::Caller<R, A...>::call(luaState, arguments...)) {
+    inline decltype(auto) call(lua_State *luaState, const A &...arguments) {
         return detail::Caller<R, A...>::call(luaState, arguments...);
     }
 }

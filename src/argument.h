@@ -35,7 +35,7 @@ namespace integral {
     namespace detail {
         namespace argument {
             template<typename ...T, unsigned ...S>
-            constexpr auto createArgumentTagPack(std::integer_sequence<unsigned, S...>) -> decltype(MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>());
+            constexpr auto createArgumentTagPack(std::integer_sequence<unsigned, S...>);
             
             template<typename ...T, unsigned ...I>
             inline void checkDefaultArgumentTypeAndIndex(const MultipleInheritancePack<ArgumentTag<T, I>...> &);
@@ -49,7 +49,7 @@ namespace integral {
             //--
             
             template<typename ...T, unsigned ...S>
-            constexpr auto createArgumentTagPack(std::integer_sequence<unsigned, S...>) -> decltype(MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>()) {
+            constexpr auto createArgumentTagPack(std::integer_sequence<unsigned, S...>) {
                 return MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>();
             }
             

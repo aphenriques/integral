@@ -45,12 +45,8 @@ namespace integral {
         public:
             LuaFunctionArgument(LuaFunctionArgument &&) = default;
             
-            // definition in class body because GCC reports strange errors from inside decltype when class definition is done separately. There is no such problem in Clang.
             template<typename R, typename ...A>
-            auto call(const A &...arguments) const -> decltype(Caller<R, A...>::call(luaState_, arguments...)) {
-                lua_pushvalue(luaState_, luaAbsoluteStackIndex_);
-                return Caller<R, A...>::call(luaState_, arguments...);
-            }
+            inline decltype(auto) call(const A &...arguments) const;
         };
         
         namespace exchanger {
@@ -59,6 +55,14 @@ namespace integral {
             public:
                 static LuaFunctionArgument get(lua_State *luaState, int index);
             };
+        }
+        
+        // --
+        
+        template<typename R, typename ...A>
+        inline decltype(auto) LuaFunctionArgument::call(const A &...arguments) const {
+            lua_pushvalue(luaState_, luaAbsoluteStackIndex_);
+            return Caller<R, A...>::call(luaState_, arguments...);
         }
     }
 }
