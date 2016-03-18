@@ -30,6 +30,8 @@ o1 = Object.new("prefix")
 print(o1:getString())
 o2 = o1:createSuffixedObjectLuaFunction("_suffix")
 print(o2:getString())
+o2:addSuffixLuaFunction("_end")
+print(o2:getString())
 
 print("--")
 -- argument checking is performed by integral::get

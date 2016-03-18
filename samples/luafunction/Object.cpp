@@ -47,10 +47,19 @@ extern "C" {
                     std::string suffix = integral::get<std::string>(luaState, 2);
                     // lua api works as usual, e.g:
                     // std::string suffix(lua_checkstring(luaState, 2));
-                    // Though it is not recommended because, in case of an error, destructors of the objets inside this function scope will not be called (lua_error performs long jump)
+                    // Though it is not recommended because, in case of an error, destructors of the objects inside this function scope will not be called (lua_error performs long jump)
                     // integral::push and integral::get are safer
                     integral::push<Object>(luaState, object.string_ + suffix);
                 return 1;
+            });
+            //
+            // lua function
+            integral::setLuaFunction(luaState, "addSuffixLuaFunction", [](lua_State *luaState) -> int {
+                    // get by reference
+                    Object &object = integral::get<Object>(luaState, 1);
+                    std::string suffix = integral::get<std::string>(luaState, 2);
+                    object.string_ += suffix;
+                return 0;
             });
 
             // LuaFunctions accepts upvalues. Though their indices are different than Lua API (as follows)
