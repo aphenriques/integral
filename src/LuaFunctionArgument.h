@@ -2,7 +2,7 @@
 //  LuaFunctionArgument.h
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -31,22 +31,22 @@
 namespace integral {
     namespace detail {
         class LuaFunctionArgument {
-            template<typename, typename> friend class exchanger::Exchanger;
+        public:
+            LuaFunctionArgument(LuaFunctionArgument &&) = default;
+            
+            // LuaFunctionArgument cannot be copied
+            LuaFunctionArgument(const LuaFunctionArgument &) = delete;
+            LuaFunctionArgument & operator=(const LuaFunctionArgument &) = delete;
+            
+            template<typename R, typename ...A>
+            inline decltype(auto) call(const A &...arguments) const;
+            
+        protected:
+            LuaFunctionArgument(lua_State *luaState, int index);
             
         private:
             lua_State * const luaState_;
             const int luaAbsoluteStackIndex_;
-            
-            LuaFunctionArgument(lua_State *luaState, int index);
-            // LuaFunctionArgument cannot not be copied
-            LuaFunctionArgument(const LuaFunctionArgument &) = delete;
-            LuaFunctionArgument & operator=(const LuaFunctionArgument &) = delete;
-            
-        public:
-            LuaFunctionArgument(LuaFunctionArgument &&) = default;
-            
-            template<typename R, typename ...A>
-            inline decltype(auto) call(const A &...arguments) const;
         };
         
         namespace exchanger {

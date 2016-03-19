@@ -77,7 +77,7 @@ namespace integral {
             
             template<typename T>
             class Exchanger<T *> {
-            private:
+            public:
                 // Pointers are unsafe
                 static T & get(lua_State *luaState, int index) = delete;
                 static void push(lua_State *luaState, T *pointer) = delete;

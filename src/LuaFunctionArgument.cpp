@@ -2,7 +2,7 @@
 //  LuaFunctionArgument.cpp
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -23,6 +23,7 @@
 
 #include "LuaFunctionArgument.h"
 #include <lua.hpp>
+#include "Adaptor.h"
 #include "ArgumentException.h"
 #include "lua_compatibility.h"
 
@@ -33,7 +34,8 @@ namespace integral {
         namespace exchanger {
             LuaFunctionArgument Exchanger<LuaFunctionArgument>::get(lua_State *luaState, int index) {
                 if (lua_isfunction(luaState, index) != 0) {
-                    return LuaFunctionArgument(luaState, index);
+                    // Adaptor<LuaFunctionArgument> is utilized to acces protected constructor of LuaFunctionArgument
+                    return Adaptor<LuaFunctionArgument>(luaState, index);
                 } else {
                     throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TFUNCTION));
                 }

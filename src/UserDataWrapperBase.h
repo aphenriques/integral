@@ -2,7 +2,7 @@
 //  UserDataWrapperBase.h
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -30,13 +30,13 @@ namespace integral {
         public:
             inline virtual ~UserDataWrapperBase() = 0;
             
+            // UserDataWrapperBase cannot be copied
+            UserDataWrapperBase(const UserDataWrapperBase &) = delete;
+            UserDataWrapperBase & operator=(const UserDataWrapperBase &) = delete;
+            
         protected:
             UserDataWrapperBase() = default;
             
-        private:
-            // UserDataWrapperBase and derived cannot not be copied
-            UserDataWrapperBase(const UserDataWrapperBase &) = delete;
-            UserDataWrapperBase & operator=(const UserDataWrapperBase &) = delete;
         };
         
         //--
