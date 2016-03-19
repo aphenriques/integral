@@ -102,10 +102,10 @@ int main(int argc, char * argv[]) {
 
 # Install
 
-`integral` builds on Linux and MacOSX (Windows has not been tested yet). It requires a C++11 compatible compiler. The library has been successfully built with:
+`integral` builds on Linux and MacOSX (Windows has not been tested yet). It requires a C++14 compatible compiler. The library has been successfully built with:
 
-* Apple LLVM version 5.0; and
-* gcc (Debian 4.7.2-5) 4.7.2
+* gcc (Debian 4.9.2-10) 4.9.2; and
+* Apple LLVM version 7.0.2 (clang-700.1.81)
 
 Modify `common.mk` for Lua and `integral` install configuration.
 
@@ -136,9 +136,9 @@ To clean everything compiled (including samples):
 
 # Usage
 
-Set the compiler standard to C++11, include `integral` headers in the search path and link to its library. E.g:
+Set the compiler standard to C++14, include `integral` headers in the search path and link to its library. E.g:
 
-    compiler flags: `-std=c++11 -I/usr/local/integral`
+    compiler flags: `-std=c++14 -I/usr/local/integral`
     linker flags: `-L/usr/local/lib -lintegral`
 
 Include the library header `integral.h` (`namespace integral`). This header includes `core.h` and `DefaultArgument.h`.
