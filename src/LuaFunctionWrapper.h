@@ -2,7 +2,7 @@
 //  LuaFunctionWrapper.h
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2015  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -34,7 +34,6 @@ namespace integral {
         class LuaFunctionWrapper {
         public:
             static void pushFunction(lua_State *luaState, const LuaFunctionWrapper &luaFunction, int nUpValues);
-            
             static void setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction, int nUpValues);
             
             // Public constructors must be used because of basic::pushUserData<LuaFunctionWrapper> in LuaFunctionWrapper::pushFunction definition
