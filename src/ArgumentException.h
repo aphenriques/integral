@@ -2,7 +2,7 @@
 //  ArgumentException.h
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -36,7 +36,7 @@ namespace integral {
         ArgumentException(lua_State *luaState, int index, const std::string &extraMessage);
         ArgumentException(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments);
         
-        inline virtual const char * what() const noexcept override;
+        inline const char * what() const noexcept override;
         
     private:
         static bool findField (lua_State *luaState, int index, int level);        
