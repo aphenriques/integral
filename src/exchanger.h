@@ -94,7 +94,7 @@ namespace integral {
             class Exchanger<std::string> {
             public:
                 static std::string get(lua_State *luaState, int index);
-                static void push(lua_State *luaState, const std::string &string);
+                inline static void push(lua_State *luaState, const std::string &string);
             };
             
             template<typename T>
@@ -266,6 +266,10 @@ namespace integral {
             
             inline void Exchanger<const char *>::push(lua_State *luaState, const char *string) {
                 lua_pushstring(luaState, string);
+            }
+            
+            inline void Exchanger<std::string>::push(lua_State *luaState, const std::string &string) {
+                lua_pushstring(luaState, string.c_str());
             }
             
             template<typename T>

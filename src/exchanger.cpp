@@ -2,7 +2,7 @@
 //  exchanger.cpp
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -59,10 +59,6 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
                     }
                 }
-            }
-            
-            void Exchanger<std::string>::push(lua_State *luaState, const std::string &string) {
-                lua_pushstring(luaState, string.c_str());
             }
             
             bool Exchanger<bool>::get(lua_State *luaState, int index) {
