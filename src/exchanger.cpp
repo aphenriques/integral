@@ -29,10 +29,11 @@ namespace integral {
             const char * Exchanger<const char *>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     const char * const string = lua_tostring(luaState, index);
-                    if (string == nullptr) {
+                    if (string != nullptr) {
+                        return string;
+                    } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
                     }
-                    return string;
                 } else {
                     const char **userData = type_manager::getConvertibleType<const char *>(luaState, index);
                     if (userData != nullptr) {
