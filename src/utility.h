@@ -42,12 +42,12 @@ namespace integral {
         void setWithHelp(lua_State *luaState, const char *field, const char *fieldDescription);
         
         // stack argument: table
-        template<typename T, typename ...D>
-        void setLuaFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&luafunction, D &&...defaultArguments);
+        template<typename T, typename ...E, unsigned ...I>
+        void setLuaFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&luafunction, DefaultArgument<E, I> &&...defaultArguments);
         
         // stack argument: table
-        template<typename T, typename ...D>
-        void setFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&function, D &&...defaultArguments);
+        template<typename T, typename ...E, unsigned ...I>
+        void setFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&function, DefaultArgument<E, I> &&...defaultArguments);
         
         void pushNameAndValueList(lua_State *luaState, std::initializer_list<std::tuple<const char *, int>> nameAndValueList);
         
@@ -56,15 +56,15 @@ namespace integral {
         
         //--
         
-        template<typename T, typename ...D>
-        void setFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&function, D &&...defaultArguments) {
-            integral::setFunction(luaState, functionName, std::forward<T>(function), std::forward<D>(defaultArguments)...);
+        template<typename T, typename ...E, unsigned ...I>
+        void setFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&function, DefaultArgument<E, I> &&...defaultArguments) {
+            integral::setFunction(luaState, functionName, std::forward<T>(function), std::move(defaultArguments)...);
             setHelp(luaState, functionName, functionDescription);
         }
         
-        template<typename T, typename ...D>
-        void setLuaFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&function, D &&...defaultArguments) {
-            integral::setLuaFunction(luaState, functionName, std::forward<T>(function), std::forward<D>(defaultArguments)...);
+        template<typename T, typename ...E, unsigned ...I>
+        void setLuaFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&function, DefaultArgument<E, I> &&...defaultArguments) {
+            integral::setLuaFunction(luaState, functionName, std::forward<T>(function), std::move(defaultArguments)...);
             setHelp(luaState, functionName, functionDescription);
         }
     }
