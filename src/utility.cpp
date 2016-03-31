@@ -95,17 +95,6 @@ namespace integral {
             }
         }
         
-        void setWithHelp(lua_State *luaState, const char *field, const char *fieldDescription, const std::function<void(lua_State *)> &pushFunction) {
-            if (lua_istable(luaState, -1) != 0) {
-                lua_pushstring(luaState, field);
-                pushFunction(luaState);
-                lua_rawset(luaState, -3);
-                setHelp(luaState, field, fieldDescription);
-            } else {
-                throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
-            }
-        }
-        
         void setWithHelp(lua_State *luaState, const char *field, const char *fieldDescription) {
             // stack argument: ? | ?
             if (lua_istable(luaState, -2) != 0) {
@@ -145,9 +134,8 @@ namespace integral {
                     fieldDescription << std::get<0>(*nameAndValueListIteratorEndMinus1);
                 }
                 fieldDescription << '}';
-                setWithHelp(luaState, field, fieldDescription.str().c_str(), [&nameAndValueList](lua_State *luaState) {
-                    pushNameAndValueList(luaState, nameAndValueList);
-                });
+                pushNameAndValueList(luaState, nameAndValueList);
+                setWithHelp(luaState, field, fieldDescription.str().c_str());
             } else {
                 throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
             }
