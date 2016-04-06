@@ -28,11 +28,11 @@ namespace integral {
     namespace detail {
         class UserDataWrapperBase {
         public:
-            inline virtual ~UserDataWrapperBase() = 0;
-            
-            // UserDataWrapperBase cannot be copied
+            // non-copyable
             UserDataWrapperBase(const UserDataWrapperBase &) = delete;
             UserDataWrapperBase & operator=(const UserDataWrapperBase &) = delete;
+            
+            inline virtual ~UserDataWrapperBase() = 0;
             
         protected:
             UserDataWrapperBase() = default;

@@ -32,11 +32,11 @@ namespace integral {
     namespace detail {
         class LuaFunctionArgument {
         public:
-            LuaFunctionArgument(LuaFunctionArgument &&) = default;
-            
-            // LuaFunctionArgument cannot be copied
+            // non-copyable
             LuaFunctionArgument(const LuaFunctionArgument &) = delete;
             LuaFunctionArgument & operator=(const LuaFunctionArgument &) = delete;
+            
+            LuaFunctionArgument(LuaFunctionArgument &&) = default;
             
             template<typename R, typename ...A>
             inline decltype(auto) call(const A &...arguments) const;

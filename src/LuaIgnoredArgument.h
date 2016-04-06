@@ -32,11 +32,11 @@ namespace integral {
     namespace detail {
         class LuaIgnoredArgument {
         public:
-            LuaIgnoredArgument(LuaIgnoredArgument &&) = default;
-            
-            // LuaIgnoredArgument cannot be copied
+            // non-copyable
             LuaIgnoredArgument(const LuaIgnoredArgument &) = delete;
             LuaIgnoredArgument & operator=(const LuaIgnoredArgument &) = delete;
+            
+            LuaIgnoredArgument(LuaIgnoredArgument &&) = default;
             
         protected:
             LuaIgnoredArgument() = default;
