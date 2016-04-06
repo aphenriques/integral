@@ -34,6 +34,7 @@
 #include <utility>
 #include <vector>
 #include <lua.hpp>
+#include "exception/Exception.h"
 #include "Adaptor.h"
 #include "ArgumentException.h"
 #include "basic.h"
