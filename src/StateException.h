@@ -1,8 +1,8 @@
 //
-//  integral.h
+//  StateException.h
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -21,15 +21,21 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_integral_h
-#define integral_integral_h
+#ifndef integral_StateException_h
+#define integral_StateException_h
 
-#include "ArgumentException.h"
-#include "CallerException.h"
-#include "core.h"
-#include "DefaultArgument.h"
-#include "State.h"
-#include "StateCallException.h"
-#include "StateException.h"
+#include <stdexcept>
+#include <string>
+
+namespace integral {
+    class StateException : public std::runtime_error {
+    public:
+        inline StateException(const std::string &errorMessage);
+    };
+    
+    //--
+    
+    inline StateException::StateException(const std::string &errorMessage) : std::runtime_error(errorMessage) {}
+}
 
 #endif
