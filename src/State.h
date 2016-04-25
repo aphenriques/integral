@@ -24,20 +24,16 @@
 #ifndef integral_State_h
 #define integral_State_h
 
+#include <memory>
 #include <string>
 #include <lua.hpp>
 
 namespace integral {
     class State {
     public:
-        // non-copyable
-        State(const State &) = delete;
-        State & operator=(const State &) = delete;
-
         // throws StateException on failure
         // defines State::atPanic as lua panic function
         State();
-        ~State();
         
         inline lua_State * getLuaState() const;
         inline void openLibs() const;
@@ -49,16 +45,16 @@ namespace integral {
         void doFile(const std::string &fileName) const;
         
     private:
-        lua_State * const luaState_;
+        std::shared_ptr<lua_State> luaState_;
         
         // throws StateException
-        static int atPanic(lua_State *luaState);
+        [[noreturn]] static int atPanic(lua_State *luaState);
     };
     
     //--
     
     inline lua_State * State::getLuaState() const {
-        return luaState_;
+        return luaState_.get();
     }
 
     inline void State::openLibs() const {

@@ -31,19 +31,17 @@
 #include "StateException.h"
 
 namespace integral {
-    State::State() : luaState_(luaL_newstate()) {
-        if (luaState_ != nullptr) {
+    State::State() : luaState_(luaL_newstate(), [](lua_State *luaState) -> void {
+        if (luaState != nullptr) {
+            lua_close(luaState);
+        }
+    }) {
+        if (luaState_.get() != nullptr) {
            lua_atpanic(getLuaState(), &State::atPanic);
         } else {
             throw StateException("Failed to allocate integral::State");
         }
     } 
-    
-    State::~State() {
-        if (luaState_ != nullptr) {
-            lua_close(luaState_);
-        }
-    }
     
     void State::doString(const std::string &string) const {
         if (luaL_dostring(getLuaState(), string.c_str()) != LUA_OK) {
@@ -62,8 +60,9 @@ namespace integral {
     }
 
     int State::atPanic(lua_State *luaState) {
+        std::string errorMessage;
         try {
-            throw StateException(std::string("lua panic error: ") + integral::get<std::string>(luaState, -1));
+            errorMessage = integral::get<std::string>(luaState, -1);
         } catch (const ArgumentException &argumentException) {
             throw StateException(std::string("lua panic error - could not retrieve error message from lua stack: ") + argumentException.what());
         } catch (const std::exception &exception) {
@@ -71,5 +70,6 @@ namespace integral {
         } catch (...) {
             throw StateException("lua panic error - unspecified exception thrown retrieving error message from lua stack");
         }
+        throw StateException(std::string("lua panic error: ") + errorMessage);
     }
 }
