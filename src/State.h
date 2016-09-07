@@ -26,7 +26,9 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <lua.hpp>
+#include "Reference.h"
 
 namespace integral {
     class State {
@@ -44,6 +46,9 @@ namespace integral {
         // throws StateCallException on error
         void doFile(const std::string &fileName) const;
         
+        template<typename T>
+        inline detail::Reference<T> operator[](T&& key) const;
+        
     private:
         std::shared_ptr<lua_State> luaState_;
         
@@ -59,6 +64,11 @@ namespace integral {
 
     inline void State::openLibs() const {
         luaL_openlibs(getLuaState());
+    }
+    
+    template<typename T>
+    inline detail::Reference<T> State::operator[](T&& key) const {
+        return detail::Reference<T>(luaState_, std::forward<T>(key));
     }
 }
 
