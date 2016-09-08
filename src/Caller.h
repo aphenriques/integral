@@ -27,6 +27,7 @@
 #include <string>
 #include <type_traits>
 #include <lua.hpp>
+#include "ArgumentException.h"
 #include "CallerException.h"
 #include "exchanger.h"
 #include "generic.h"
@@ -53,9 +54,15 @@ namespace integral {
             static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
             exchanger::pushCopy(luaState, arguments...);
             if (lua_pcall(luaState, type_count::getTypeCount<A...>(), type_count::getTypeCount<R>(), 0) == lua_compatibility::keLuaOk) {
-                decltype(auto) returnValue = exchanger::get<R>(luaState, -1);
-                lua_pop(luaState, type_count::getTypeCount<R>());
-                return returnValue;
+                try {
+                    decltype(auto) returnValue = exchanger::get<R>(luaState, -1);
+                    lua_pop(luaState, type_count::getTypeCount<R>());
+                    return returnValue;
+                } catch (const ArgumentException &argumentException) {
+                    // the number of results from lua_pcall is adjusted to 'nresults' argument
+                    lua_pop(luaState, type_count::getTypeCount<R>());
+                    throw ArgumentException(luaState, -1, std::string("invalid return type: " ) + argumentException.what());
+                }
             } else {
                 std::string errorMessage(lua_tostring(luaState, -1));
                 lua_pop(luaState, 1);
