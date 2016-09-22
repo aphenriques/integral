@@ -26,16 +26,16 @@
 
 namespace integral {
     namespace detail {
-        template <typename T>
+        template<typename T>
         class FunctorTypeFinder : public FunctorTypeFinder<decltype(&T::operator())> {};
         
-        template <typename T, typename R, typename ...A>
+        template<typename T, typename R, typename ...A>
         class FunctorTypeFinder<R(T::*)(A...) const> {
         public:
             using FunctionType = R(A...);
         };
         
-        template <typename T, typename R, typename ...A>
+        template<typename T, typename R, typename ...A>
         class FunctorTypeFinder<R(T::*)(A...)> {
         public:
             using FunctionType = R(A...);
