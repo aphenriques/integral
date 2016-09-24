@@ -30,6 +30,7 @@
 #include <string>
 #include <tuple>
 #include <type_traits>
+#include <typeinfo>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -684,7 +685,16 @@ namespace integral {
             template<typename T, typename ...A>
             inline void singlePush(lua_State *luaState, A &&...arguments) {
                 static_assert(IsTemplateClass<LuaPack, generic::BasicType<T>>::value == false, "integral::LuaPack cannot be pushed in this circumstance");
+                const int stackTopIndex = lua_gettop(luaState);
                 push<T>(luaState, std::forward<A>(arguments)...);
+                // stack: ?...
+                const int stackIndexDelta = lua_gettop(luaState) - stackTopIndex;
+                if (stackIndexDelta != 1) {
+                    if (stackIndexDelta > 0) {
+                        lua_pop(luaState, stackIndexDelta);
+                    }
+                    throw exception::LogicException(__FILE__, __LINE__, __func__, std::string("could not push 1 element for type '") + typeid(T).name() + "'. Pushed " + std::to_string(stackIndexDelta) + "element(s)");
+                }
             }
             
             inline void pushCopy(lua_State *luaState) {}
