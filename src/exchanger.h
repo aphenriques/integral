@@ -528,7 +528,7 @@ namespace integral {
                 if (unorderedMapSize <= std::numeric_limits<int>::max()) {
                     lua_createtable(luaState, static_cast<int>(unorderedMapSize), 0);
                     // stack: table
-                    for (const auto& keyValue : luaUnorderedMap) {
+                    for (const auto &keyValue : luaUnorderedMap) {
                         // stack: table
                         singlePush<T>(luaState, keyValue.first);
                         // stack: table | key
