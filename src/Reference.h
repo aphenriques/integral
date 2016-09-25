@@ -43,20 +43,20 @@ namespace integral {
             // non-copyable
             Reference(const Reference &) = delete;
             Reference<K, R> & operator=(const Reference &) = delete;
-            
+
             inline Reference(K &&key, R &&chainedReference);
             Reference(Reference &&) = default;
-            
+
             inline lua_State * getLuaState() const;
-            
+
             void push() const;
-            
+
             template<typename L>
             inline Reference<L, Reference<K, R>> operator[](L &&key) const &;
-            
+
             template<typename L>
             inline Reference<L, Reference<K, R>> operator[](L &&key) &&;
-            
+
             template<typename V>
             Reference<K, R> & set(V &&value);
 
@@ -72,12 +72,12 @@ namespace integral {
 
         template<typename K, typename R>
         inline Reference<K, R>::Reference(K &&key, R &&chainedReference) : key_(std::forward<K>(key)),  chainedReference_(std::forward<R>(chainedReference)) {}
-        
+
         template<typename K, typename R>
         inline lua_State * Reference<K, R>::getLuaState() const {
             return chainedReference_.getLuaState();
         }
-        
+
         template<typename K, typename R>
         inline void Reference<K, R>::push() const {
             chainedReference_.push();
@@ -101,13 +101,13 @@ namespace integral {
         template<typename K, typename R>
         template<typename L>
         inline Reference<L, Reference<K, R>> Reference<K, R>::operator[](L &&key) const & {
-            return Reference<L, Reference<K, R>>(std::forward<K>(key), *this);
+            return Reference<L, Reference<K, R>>(std::forward<L>(key), *this);
         }
-        
+
         template<typename K, typename R>
         template<typename L>
         inline Reference<L, Reference<K, R>> Reference<K, R>::operator[](L &&key) && {
-            return Reference<L, Reference<K, R>>(std::forward<K>(key), std::move(*this));
+            return Reference<L, Reference<K, R>>(std::forward<L>(key), std::move(*this));
         }
 
         template<typename K, typename R>
