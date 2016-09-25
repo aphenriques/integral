@@ -2,7 +2,7 @@
 //  ArgumentException.cpp
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -21,11 +21,11 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ArgumentException.h"
+#include "ArgumentException.hpp"
 #include <cstring>
 #include <sstream>
 #include <lua.hpp>
-#include "lua_compatibility.h"
+#include "lua_compatibility.hpp"
 
 namespace integral {
     ArgumentException ArgumentException::createTypeErrorException(lua_State *luaState, int index, const std::string &userDataName) {

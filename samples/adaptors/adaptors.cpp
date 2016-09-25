@@ -30,7 +30,7 @@
 #include <unordered_map>
 #include <vector>
 #include <lua.hpp>
-#include "integral.h"
+#include "integral.hpp"
 
 std::vector<int> getVectorSample() {
     return {1, 2, 3};

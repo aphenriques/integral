@@ -21,15 +21,15 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "utility.h"
+#include "utility.hpp"
 #include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <sstream>
 #include <tuple>
-#include "core.h"
-#include "exception/Exception.h"
-#include "message.h"
+#include "core.hpp"
+#include "exception/Exception.hpp"
+#include "message.hpp"
 
 namespace integral {
     namespace utility {

@@ -2,7 +2,7 @@
 //  lua_compatibility.cpp
 //  integral
 //
-//  Copyright (C) 2014  André Pereira Henriques
+//  Copyright (C) 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -20,7 +20,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include "lua_compatibility.h"
+#include "lua_compatibility.hpp"
 #include <lua.hpp>
 
 namespace integral {

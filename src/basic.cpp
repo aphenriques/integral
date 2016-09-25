@@ -2,7 +2,7 @@
 //  basic.cpp
 //  integral
 //
-//  Copyright (C) 2013, 2014  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -21,7 +21,7 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "basic.h"
+#include "basic.hpp"
 
 namespace integral {
     namespace detail {

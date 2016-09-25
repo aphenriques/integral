@@ -21,12 +21,12 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "type_manager.h"
+#include "type_manager.hpp"
 #include <typeindex>
 #include <lua.hpp>
-#include "exception/Exception.h"
-#include "basic.h"
-#include "lua_compatibility.h"
+#include "exception/Exception.hpp"
+#include "basic.hpp"
+#include "lua_compatibility.hpp"
 
 namespace integral {
     namespace detail {

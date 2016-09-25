@@ -21,7 +21,7 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "message.h"
+#include "message.hpp"
 
 namespace integral {
     namespace detail {

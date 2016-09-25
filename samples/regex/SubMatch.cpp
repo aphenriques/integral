@@ -21,7 +21,7 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "SubMatch.h"
-#include "Match.h"
+#include "SubMatch.hpp"
+#include "Match.hpp"
 
 SubMatch::SubMatch(const Match &match, unsigned index) : std::csub_match(match[index]), sharedData_(match.getSharedData())  {}

@@ -21,14 +21,14 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "State.h"
+#include "State.hpp"
 #include <exception>
 #include <string>
 #include <lua.hpp>
-#include "ArgumentException.h"
-#include "core.h"
-#include "StateCallException.h"
-#include "StateException.h"
+#include "ArgumentException.hpp"
+#include "core.hpp"
+#include "StateCallException.hpp"
+#include "StateException.hpp"
 
 namespace integral {
     State::State() : luaState_(luaL_newstate(), [](lua_State *luaState) -> void {

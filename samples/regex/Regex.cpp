@@ -26,8 +26,8 @@
 #include <string>
 #include <utility>
 #include <lua.hpp>
-#include "integral.h"
-#include "Match.h"
+#include "integral.hpp"
+#include "Match.hpp"
 
 extern "C" {
     LUALIB_API int luaopen_libRegex(lua_State *luaState) {

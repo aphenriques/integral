@@ -25,7 +25,7 @@
 #include <functional>
 #include <string>
 #include <lua.hpp>
-#include "integral.h"
+#include "integral.hpp"
 
 class Object {
 public:

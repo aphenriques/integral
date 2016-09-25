@@ -21,11 +21,11 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "LuaFunctionArgument.h"
+#include "LuaFunctionArgument.hpp"
 #include <lua.hpp>
-#include "Adaptor.h"
-#include "ArgumentException.h"
-#include "lua_compatibility.h"
+#include "Adaptor.hpp"
+#include "ArgumentException.hpp"
+#include "lua_compatibility.hpp"
 
 namespace integral {
     namespace detail {

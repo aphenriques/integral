@@ -25,8 +25,8 @@
 #include <memory>
 #include <string>
 #include <lua.hpp>
-#include "integral.h"
-#include "utility.h"
+#include "integral.hpp"
+#include "utility.hpp"
 
 static const char * const luaTestCode = R"(
 require("usr")

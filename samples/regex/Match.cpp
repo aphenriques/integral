@@ -21,7 +21,7 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Match.h"
+#include "Match.hpp"
 
 Match::Match(const char * string, const std::regex &pattern, Mode mode) : sharedData_(new std::string(string)) {
     std::cmatch match;

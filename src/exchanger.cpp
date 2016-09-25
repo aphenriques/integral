@@ -21,7 +21,7 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "exchanger.h"
+#include "exchanger.hpp"
 
 namespace integral {
     namespace detail {

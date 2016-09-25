@@ -23,7 +23,7 @@
 
 #include <iostream>
 #include <lua.hpp>
-#include "integral.h"
+#include "integral.hpp"
 
 class Object {
 public:

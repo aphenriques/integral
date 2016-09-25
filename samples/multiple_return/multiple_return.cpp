@@ -24,7 +24,7 @@
 #include <iostream>
 #include <string>
 #include <lua.hpp>
-#include "integral.h"
+#include "integral.hpp"
 
 integral::LuaPack<std::string, double, unsigned> getSamplePack1() {
     return {"foo", -1.2, 42};
