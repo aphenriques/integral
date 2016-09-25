@@ -24,81 +24,134 @@
 #ifndef integral_Reference_h
 #define integral_Reference_h
 
-#include <memory>
 #include <utility>
 #include <lua.hpp>
 #include "exception/Exception.h"
-#include "core.h"
+#include "ArgumentException.h"
+#include "exchanger.h"
 #include "generic.h"
+#include "GlobalReference.h"
+#include "IsTemplateClass.h"
 
 namespace integral {
     namespace detail {
-        template<typename T>
+        template<typename K, typename R>
         class Reference {
+            static_assert(IsTemplateClass<LuaPack, generic::BasicType<K>>::value == false, "integral::LuaPack cannot be a key");
+
         public:
             // non-copyable
             Reference(const Reference &) = delete;
-            Reference<T> & operator=(const Reference &) = delete;
+            Reference<K, R> & operator=(const Reference &) = delete;
             
-            inline Reference(const std::shared_ptr<lua_State>& luaState, T&& key);
+            inline Reference(K &&key, R &&chainedReference);
             Reference(Reference &&) = default;
             
-            template<typename U>
-            Reference<T> & operator=(U&& value);
-    
-            template<typename U>
-            operator U() const;
-            
-        private:
-            std::shared_ptr<lua_State> luaState_;
-            const T key_;
-            
             inline lua_State * getLuaState() const;
+            
+            void push() const;
+            
+            template<typename L>
+            inline Reference<L, Reference<K, R>> operator[](L &&key) const &;
+            
+            template<typename L>
+            inline Reference<L, Reference<K, R>> operator[](L &&key) &&;
+            
+            template<typename V>
+            Reference<K, R> & set(V &&value);
+
+            template<typename V>
+            V get() const;
+
+        private:
+            K key_;
+            R chainedReference_;
         };
-        
+
         //--
+
+        template<typename K, typename R>
+        inline Reference<K, R>::Reference(K &&key, R &&chainedReference) : key_(std::forward<K>(key)),  chainedReference_(std::forward<R>(chainedReference)) {}
         
-        template<typename T>
-        inline Reference<T>::Reference(const std::shared_ptr<lua_State>& luaState, T&& key) : luaState_(luaState), key_(std::forward<T>(key)) {}
+        template<typename K, typename R>
+        inline lua_State * Reference<K, R>::getLuaState() const {
+            return chainedReference_.getLuaState();
+        }
         
-        template<typename T>
-        template<typename U>
-        Reference<T> & Reference<T>::operator=(U&& value) {
-            lua_pushglobaltable(getLuaState());
+        template<typename K, typename R>
+        inline void Reference<K, R>::push() const {
+            chainedReference_.push();
+            // stack: ?
             if (lua_istable(getLuaState(), -1) != 0) {
-                // BasicType<T> must be used especially due to string literal type
-                integral::push<generic::BasicType<T>>(getLuaState(), key_);
-                integral::push<generic::BasicType<U>>(getLuaState(), std::forward<U>(value));
-                lua_settable(getLuaState(), -3);
+                // stack: chainedReferenceTable
+                // BasicType<K> must be used especially due to string literal type
+                exchanger::singlePush<generic::BasicType<K>>(getLuaState(), key_);
+                // stack: chainedReferenceTable | key
+                lua_rawget(getLuaState(), -2);
+                // stack: chainedReferenceTable | reference
+                lua_remove(getLuaState(), -2);
+                // stack: reference
+            } else {
+                // stack: ?
+                lua_pop(getLuaState(), 1);
+                throw exception::LogicException(__FILE__, __LINE__, __func__, "chained reference is not a table");
+            }
+        }
+
+        template<typename K, typename R>
+        template<typename L>
+        inline Reference<L, Reference<K, R>> Reference<K, R>::operator[](L &&key) const & {
+            return Reference<L, Reference<K, R>>(std::forward<K>(key), *this);
+        }
+        
+        template<typename K, typename R>
+        template<typename L>
+        inline Reference<L, Reference<K, R>> Reference<K, R>::operator[](L &&key) && {
+            return Reference<L, Reference<K, R>>(std::forward<K>(key), std::move(*this));
+        }
+
+        template<typename K, typename R>
+        template<typename V>
+        Reference<K, R> & Reference<K, R>::set(V &&value) {
+            chainedReference_.push();
+            // stack: ?
+            if (lua_istable(getLuaState(), -1) != 0) {
+                // stack: chainedReferenceTable
+                // BasicType<K> must be used especially due to string literal type
+                exchanger::singlePush<generic::BasicType<K>>(getLuaState(), key_);
+                // stack: chainedReferenceTable | key
+                exchanger::singlePush<generic::BasicType<V>>(getLuaState(), std::forward<V>(value));
+                // stack: chainedReferenceTable | key | value
+                lua_rawset(getLuaState(), -3);
+                // stack: chainedReferenceTable
+                lua_pop(getLuaState(), 1);
+                // stack:
                 return *this;
             } else {
-                lua_pop(getLuaState(), -1);
-                throw exception::RuntimeException(__FILE__, __LINE__, __func__, "corrupted lua state - could not find global table");
-                
+                // stack: ?
+                lua_pop(getLuaState(), 1);
+                throw exception::LogicException(__FILE__, __LINE__, __func__, "chained reference is not a table");
             }
         }
-        
-        template<typename T>
-        template<typename U>
-        Reference<T>::operator U() const {
-            lua_pushglobaltable(getLuaState());
-            if (lua_istable(getLuaState(), -1) != 0) {
-                // BasicType<T> must be used especially due to string literal type
-                integral::push<generic::BasicType<T>>(getLuaState(), key_);
-                lua_gettable(getLuaState(), -2);
-                return integral::get<U>(getLuaState(), -1);
-            } else {
-                lua_pop(getLuaState(), -1);
-                throw exception::RuntimeException(__FILE__, __LINE__, __func__, "corrupted lua state - could not find global table");
 
+        template<typename K, typename R>
+        template<typename V>
+        V Reference<K, R>::get() const {
+            push();
+            // stack: ?
+            try {
+                decltype(auto) returnValue = exchanger::singleGet<V>(getLuaState(), -1);
+                // stack: value
+                lua_pop(getLuaState(), 1);
+                // stack:
+                return returnValue;
+            } catch (const ArgumentException &argumentException) {
+                // stack: ?
+                lua_pop(getLuaState(), 1);
+                // stack:
+                throw ArgumentException(getLuaState(), -1, std::string("invalid type - element: " ) + argumentException.what());
             }
         }
-        
-        template<typename T>
-        inline lua_State * Reference<T>::getLuaState() const {
-            return luaState_.get();
-        }
-
     }
 }
 

@@ -41,8 +41,8 @@ namespace integral {
         } else {
             throw StateException("Failed to allocate integral::State");
         }
-    } 
-    
+    }
+
     void State::doString(const std::string &string) const {
         if (luaL_dostring(getLuaState(), string.c_str()) != LUA_OK) {
             const std::string errorMessage(integral::get<std::string>(getLuaState(), -1));

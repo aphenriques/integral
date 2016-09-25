@@ -28,7 +28,11 @@
 #include <string>
 #include <utility>
 #include <lua.hpp>
+#include "core.h"
+#include "generic.h"
+#include "GlobalReference.h"
 #include "Reference.h"
+#include "IsTemplateClass.h"
 
 namespace integral {
     class State {
@@ -46,8 +50,8 @@ namespace integral {
         // throws StateCallException on error
         void doFile(const std::string &fileName) const;
         
-        template<typename T>
-        inline detail::Reference<T> operator[](T&& key) const;
+        template<typename K>
+        inline detail::Reference<K, detail::GlobalReference> operator[](K &&key) const;
         
     private:
         std::shared_ptr<lua_State> luaState_;
@@ -66,9 +70,10 @@ namespace integral {
         luaL_openlibs(getLuaState());
     }
     
-    template<typename T>
-    inline detail::Reference<T> State::operator[](T&& key) const {
-        return detail::Reference<T>(luaState_, std::forward<T>(key));
+    template<typename K>
+    inline detail::Reference<K, detail::GlobalReference> State::operator[](K &&key) const {
+        static_assert(detail::IsTemplateClass<LuaPack, detail::generic::BasicType<K>>::value == false, "integral::LuaPack cannot be a key");
+        return detail::Reference<K, detail::GlobalReference>(std::forward<K>(key), detail::GlobalReference(luaState_));
     }
 }
 
