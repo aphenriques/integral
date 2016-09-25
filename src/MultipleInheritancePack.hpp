@@ -1,5 +1,5 @@
 //
-//  MultipleInheritancePack.hpp"
+//  MultipleInheritancePack.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_MultipleInheritancePack_h
-#define integral_MultipleInheritancePack_h
+#ifndef integral_MultipleInheritancePack_hpp
+#define integral_MultipleInheritancePack_hpp
 
 namespace integral {
     namespace detail {

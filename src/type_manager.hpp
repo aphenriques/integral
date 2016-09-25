@@ -1,5 +1,5 @@
 //
-//  type_manager.hpp"
+//  type_manager.hpp
 //  integral
 //
 //  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_type_manager_h
-#define integral_type_manager_h
+#ifndef integral_type_manager_hpp
+#define integral_type_manager_hpp
 
 #include <functional>
 #include <string>

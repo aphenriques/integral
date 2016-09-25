@@ -1,5 +1,5 @@
 //
-//  DefaultArgument.hpp"
+//  DefaultArgument.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_DefaultArgument_h
-#define integral_DefaultArgument_h
+#ifndef integral_DefaultArgument_hpp
+#define integral_DefaultArgument_hpp
 
 #include <utility>
 #include "ArgumentTag.hpp"

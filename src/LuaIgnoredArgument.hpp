@@ -1,5 +1,5 @@
 //
-//  LuaIgnoredArgument.hpp"
+//  LuaIgnoredArgument.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_LuaIgnoredArgument_h
-#define integral_LuaIgnoredArgument_h
+#ifndef integral_LuaIgnoredArgument_hpp
+#define integral_LuaIgnoredArgument_hpp
 
 #include <lua.hpp>
 #include "Adaptor.hpp"

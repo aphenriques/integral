@@ -1,5 +1,5 @@
 //
-//  generic.hpp"
+//  generic.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_generic_h
-#define integral_generic_h
+#ifndef integral_generic_hpp
+#define integral_generic_hpp
 
 #include "IsStringLiteral.hpp"
 

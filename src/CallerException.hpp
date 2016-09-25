@@ -1,5 +1,5 @@
 //
-//  CallerException.hpp"
+//  CallerException.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_CallerException_h
-#define integral_CallerException_h
+#ifndef integral_CallerException_hpp
+#define integral_CallerException_hpp
 
 #include <stdexcept>
 #include <string>

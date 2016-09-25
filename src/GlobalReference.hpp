@@ -1,5 +1,5 @@
 //
-//  GlobalReference.hpp"
+//  GlobalReference.hpp
 //  integral
 //
 //  Copyright (C) 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_GlobalReference_h
-#define integral_GlobalReference_h
+#ifndef integral_GlobalReference_hpp
+#define integral_GlobalReference_hpp
 
 #include <memory>
 #include <lua.hpp>

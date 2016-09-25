@@ -1,5 +1,5 @@
 //
-//  TypeCounter.hpp"
+//  TypeCounter.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -22,8 +22,8 @@
 //
 
 
-#ifndef integral_TypeCounter_h
-#define integral_TypeCounter_h
+#ifndef integral_TypeCounter_hpp
+#define integral_TypeCounter_hpp
 
 #include "exchanger.hpp"
 

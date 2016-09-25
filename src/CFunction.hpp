@@ -1,5 +1,5 @@
 //
-//  CFunction.hpp"
+//  CFunction.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_CFunction_h
-#define integral_CFunction_h
+#ifndef integral_CFunction_hpp
+#define integral_CFunction_hpp
 
 #include <functional>
 #include "Adaptor.hpp"

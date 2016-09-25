@@ -1,5 +1,5 @@
 //
-//  LuaFunctionWrapper.hpp"
+//  LuaFunctionWrapper.hpp
 //  integral
 //
 //  Copyright (C) 2013, 2014, 2015, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_LuaFunctionWrapper_h
-#define integral_LuaFunctionWrapper_h
+#ifndef integral_LuaFunctionWrapper_hpp
+#define integral_LuaFunctionWrapper_hpp
 
 #include <functional>
 #include <string>

@@ -1,5 +1,5 @@
 //
-//  State.hpp"
+//  State.hpp
 //  integral
 //
 //  Copyright (C) 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_State_h
-#define integral_State_h
+#ifndef integral_State_hpp
+#define integral_State_hpp
 
 #include <memory>
 #include <string>

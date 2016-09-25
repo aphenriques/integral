@@ -1,5 +1,5 @@
 //
-//  exchanger.hpp"
+//  exchanger.hpp
 //  integral
 //
 //  Copyright (C) 2013, 2014, 2015, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_exchanger_h
-#define integral_exchanger_h
+#ifndef integral_exchanger_hpp
+#define integral_exchanger_hpp
 
 #include <array>
 #include <limits>

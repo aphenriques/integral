@@ -1,5 +1,5 @@
 //
-//  Adaptor.hpp"
+//  Adaptor.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_Adaptor_h
-#define integral_Adaptor_h
+#ifndef integral_Adaptor_hpp
+#define integral_Adaptor_hpp
 
 #include <utility>
 

@@ -1,5 +1,5 @@
 //
-//  DefaultArgumentManager.hpp"
+//  DefaultArgumentManager.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2015, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_DefaultArgumentManager_h
-#define integral_DefaultArgumentManager_h
+#ifndef integral_DefaultArgumentManager_hpp
+#define integral_DefaultArgumentManager_hpp
 
 #include <tuple>
 #include <utility>

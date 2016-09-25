@@ -1,5 +1,5 @@
 //
-//  StateException.hpp"
+//  StateException.hpp
 //  integral
 //
 //  Copyright (C) 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_StateException_h
-#define integral_StateException_h
+#ifndef integral_StateException_hpp
+#define integral_StateException_hpp
 
 #include <stdexcept>
 #include <string>

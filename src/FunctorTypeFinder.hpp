@@ -1,5 +1,5 @@
 //
-//  FunctorTypeFinder.hpp"
+//  FunctorTypeFinder.hpp
 //  integral
 //
 //  Copyright (C) 2015, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_FunctorTypeFinder_h
-#define integral_FunctorTypeFinder_h
+#ifndef integral_FunctorTypeFinder_hpp
+#define integral_FunctorTypeFinder_hpp
 
 namespace integral {
     namespace detail {

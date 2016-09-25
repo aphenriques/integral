@@ -1,5 +1,5 @@
 //
-//  utility.hpp"
+//  utility.hpp
 //  integral
 //
 //  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_utility_h
-#define integral_utility_h
+#ifndef integral_utility_hpp
+#define integral_utility_hpp
 
 #include <functional>
 #include <initializer_list>

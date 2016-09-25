@@ -1,5 +1,5 @@
 //
-//  FunctionCaller.hpp"
+//  FunctionCaller.hpp
 //  integral
 //
 //  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_FunctionCaller_h
-#define integral_FunctionCaller_h
+#ifndef integral_FunctionCaller_hpp
+#define integral_FunctionCaller_hpp
 
 #include <functional>
 #include <utility>

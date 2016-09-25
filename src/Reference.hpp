@@ -1,5 +1,5 @@
 //
-//  Reference.hpp"
+//  Reference.hpp
 //  integral
 //
 //  Copyright (C) 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_Reference_h
-#define integral_Reference_h
+#ifndef integral_Reference_hpp
+#define integral_Reference_hpp
 
 #include <utility>
 #include <lua.hpp>

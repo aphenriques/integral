@@ -1,5 +1,5 @@
 //
-//  ArgumentException.hpp"
+//  ArgumentException.hpp
 //  integral
 //
 //  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_ArgumentException_h
-#define integral_ArgumentException_h
+#ifndef integral_ArgumentException_hpp
+#define integral_ArgumentException_hpp
 
 #include <exception>
 #include <string>

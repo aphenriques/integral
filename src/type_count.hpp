@@ -1,5 +1,5 @@
 //
-//  type_count.hpp"
+//  type_count.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_type_count_h
-#define integral_type_count_h
+#ifndef integral_type_count_hpp
+#define integral_type_count_hpp
 
 #include "exchanger.hpp"
 #include "generic.hpp"

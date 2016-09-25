@@ -1,5 +1,5 @@
 //
-//  Match.hpp"
+//  Match.hpp
 //  integral
 //
 //  Copyright (C) 2013, 2014  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef MATCH_H
-#define MATCH_H
+#ifndef Match_hpp
+#define Match_hpp
 
 #include <memory>
 #include <regex>

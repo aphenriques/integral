@@ -1,5 +1,5 @@
 //
-//  CLuaFunction.hpp"
+//  CLuaFunction.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_CLuaFunction_h
-#define integral_CLuaFunction_h
+#ifndef integral_CLuaFunction_hpp
+#define integral_CLuaFunction_hpp
 
 #include <functional>
 #include "Adaptor.hpp"

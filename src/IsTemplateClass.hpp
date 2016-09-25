@@ -1,5 +1,5 @@
 //
-//  IsTemplateClass.hpp"
+//  IsTemplateClass.hpp
 //  integral
 //
 //  Copyright (C) 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef IsTemplateClass_h
-#define IsTemplateClass_h
+#ifndef IsTemplateClass_hpp
+#define IsTemplateClass_hpp
 
 #include <type_traits>
 
@@ -36,4 +36,4 @@ namespace integral {
     }
 }
 
-#endif /* IsTemplateClass_h */
+#endif /* IsTemplateClass_hpp */

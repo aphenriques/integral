@@ -1,5 +1,5 @@
 //
-//  LuaPack.hpp"
+//  LuaPack.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_LuaPack_h
-#define integral_LuaPack_h
+#ifndef integral_LuaPack_hpp
+#define integral_LuaPack_hpp
 
 #include <tuple>
 #include <utility>

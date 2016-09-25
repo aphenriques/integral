@@ -1,5 +1,5 @@
 //
-//  message.hpp"
+//  message.hpp
 //  integral
 //
 //  Copyright (C) 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_message_h
-#define integral_message_h
+#ifndef integral_message_hpp
+#define integral_message_hpp
 
 namespace integral {
     namespace detail {
@@ -33,4 +33,4 @@ namespace integral {
     }
 }
 
-#endif /* integral_message_h */
+#endif /* integral_message_hpp */

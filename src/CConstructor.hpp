@@ -1,5 +1,5 @@
 //
-//  CConstructor.hpp"
+//  CConstructor.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_CConstructor_h
-#define integral_CConstructor_h
+#ifndef integral_CConstructor_hpp
+#define integral_CConstructor_hpp
 
 #include <functional>
 #include "exchanger.hpp"

@@ -1,5 +1,5 @@
 //
-//  ConstructorWrapper.hpp"
+//  ConstructorWrapper.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2015, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_ConstructorWrapper_h
-#define integral_ConstructorWrapper_h
+#ifndef integral_ConstructorWrapper_hpp
+#define integral_ConstructorWrapper_hpp
 
 #include <functional>
 #include <string>

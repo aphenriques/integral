@@ -1,5 +1,5 @@
 //
-//  LuaFunctionArgument.hpp"
+//  LuaFunctionArgument.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_LuaFunctionArgument_h
-#define integral_LuaFunctionArgument_h
+#ifndef integral_LuaFunctionArgument_hpp
+#define integral_LuaFunctionArgument_hpp
 
 #include <lua.hpp>
 #include "Caller.hpp"

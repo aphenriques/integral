@@ -1,5 +1,5 @@
 //
-//  ArgumentTag.hpp"
+//  ArgumentTag.hpp
 //  integral
 //
 //  Copyright (C) 2014, 2016  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_ArgumentTag_h
-#define integral_ArgumentTag_h
+#ifndef integral_ArgumentTag_hpp
+#define integral_ArgumentTag_hpp
 
 namespace integral {
     namespace detail {

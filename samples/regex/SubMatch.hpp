@@ -1,5 +1,5 @@
 //
-//  SubMatch.hpp"
+//  SubMatch.hpp
 //  integral
 //
 //  Copyright (C) 2013, 2014  André Pereira Henriques
@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef SUBMATCH_H
-#define SUBMATCH_H
+#ifndef SubMatch_hpp
+#define SubMatch_hpp
 
 #include <memory>
 #include <regex>
