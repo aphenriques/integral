@@ -31,6 +31,7 @@
 static const char * const luaTestCode = R"(
 require("usr")
 print(x)
+y = {{1, 2}, x = 'string'}
 )";
 
 int main(int argc, char* argv[]) {
@@ -41,6 +42,8 @@ int main(int argc, char* argv[]) {
         luaState.doString(luaTestCode);
         int x = luaState["x"].get<int>();
         std::cout << "c++: " << x << std::endl;
+        std::cout << "c++: " << luaState["y"]["x"].get<const char*>() << std::endl;
+        std::cout << "c++: " << luaState["y"][1][2].get<unsigned>() << std::endl;
         integral::utility::printStack(luaState.getLuaState());
     } catch (const std::exception &exception) {
         std::cerr << "exception: " << exception.what() << std::endl;
