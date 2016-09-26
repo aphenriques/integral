@@ -28,10 +28,10 @@
 
 namespace integral {
     namespace detail {
-        template<template<typename...> class T, typename U>
+        template<template<typename ...> class T, typename U>
         class IsTemplateClass : public std::false_type {};
         
-        template<template<typename...> class T, typename ...P>
+        template<template<typename ...> class T, typename ...P>
         class IsTemplateClass<T, T<P...>> : public std::true_type {};
     }
 }
