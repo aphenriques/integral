@@ -32,55 +32,6 @@ namespace integral {
         return ArgumentException(luaState, index, std::string(userDataName) + " expected, got " + std::string(luaL_typename(luaState, index)));
     }
     
-    ArgumentException::ArgumentException(lua_State *luaState, int index, const std::string &extraMessage) {
-        lua_Debug debugInfo;
-        if (lua_getstack(luaState, 0, &debugInfo) == 0) {
-            std::stringstream messageStream;
-            messageStream << "bad argument #" << index << " (" << extraMessage << ")";
-            message_ = messageStream.str();
-            return;
-        }
-        lua_getinfo(luaState, "n", &debugInfo);
-        if (std::strcmp(debugInfo.namewhat, "method") == 0) {
-            --index;
-            if (index == 0) {
-                std::stringstream messageStream;
-                messageStream << "calling '" << debugInfo.name << "' on bad self (" << extraMessage << ")";
-                message_ = messageStream.str();
-                return;
-            }
-        }
-        if (debugInfo.name == nullptr) {
-            debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
-        }
-        std::stringstream messageStream;
-        messageStream << "bad argument #" << index << " to '" <<  debugInfo.name << "' (" << extraMessage << ")";
-        message_ = messageStream.str();
-    }
-    
-    ArgumentException::ArgumentException(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments) {
-        lua_Debug debugInfo;
-        if (lua_getstack(luaState, 0, &debugInfo) == 0) {
-            std::stringstream messageStream;
-            messageStream << "excessive parameters provided to function (" << maximumNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
-            message_ = messageStream.str();
-            return;
-        }
-        lua_getinfo(luaState, "n", &debugInfo);
-        if (std::strcmp(debugInfo.namewhat, "method") == 0) {
-            std::stringstream messageStream;
-            messageStream << "excessive parameters provided to method " << debugInfo.name << " (" << (maximumNumberOfArguments - 1) << " expected, got " << (actualNumberOfArguments - 1) << ")";
-            message_ = messageStream.str();
-            return;
-        }
-        if (debugInfo.name == nullptr) {
-            debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
-        }
-        std::stringstream messageStream;
-        messageStream << "excessive parameters provided to function " << debugInfo.name << " (" << maximumNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
-        message_ = messageStream.str();
-    }
-    
     bool ArgumentException::findField(lua_State *luaState, int index, int level) {
         if (level == 0 || lua_istable(luaState, -1) == 0) {
             return false;
@@ -116,5 +67,50 @@ namespace integral {
             lua_settop(luaState, top);
             return false;
         }
+    }
+    
+    std::string ArgumentException::getExceptionMessage(lua_State *luaState, int index, const std::string &extraMessage) {
+        lua_Debug debugInfo;
+        if (lua_getstack(luaState, 0, &debugInfo) == 0) {
+            std::stringstream messageStream;
+            messageStream << "bad argument #" << index << " (" << extraMessage << ")";
+            return messageStream.str();
+        }
+        lua_getinfo(luaState, "n", &debugInfo);
+        if (std::strcmp(debugInfo.namewhat, "method") == 0) {
+            --index;
+            if (index == 0) {
+                std::stringstream messageStream;
+                messageStream << "calling '" << debugInfo.name << "' on bad self (" << extraMessage << ")";
+                return messageStream.str();
+            }
+        }
+        if (debugInfo.name == nullptr) {
+            debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
+        }
+        std::stringstream messageStream;
+        messageStream << "bad argument #" << index << " to '" <<  debugInfo.name << "' (" << extraMessage << ")";
+        return messageStream.str();
+    }
+    
+    std::string ArgumentException::getExceptionMessage(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments) {
+        lua_Debug debugInfo;
+        if (lua_getstack(luaState, 0, &debugInfo) == 0) {
+            std::stringstream messageStream;
+            messageStream << "excessive parameters provided to function (" << maximumNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
+            return messageStream.str();
+        }
+        lua_getinfo(luaState, "n", &debugInfo);
+        if (std::strcmp(debugInfo.namewhat, "method") == 0) {
+            std::stringstream messageStream;
+            messageStream << "excessive parameters provided to method " << debugInfo.name << " (" << (maximumNumberOfArguments - 1) << " expected, got " << (actualNumberOfArguments - 1) << ")";
+            return messageStream.str();
+        }
+        if (debugInfo.name == nullptr) {
+            debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
+        }
+        std::stringstream messageStream;
+        messageStream << "excessive parameters provided to function " << debugInfo.name << " (" << maximumNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
+        return messageStream.str();
     }
 }

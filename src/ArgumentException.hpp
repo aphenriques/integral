@@ -24,32 +24,32 @@
 #ifndef integral_ArgumentException_hpp
 #define integral_ArgumentException_hpp
 
+#include <stdexcept>
 #include <exception>
 #include <string>
 #include <lua.hpp>
 
 namespace integral {
-    class ArgumentException : public std::exception {
+    class ArgumentException : public std::invalid_argument {
     public:
         static ArgumentException createTypeErrorException(lua_State *luaState, int index, const std::string &userDataName);
         
-        ArgumentException(lua_State *luaState, int index, const std::string &extraMessage);
-        ArgumentException(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments);
-        
-        inline const char * what() const noexcept override;
+        inline ArgumentException(lua_State *luaState, int index, const std::string &extraMessage);
+        inline ArgumentException(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments);
         
     private:
         static bool findField (lua_State *luaState, int index, int level);        
         static bool pushGlobalFunctionName (lua_State *L, lua_Debug *debugInfo);
-        
-        std::string message_;
+        static std::string getExceptionMessage(lua_State *luaState, int index, const std::string &extraMessage);
+        static std::string getExceptionMessage(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments);
     };
     
     //--
     
-    inline const char * ArgumentException::what() const noexcept {
-        return message_.c_str();
-    }
+    
+    inline ArgumentException::ArgumentException(lua_State *luaState, int index, const std::string &extraMessage) : std::invalid_argument(getExceptionMessage(luaState, index, extraMessage)) {}
+    
+    inline ArgumentException::ArgumentException(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments) : std::invalid_argument(getExceptionMessage(luaState, maximumNumberOfArguments, actualNumberOfArguments)) {}
 }
 
 
