@@ -25,11 +25,11 @@
 #define integral_State_hpp
 
 #include <memory>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <lua.hpp>
 #include "exception/ClassException.hpp"
+#include "exception/Exception.hpp"
 #include "core.hpp"
 #include "generic.hpp"
 #include "GlobalReference.hpp"
@@ -56,8 +56,9 @@ namespace integral {
         inline detail::Reference<K, detail::GlobalReference> operator[](K &&key) const;
         
     private:
-        // stack argument: errorString
-        static std::string getErrorMessage(lua_State *luaState);
+        static const char * const kErrorStackArgument;
+        static const char * const kErrorStackMiscellanous;
+        static const char * const kErrorStackUnspecified;
         
         std::shared_ptr<lua_State> luaState_;
         
@@ -65,7 +66,7 @@ namespace integral {
         [[noreturn]] static int atPanic(lua_State *luaState);
     };
     
-    using StateException = exception::ClassException<State, std::runtime_error>;
+    using StateException = exception::ClassException<State, exception::RuntimeException>;
     
     //--
     
