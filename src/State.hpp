@@ -30,6 +30,7 @@
 #include <lua.hpp>
 #include "exception/ClassException.hpp"
 #include "exception/Exception.hpp"
+#include "Adaptor.hpp"
 #include "core.hpp"
 #include "generic.hpp"
 #include "GlobalReference.hpp"
@@ -67,6 +68,7 @@ namespace integral {
     };
     
     using StateException = exception::ClassException<State, exception::RuntimeException>;
+    using ReferenceException = detail::ReferenceException;
     
     //--
     
@@ -81,7 +83,8 @@ namespace integral {
     template<typename K>
     inline detail::Reference<K, detail::GlobalReference> State::operator[](K &&key) const {
         static_assert(detail::IsTemplateClass<LuaPack, detail::generic::BasicType<K>>::value == false, "integral::LuaPack cannot be a key");
-        return detail::Reference<K, detail::GlobalReference>(std::forward<K>(key), detail::GlobalReference(luaState_));
+        // Adaptor<detail::Reference<...>> is utilized to access protected constructor of detail::Reference<...>
+        return detail::Adaptor<detail::Reference<K, detail::GlobalReference>>(std::forward<K>(key), detail::GlobalReference(luaState_));
     }
 }
 

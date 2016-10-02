@@ -27,6 +27,8 @@
 #include <utility>
 #include <lua.hpp>
 #include "exception/Exception.hpp"
+#include "exception/TemplateClassException.hpp"
+#include "Adaptor.hpp"
 #include "ArgumentException.hpp"
 #include "exchanger.hpp"
 #include "generic.hpp"
@@ -44,15 +46,11 @@ namespace integral {
             Reference(const Reference &) = delete;
             Reference<K, R> & operator=(const Reference &) = delete;
 
-            inline Reference(K &&key, R &&chainedReference);
             Reference(Reference &&) = default;
 
             inline lua_State * getLuaState() const;
 
             void push() const;
-
-            template<typename L>
-            inline Reference<L, Reference<K, R>> operator[](L &&key) const &;
 
             template<typename L>
             inline Reference<L, Reference<K, R>> operator[](L &&key) &&;
@@ -63,15 +61,17 @@ namespace integral {
             template<typename V>
             V get() const;
 
+        protected:
+            inline Reference(K &&key, R &&chainedReference);
+
         private:
             K key_;
             R chainedReference_;
         };
+        
+        using ReferenceException = exception::TemplateClassException<Reference, exception::RuntimeException>;
 
         //--
-
-        template<typename K, typename R>
-        inline Reference<K, R>::Reference(K &&key, R &&chainedReference) : key_(std::forward<K>(key)),  chainedReference_(std::forward<R>(chainedReference)) {}
 
         template<typename K, typename R>
         inline lua_State * Reference<K, R>::getLuaState() const {
@@ -94,20 +94,15 @@ namespace integral {
             } else {
                 // stack: ?
                 lua_pop(getLuaState(), 1);
-                throw exception::LogicException(__FILE__, __LINE__, __func__, "chained reference is not a table");
+                throw ReferenceException(__FILE__, __LINE__, __func__, "[integral] chained reference is not a table");
             }
         }
 
         template<typename K, typename R>
         template<typename L>
-        inline Reference<L, Reference<K, R>> Reference<K, R>::operator[](L &&key) const & {
-            return Reference<L, Reference<K, R>>(std::forward<L>(key), *this);
-        }
-
-        template<typename K, typename R>
-        template<typename L>
         inline Reference<L, Reference<K, R>> Reference<K, R>::operator[](L &&key) && {
-            return Reference<L, Reference<K, R>>(std::forward<L>(key), std::move(*this));
+            // Adaptor<detail::Reference<...>> is utilized to access protected constructor of detail::Reference<...>
+            return Adaptor<detail::Reference<L, Reference<K, R>>>(std::forward<L>(key), std::move(*this));
         }
 
         template<typename K, typename R>
@@ -130,7 +125,7 @@ namespace integral {
             } else {
                 // stack: ?
                 lua_pop(getLuaState(), 1);
-                throw exception::LogicException(__FILE__, __LINE__, __func__, "chained reference is not a table");
+                throw ReferenceException(__FILE__, __LINE__, __func__, "[integral] chained reference is not a table");
             }
         }
 
@@ -149,9 +144,12 @@ namespace integral {
                 // stack: ?
                 lua_pop(getLuaState(), 1);
                 // stack:
-                throw ArgumentException(getLuaState(), -1, std::string("invalid type - element: " ) + argumentException.what());
+                throw ArgumentException(getLuaState(), -1, std::string("[integral] invalid type - element: " ) + argumentException.what());
             }
         }
+        
+        template<typename K, typename R>
+        inline Reference<K, R>::Reference(K &&key, R &&chainedReference) : key_(std::forward<K>(key)),  chainedReference_(std::forward<R>(chainedReference)) {}
     }
 }
 
