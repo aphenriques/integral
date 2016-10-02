@@ -34,7 +34,7 @@ namespace integral {
         namespace exchanger {
             LuaFunctionArgument Exchanger<LuaFunctionArgument>::get(lua_State *luaState, int index) {
                 if (lua_isfunction(luaState, index) != 0) {
-                    // Adaptor<LuaFunctionArgument> is utilized to acces protected constructor of LuaFunctionArgument
+                    // Adaptor<LuaFunctionArgument> is utilized to access protected constructor of LuaFunctionArgument
                     return Adaptor<LuaFunctionArgument>(luaState, index);
                 } else {
                     throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TFUNCTION));
