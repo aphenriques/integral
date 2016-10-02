@@ -46,6 +46,9 @@
 #include "type_manager.hpp"
 
 namespace integral {
+    // Exception thrown by Caller
+    using CallerException = detail::CallerException;
+    
     // Proxy to any value in lua state.
     // It is meant to be used as an argument to a C++ function.
     using LuaIgnoredArgument = detail::LuaIgnoredArgument;

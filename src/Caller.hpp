@@ -24,11 +24,12 @@
 #ifndef integral_Caller_hpp
 #define integral_Caller_hpp
 
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <lua.hpp>
+#include "exception/TemplateClassException.hpp"
 #include "ArgumentException.hpp"
-#include "CallerException.hpp"
 #include "exchanger.hpp"
 #include "generic.hpp"
 #include "type_count.hpp"
@@ -46,6 +47,8 @@ namespace integral {
         public:
             static void call(lua_State *luaState, const A &...arguments);
         };
+        
+        using CallerException = exception::TemplateClassException<Caller, std::runtime_error>;
         
         //--
         

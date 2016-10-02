@@ -25,9 +25,11 @@
 #define integral_State_hpp
 
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <lua.hpp>
+#include "exception/ClassException.hpp"
 #include "core.hpp"
 #include "generic.hpp"
 #include "GlobalReference.hpp"
@@ -44,21 +46,26 @@ namespace integral {
         inline lua_State * getLuaState() const;
         inline void openLibs() const;
         
-        // throws StateCallException on error
+        // throws StateException on error
         void doString(const std::string &string) const;
     
-        // throws StateCallException on error
+        // throws StateException on error
         void doFile(const std::string &fileName) const;
         
         template<typename K>
         inline detail::Reference<K, detail::GlobalReference> operator[](K &&key) const;
         
     private:
+        // stack argument: errorString
+        static std::string getErrorMessage(lua_State *luaState);
+        
         std::shared_ptr<lua_State> luaState_;
         
         // throws StateException
         [[noreturn]] static int atPanic(lua_State *luaState);
     };
+    
+    using StateException = exception::ClassException<State, std::runtime_error>;
     
     //--
     

@@ -25,11 +25,8 @@
 #define integral_integral_hpp
 
 #include "ArgumentException.hpp"
-#include "CallerException.hpp"
 #include "core.hpp"
 #include "DefaultArgument.hpp"
 #include "State.hpp"
-#include "StateCallException.hpp"
-#include "StateException.hpp"
 
 #endif
