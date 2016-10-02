@@ -38,12 +38,16 @@ int main(int argc, char* argv[]) {
     try {
         integral::State luaState;
         luaState.openLibs();
+        luaState.doFile("test.lua");
         luaState["x"].set(42);
         luaState.doString(luaTestCode);
         int x = luaState["x"].get<int>();
         std::cout << "c++: " << x << std::endl;
         std::cout << "c++: " << luaState["y"]["x"].get<const char*>() << std::endl;
         std::cout << "c++: " << luaState["y"][1][2].get<unsigned>() << std::endl;
+        auto xRef = luaState["x"];
+        auto yRef = luaState["y"][1][2];
+        std::cout << "c++: " << xRef.get<int>() << std::endl;
         integral::utility::printStack(luaState.getLuaState());
     } catch (const std::exception &exception) {
         std::cerr << "exception: " << exception.what() << std::endl;
