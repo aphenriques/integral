@@ -37,25 +37,32 @@ y = {{1, 2}, x = 'string'}
 int main(int argc, char* argv[]) {
     try {
         integral::State luaState;
-        luaState.openLibs();
-        luaState.doFile("test.lua");
-        luaState["x"].set(42);
-        luaState.doString(luaTestCode);
-        int x = luaState["x"].get<int>();
-        std::cout << "c++: " << x << std::endl;
-        std::cout << "c++: " << luaState["y"]["x"].get<const char*>() << std::endl;
-        std::cout << "c++: " << luaState["y"][1][2].get<unsigned>() << std::endl;
-        auto xRef = luaState["x"];
-        auto yRef = luaState["y"][1][2];
-        std::cout << "c++: " << xRef.get<int>() << std::endl;
+        try {
+            luaState.openLibs();
+            luaState.doFile("test.lua");
+            luaState["x"].set(42);
+            luaState.doString(luaTestCode);
+            int x = luaState["x"].get<int>();
+            std::cout << "c++: " << x << std::endl;
+            std::cout << "c++: " << luaState["y"]["2"].get<const char*>() << std::endl;
+            std::cout << "c++: " << luaState["y"][1][2].get<unsigned>() << std::endl;
+            auto xRef = luaState["x"];
+            auto yRef = luaState["y"][1][2];
+            std::cout << "c++: " << xRef.get<int>() << std::endl;
+            integral::utility::printStack(luaState.getLuaState());
+            std::cout << "fim" << std::endl;
+            return EXIT_SUCCESS;
+        } catch (const std::exception &exception) {
+            std::cerr << "exception: " << exception.what() << std::endl;
+        } catch (...) {
+            std::cerr << "unknown exception thrown" << std::endl;
+        }
         integral::utility::printStack(luaState.getLuaState());
+        return EXIT_FAILURE;
     } catch (const std::exception &exception) {
         std::cerr << "exception: " << exception.what() << std::endl;
-        return EXIT_FAILURE;
     } catch (...) {
         std::cerr << "unknown exception thrown" << std::endl;
-        return EXIT_FAILURE;
     }
-    std::cout << "fim" << std::endl;
-    return EXIT_SUCCESS;
+    return EXIT_FAILURE;
 }
