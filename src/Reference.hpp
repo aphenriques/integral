@@ -34,6 +34,7 @@
 #include "generic.hpp"
 #include "GlobalReference.hpp"
 #include "IsTemplateClass.hpp"
+#include "serializer.hpp"
 
 namespace integral {
     namespace detail {
@@ -49,8 +50,8 @@ namespace integral {
             Reference(Reference &&) = default;
 
             inline lua_State * getLuaState() const;
-
             void push() const;
+            std::string getReferenceString() const;
 
             template<typename L>
             inline Reference<L, Reference<K, R>> operator[](L &&key) &&;
@@ -94,9 +95,15 @@ namespace integral {
             } else {
                 // stack: ?
                 lua_pop(getLuaState(), 1);
-                throw ReferenceException(__FILE__, __LINE__, __func__, "[integral] chained reference is not a table");
+                throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] reference ") + chainedReference_.getReferenceString() + " is not a table");
             }
         }
+        
+        template<typename K, typename R>
+        std::string Reference<K, R>::getReferenceString() const {
+            return chainedReference_.getReferenceString() + "[" + serializer::getString(key_) + "]";
+        }
+
 
         template<typename K, typename R>
         template<typename L>
@@ -125,7 +132,7 @@ namespace integral {
             } else {
                 // stack: ?
                 lua_pop(getLuaState(), 1);
-                throw ReferenceException(__FILE__, __LINE__, __func__, "[integral] chained reference is not a table");
+                throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] reference ") + getReferenceString() + " is not a table");
             }
         }
 
@@ -144,7 +151,7 @@ namespace integral {
                 // stack: ?
                 lua_pop(getLuaState(), 1);
                 // stack:
-                throw ArgumentException(getLuaState(), -1, std::string("[integral] invalid type - element: " ) + argumentException.what());
+                throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] invalid type getting reference  " ) + getReferenceString() + ": " + argumentException.what());
             }
         }
         

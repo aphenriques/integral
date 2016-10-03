@@ -25,6 +25,7 @@
 #define integral_GlobalReference_hpp
 
 #include <memory>
+#include <string>
 #include <lua.hpp>
 
 namespace integral {
@@ -35,6 +36,7 @@ namespace integral {
             
             inline lua_State * getLuaState() const;
             inline void push() const;
+            inline std::string getReferenceString() const;
             
         private:
             std::shared_ptr<lua_State> luaState_;
@@ -51,7 +53,10 @@ namespace integral {
         inline void GlobalReference::push() const {
             lua_pushglobaltable(getLuaState());
         }
-
+        
+        inline std::string GlobalReference::getReferenceString() const {
+            return std::string("_G");
+        }
     }
 }
 
