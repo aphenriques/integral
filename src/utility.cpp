@@ -56,6 +56,7 @@ namespace integral {
                         break;
                         
                     case LUA_TLIGHTUSERDATA:
+                        // this is necessary because lua_typename(luaState, LUA_TLIGHTUSERDATA) returns "userdata"
                         std::cout << "lightuserdata";
                         break;
                         
