@@ -60,13 +60,12 @@ namespace integral {
                         break;
                         
                     default:
-                        if (lua_iscfunction(luaState, i) != 0) {
-                            std::cout << "cfunction";
-                        } else {
+                        if (lua_iscfunction(luaState, i) == 0)  {
                             std::cout << lua_typename(luaState, t);
+                        } else {
+                            std::cout << "cfunction";
                         }
                         break;
-                        
                 }
                 std::cout << "  ";
             }
