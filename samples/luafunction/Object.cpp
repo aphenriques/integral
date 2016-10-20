@@ -25,6 +25,7 @@
 #include <string>
 #include <lua.hpp>
 #include "integral.hpp"
+#include "utility.hpp"
 
 class Object {
 public:
@@ -66,7 +67,7 @@ extern "C" {
             integral::push<std::string>(luaState, "upvalue!");
             integral::setLuaFunction(luaState, "printUpvalue", [](lua_State *luaState) -> int {
                 // upvalue index is offset by 1 (because of integral internals). integral::LuaUpValuesIndex or lua_upvalueindex(index + 1) should be used to index upvalues
-                std::cout << integral::get<std::string>(luaState, integral::getLuaUpValueIndex(1)) << std::endl;
+                std::cout << integral::get<std::string>(luaState, integral::LuaFunctionWrapper::getUpValueIndex(1)) << std::endl;
                 return 0;
             }, 1); // 1 upvalue
 
@@ -78,7 +79,7 @@ extern "C" {
                 std::string printerName = integral::get<std::string>(luaState, 1);
                 integral::push<std::string>(luaState, "upvalue_message!");
                 integral::pushLuaFunction(luaState, [printerName](lua_State *luaState) -> int {
-                    std::cout << printerName << ": " << integral::get<std::string>(luaState, integral::getLuaUpValueIndex(1)) << std::endl;
+                    std::cout << printerName << ": " << integral::get<std::string>(luaState, integral::LuaFunctionWrapper::getUpValueIndex(1)) << std::endl;
                     return 0;
                 }, 1);
                 return 1;
@@ -87,12 +88,14 @@ extern "C" {
 
             // alternative way to push LuaFunctions
             lua_pushstring(luaState, "printMessage");
-            integral::push<integral::CLuaFunction>(luaState, [](lua_State *luaState) -> int {
+            integral::push<integral::LuaFunctionWrapper>(luaState, [](lua_State *luaState) -> int {
                 std::cout << "message from CLuaFunction" << std::endl;
                 return 0;
             });
             lua_rawset(luaState, -3);
 
+            integral::utility::printStack(luaState);
+            integral::setLuaFunction(luaState, "printStack", integral::utility::printStack);
             return 1;
         } catch (const std::exception &exception) {
             lua_pushstring(luaState, (std::string("[luafunction sample setup] ") + exception.what()).c_str());

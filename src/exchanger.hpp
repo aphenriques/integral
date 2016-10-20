@@ -42,7 +42,9 @@
 #include "generic.hpp"
 #include "IsTemplateClass.hpp"
 #include "lua_compatibility.hpp"
+#include "LuaFunctionWrapper.hpp"
 #include "LuaPack.hpp"
+#include "message.hpp"
 #include "type_manager.hpp"
 #include "UserDataWrapper.hpp"
 #include "UserDataWrapperBase.hpp"
@@ -127,6 +129,18 @@ namespace integral {
                 inline static void push(lua_State *luaState, T number);
             };
             
+            template<>
+            class Exchanger<LuaFunctionWrapper> {
+            public:
+                static LuaFunctionWrapper get(lua_State *luaState, int index);
+                
+                template<typename F>
+                static void push(lua_State *luaState, F &&luaFunction, int nUpValues = 0);
+
+            private:
+                static const char * const kMetatableName_;
+            };
+            
             template<typename T>
             class Exchanger<LuaVector<T>> {
             public:
@@ -194,6 +208,9 @@ namespace integral {
             
             template<typename A, typename ...B>
             void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments);
+            
+            template<typename T>
+            void setLuaFunctionWrapper(lua_State *luaState, const std::string &name, T&& luaFunction, int nUpValues = 0);
             
             // Exchanger<LuaPack<T...>> is not like other Exchanger specializations because it can push and get more than 1 element from the lua stack, so it must be used with caution. LuaPack cannot be an element of LuaVector, LuaArray, LuaUnorderedMap or LuaTuple, because their Exchangers are designed to work with single elements. These adaptors use singleGet(...) and singlePush(...) to assert that LuaPack is not a type of one of their elements.
             template<typename ...T>
@@ -352,6 +369,32 @@ namespace integral {
             template<typename T>
             inline void Exchanger< T, typename std::enable_if<std::is_floating_point<T>::value>::type>::push(lua_State *luaState, T number) {
                 lua_pushnumber(luaState, static_cast<lua_Number>(number));
+            }
+            
+            template<typename F>
+            void Exchanger<LuaFunctionWrapper>::push(lua_State *luaState, F &&luaFunction, int nUpValues) {
+                basic::pushUserData<LuaFunctionWrapper>(luaState, std::forward<F>(luaFunction));
+                basic::pushClassMetatable<LuaFunctionWrapper>(luaState, kMetatableName_);
+                lua_setmetatable(luaState, -2);
+                if (nUpValues != 0) {
+                    lua_insert(luaState, -1 - nUpValues);
+                }
+                lua_pushcclosure(luaState, [](lua_State *luaState) {
+                    try {
+                        LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState, lua_upvalueindex(1), kMetatableName_));
+                        if (luaFunctionWrapper != nullptr) {
+                            return luaFunctionWrapper->getLuaFunction()(luaState);
+                        } else {
+                            throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted LuaFunctionWrapper");
+                        }
+                    } catch (const std::exception &exception) {
+                        lua_pushstring(luaState, (std::string("[integral] ") + exception.what()).c_str());
+                    } catch (...) {
+                        lua_pushstring(luaState, message::gkUnknownExceptionMessage);
+                    }
+                    // error return outside catch scope so that the exception destructor can be called
+                    return lua_error(luaState);
+                }, 1 + nUpValues);
             }
             
             template<typename T>
@@ -703,6 +746,18 @@ namespace integral {
             void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments) {
                 push<generic::BasicType<A>>(luaState, std::forward<A>(firstArgument));
                 pushCopy(luaState, std::forward<B>(remainingArguments)...);
+            }
+            
+            template<typename T>
+            void setLuaFunctionWrapper(lua_State *luaState, const std::string &name, T&& luaFunction, int nUpValues) {
+                if (lua_istable(luaState, -1 - nUpValues) != 0) {
+                    push<LuaFunctionWrapper>(luaState, std::forward<T>(luaFunction), nUpValues);
+                    lua_pushstring(luaState, name.c_str());
+                    lua_insert(luaState, -2);
+                    lua_rawset(luaState, -3);
+                } else {
+                    throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
+                }
             }
             
             template<typename ...T>

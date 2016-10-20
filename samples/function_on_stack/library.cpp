@@ -45,7 +45,7 @@ extern "C" {
 
             integral::setLuaFunction(luaState, "getPrefixFunction", [](lua_State *luaState) -> int {
                 integral::pushLuaFunction(luaState,[](lua_State *luaState) -> int {
-                    integral::push<std::string>(luaState, integral::get<std::string>(luaState, integral::getLuaUpValueIndex(1))
+                    integral::push<std::string>(luaState, integral::get<std::string>(luaState, integral::LuaFunctionWrapper::getUpValueIndex(1))
                                                           + integral::get<std::string>(luaState, 1));
                     return 1;
                 }, 1);

@@ -58,7 +58,7 @@ extern "C" {
             });
             lua_rawset(luaState, -3);
 
-            integral::setFunction(luaState, "getConstantFunction", [](double constant) -> integral::CLuaFunction {
+            integral::setFunction(luaState, "getConstantFunction", [](double constant) -> integral::LuaFunctionWrapper {
                 return [constant](lua_State *luaState) -> int {
                     integral::push<double>(luaState, constant);
                     return 1;

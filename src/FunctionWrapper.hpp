@@ -125,7 +125,7 @@ namespace integral {
                 try {
                     UserDataWrapper<FunctionWrapperType> *functionWrapper = type_manager::getUserDataWrapper<FunctionWrapperType>(luaState, lua_upvalueindex(1));
                     if (functionWrapper != nullptr) {
-                        // replicate code of maximum number of parameters checking in function::callConstructor
+                        // replicate code of maximum number of parameters checking in ConstructorWrapper<M, T, A...>::operator()
                         const unsigned numberOfArgumentsOnStack = static_cast<unsigned>(lua_gettop(luaState));
                         // type_count::getTypeCount provides the pack expanded count
                         constexpr unsigned keLuaNumberOfArguments = type_count::getTypeCount<A...>();

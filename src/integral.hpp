@@ -27,6 +27,7 @@
 #include "ArgumentException.hpp"
 #include "core.hpp"
 #include "DefaultArgument.hpp"
+#include "LuaFunctionWrapper.hpp"
 #include "State.hpp"
 
 #endif

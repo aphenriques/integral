@@ -44,3 +44,6 @@ printer()
 
 print("--")
 Object.printMessage()
+
+print("--")
+Object.printStack();

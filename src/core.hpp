@@ -32,7 +32,6 @@
 #include "Caller.hpp"
 #include "CConstructor.hpp"
 #include "CFunction.hpp"
-#include "CLuaFunction.hpp"
 #include "ConstructorWrapper.hpp"
 #include "DefaultArgument.hpp"
 #include "DefaultArgumentManager.hpp"
@@ -43,6 +42,7 @@
 #include "LuaFunctionWrapper.hpp"
 #include "LuaIgnoredArgument.hpp"
 #include "LuaPack.hpp"
+#include "message.hpp"
 #include "type_manager.hpp"
 
 namespace integral {
@@ -78,7 +78,7 @@ namespace integral {
     // LuaPack can be seamlessly converted to std::tuple.
     template<typename ...T>
     using LuaPack = detail::LuaPack<T...>;
-    
+
     // Proxy to a (either C++ or lua) function in lua state.
     // The object of this class cannot be stored, it only points to a function in the stack.
     // It is meant to be used as an argument to a C++ function.
@@ -92,11 +92,6 @@ namespace integral {
     // CFuntion can not be gotten with integral::get
     template<typename T>
     using CFunction = detail::CFunction<T>;
-    
-    // Proxy to std::function<int(lua_State *)> [lua_CFunction]
-    // It is used to push a function onto the lua stack
-    // CLuaFunction can not be gotten with integral::get
-    using CLuaFunction = detail::CLuaFunction;
     
     // Proxy to class contructor
     // It is used to push a constructor onto the lua stack
@@ -191,18 +186,13 @@ namespace integral {
     // "name": name of the bound Lua function.
     // "function": function that takes a lua_State * as argument and return an int (number of return values/objects).
     // The first upvalue in the luacfunction is always the userdata that holds the function (std::function), so the remaining upvalues indexes are offset by 1.
-    // Use getLuaUpValueIndex or lua_upvalueindex(index + 1) to get an upvalue index.
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, const std::function<int(lua_State *)> &function, int nUpValues = 0);
-    
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, std::function<int(lua_State *)> &&function, int nUpValues = 0);
-    
-    inline void pushLuaFunction(lua_State *luaState, const std::function<int(lua_State *)> &function, int nUpValues = 0);
-    
-    inline void pushLuaFunction(lua_State *luaState, std::function<int(lua_State *)> &&function, int nUpValues = 0);
-    
-    // Gets the correct upvalue index.
-    // setLuaFunction and pushLuaFunction offset the upvalues to insert the bound function userdata (std::function) in the first position.
-    inline int getLuaUpValueIndex(int index);
+    // Use LuaFunctionWrapper::getUpValueIndex or lua_upvalueindex(index + 1) to get an upvalue index.
+    template<typename T>
+    inline void setLuaFunction(lua_State *luaState, const std::string &name, T&& luaFunction, int nUpValues = 0);
+
+    template<typename T>
+    inline void pushLuaFunction(lua_State *luaState, T&& luaFunction, int nUpValues = 0);
+
     
     // Binds a function in the table or metatable on top of the stack.
     // The function is managed by integral so that if an exception is thrown from it, it is translated to a Lua error
@@ -355,25 +345,16 @@ namespace integral {
         detail::ConstructorWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, T, A...>::pushConstructor(luaState, std::move(defaultArguments)...);
     }
     
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, const std::function<int(lua_State *)> &function, int nUpValues) {
-        detail::LuaFunctionWrapper::setFunction(luaState, name, function, nUpValues);
+    template<typename T>
+    inline void setLuaFunction(lua_State *luaState, const std::string &name, T&& luaFunction, int nUpValues) {
+        detail::exchanger::setLuaFunctionWrapper(luaState, name, std::forward<T>(luaFunction), nUpValues);
     }
     
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, std::function<int(lua_State *)> &&function, int nUpValues) {
-        detail::LuaFunctionWrapper::setFunction(luaState, name, std::move(function), nUpValues);
+    template<typename T>
+    inline void pushLuaFunction(lua_State *luaState, T&& luaFunction, int nUpValues) {
+        push<LuaFunctionWrapper>(luaState, std::forward<T>(luaFunction), nUpValues);
     }
-    
-    inline void pushLuaFunction(lua_State *luaState, const std::function<int(lua_State *)> &function, int nUpValues) {
-        detail::LuaFunctionWrapper::pushFunction(luaState, function, nUpValues);
-    }
-    
-    inline void pushLuaFunction(lua_State *luaState, std::function<int(lua_State *)> &&function, int nUpValues) {
-        detail::LuaFunctionWrapper::pushFunction(luaState, std::move(function), nUpValues);
-    }
-    
-    inline int getLuaUpValueIndex(int index) {
-        return lua_upvalueindex(index + 1);
-    }
+
     
     template<typename R, typename ...A, typename ...E, unsigned ...I>
     inline void setFunction(lua_State *luaState, const std::string &name, const std::function<R(A...)> &function, DefaultArgument<E, I> &&...defaultArguments) {
