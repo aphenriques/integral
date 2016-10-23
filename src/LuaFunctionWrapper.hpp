@@ -30,32 +30,32 @@
 #include "exchanger.hpp"
 
 namespace integral {
-    // This class exists to make it possible to get exceptions thrown by luaFunction_ (see Exchanger<LuaFunctionWrapper>::push). For example, this is important to get exceptions thrown by exchanger::callConstructor when there are wrong parameters (exchanger::Exchange throws).
-    // The function is managed by integral so that if an exception is thrown from it, it is translated to a Lua error
-    // The first upvalue in the related lua_CFunction is always the userdata that holds LuaFunctionWrapper, so the remaining upvalues indexes are offset by 1.
-    // Use getUpValueIndex or lua_upvalueindex(index + 1) to get an upvalue index.
-    class LuaFunctionWrapper {
-    public:
-        // Gets adjusted upvalue index.
-        // Exchanger<LuaFunctionWrapper>::push offsets the upvalues to insert the bound function userdata in the first position.
-        static inline int getUpValueIndex(int index);
-        
-        // "luaFunction": lua_CFunction like function or functor.
-        template<typename T>
-        inline LuaFunctionWrapper(T &&luaFunction);
-        
-        // necessary because of the template constructor
-        LuaFunctionWrapper(const LuaFunctionWrapper &) = default;
-        LuaFunctionWrapper(LuaFunctionWrapper &) = default;
-        LuaFunctionWrapper(LuaFunctionWrapper &&) = default;
-        
-        inline const std::function<int(lua_State *)> & getLuaFunction() const;
-        
-    private:
-        std::function<int(lua_State *)> luaFunction_;
-    };
-    
     namespace detail {
+        // This class exists to make it possible to get exceptions thrown by luaFunction_ (see Exchanger<LuaFunctionWrapper>::push). For example, this is important to get exceptions thrown by exchanger::callConstructor when there are wrong parameters (exchanger::Exchange throws).
+        // The function is managed by integral so that if an exception is thrown from it, it is translated to a Lua error
+        // The first upvalue in the related lua_CFunction is always the userdata that holds LuaFunctionWrapper, so the remaining upvalues indexes are offset by 1.
+        // Use getUpValueIndex or lua_upvalueindex(index + 1) to get an upvalue index.
+        class LuaFunctionWrapper {
+        public:
+            // Gets adjusted upvalue index.
+            // Exchanger<LuaFunctionWrapper>::push offsets the upvalues to insert the bound function userdata in the first position.
+            static inline int getUpValueIndex(int index);
+            
+            // "luaFunction": lua_CFunction like function or functor.
+            template<typename T>
+            inline LuaFunctionWrapper(T &&luaFunction);
+            
+            // necessary because of the template constructor
+            LuaFunctionWrapper(const LuaFunctionWrapper &) = default;
+            LuaFunctionWrapper(LuaFunctionWrapper &) = default;
+            LuaFunctionWrapper(LuaFunctionWrapper &&) = default;
+            
+            inline const std::function<int(lua_State *)> & getLuaFunction() const;
+            
+        private:
+            std::function<int(lua_State *)> luaFunction_;
+        };
+        
         namespace exchanger {
             template<>
             class Exchanger<LuaFunctionWrapper> {
@@ -73,22 +73,20 @@ namespace integral {
             template<typename T>
             void setLuaFunctionWrapper(lua_State *luaState, const std::string &name, T&& luaFunction, int nUpValues = 0);
         }
-    }
     
-    //--
-    
-    inline int LuaFunctionWrapper::getUpValueIndex(int index) {
-        return lua_upvalueindex(index + 1);
-    }
-    
-    template<typename T>
-    inline LuaFunctionWrapper::LuaFunctionWrapper(T &&luaFunction) : luaFunction_(std::forward<T>(luaFunction)) {}
+        //--
+        
+        inline int LuaFunctionWrapper::getUpValueIndex(int index) {
+            return lua_upvalueindex(index + 1);
+        }
+        
+        template<typename T>
+        inline LuaFunctionWrapper::LuaFunctionWrapper(T &&luaFunction) : luaFunction_(std::forward<T>(luaFunction)) {}
 
-    inline const std::function<int(lua_State *)> & LuaFunctionWrapper::getLuaFunction() const {
-        return luaFunction_;
-    }
-    
-    namespace detail {
+        inline const std::function<int(lua_State *)> & LuaFunctionWrapper::getLuaFunction() const {
+            return luaFunction_;
+        }
+        
         namespace exchanger {
             template<typename F>
             void Exchanger<LuaFunctionWrapper>::push(lua_State *luaState, F &&luaFunction, int nUpValues) {

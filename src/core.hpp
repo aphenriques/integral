@@ -78,6 +78,9 @@ namespace integral {
     // LuaPack can be seamlessly converted to std::tuple.
     template<typename ...T>
     using LuaPack = detail::LuaPack<T...>;
+    
+    //lua_CFunction like function or functor wrapper
+    using LuaFunctionWrapper = detail::LuaFunctionWrapper;
 
     // Proxy to a (either C++ or lua) function in lua state.
     // The object of this class cannot be stored, it only points to a function in the stack.
