@@ -47,7 +47,7 @@ extern "C" {
             integral::setFunction(luaState, "getName", &Object::getName);
             lua_pop(luaState, 1);
 
-            using ObjectConstructorAdaptorType = integral::CConstructor<Object, const std::string &>;
+            using ObjectConstructorAdaptorType = integral::ConstructorWrapper<Object, const std::string &>;
             integral::setFunction(luaState, "getObjectConstructor", []() -> ObjectConstructorAdaptorType {
                 return ObjectConstructorAdaptorType();
             });

@@ -30,7 +30,6 @@
 #include <utility>
 #include <lua.hpp>
 #include "Caller.hpp"
-#include "CConstructor.hpp"
 #include "CFunction.hpp"
 #include "ConstructorWrapper.hpp"
 #include "DefaultArgument.hpp"
@@ -98,9 +97,9 @@ namespace integral {
     
     // Proxy to class contructor
     // It is used to push a constructor onto the lua stack
-    // CConstructor can not be gotten with integral::get
+    // ConstructorWrapper can not be gotten with integral::get
     template<typename T, typename ...A>
-    using CConstructor = detail::CConstructor<T, A...>;
+    using ConstructorWrapper = detail::ConstructorWrapper<T, A...>;
     
     // Pushes class metatable of type "T".
     // The class metatable can be converted to base types EVEN when they are NOT especified with defineTypeFunction or defineInheritance.
@@ -179,7 +178,7 @@ namespace integral {
     // "defaultArguments...": pack of default arguments. Each with its own specific type E at index I (every type is deduced from the function arguments). DefaultArgument Index I starts with 1 (like lua). Static checking is performed, so the invalid type or/and index causes compilation error. DefaultArgument<E, I> constructor arguments are forwarded for T type object constructor (check DefaultConstructor.h for details)
     // defaultArguments... argument is a rvalue in order to utilize move constructors whenever possible. Moreover, forcing the declaration of DefaultArgument in-place adds clarity.
     template<typename T, typename ...A, typename ...E, unsigned ...I>
-    inline void setConstructor(lua_State *luaState, const std::string &name, DefaultArgument<E, I> &&...defaultArguments);
+    void setConstructor(lua_State *luaState, const std::string &name, DefaultArgument<E, I> &&...defaultArguments);
     
     template<typename T, typename ...A, typename ...E, unsigned ...I>
     inline void pushConstructor(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments);
@@ -191,7 +190,7 @@ namespace integral {
     // The first upvalue in the luacfunction is always the userdata that holds the function (std::function), so the remaining upvalues indexes are offset by 1.
     // Use LuaFunctionWrapper::getUpValueIndex or lua_upvalueindex(index + 1) to get an upvalue index.
     template<typename T>
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, T&& luaFunction, int nUpValues = 0);
+    void setLuaFunction(lua_State *luaState, const std::string &name, T&& luaFunction, int nUpValues = 0);
 
     template<typename T>
     inline void pushLuaFunction(lua_State *luaState, T&& luaFunction, int nUpValues = 0);
@@ -339,18 +338,32 @@ namespace integral {
     }
     
     template<typename T, typename ...A, typename ...E, unsigned ...I>
-    inline void setConstructor(lua_State *luaState, const std::string &name, DefaultArgument<E, I> &&...defaultArguments) {
-        detail::ConstructorWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, T, A...>::setConstructor(luaState, name, std::move(defaultArguments)...);
+    void setConstructor(lua_State *luaState, const std::string &name, DefaultArgument<E, I> &&...defaultArguments) {
+        if (lua_istable(luaState, -1) != 0) {
+            push<ConstructorWrapper<T, A...>>(luaState, std::move(defaultArguments)...);
+            lua_pushstring(luaState, name.c_str());
+            lua_insert(luaState, -2);
+            lua_rawset(luaState, -3);
+        } else {
+            throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
+        }
     }
     
     template<typename T, typename ...A, typename ...E, unsigned ...I>
     inline void pushConstructor(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments) {
-        detail::ConstructorWrapper<detail::DefaultArgumentManager<DefaultArgument<E, I>...>, T, A...>::pushConstructor(luaState, std::move(defaultArguments)...);
+        push<ConstructorWrapper<T, A...>>(luaState, std::move(defaultArguments)...);
     }
     
     template<typename T>
-    inline void setLuaFunction(lua_State *luaState, const std::string &name, T&& luaFunction, int nUpValues) {
-        detail::exchanger::setLuaFunctionWrapper(luaState, name, std::forward<T>(luaFunction), nUpValues);
+    void setLuaFunction(lua_State *luaState, const std::string &name, T&& luaFunction, int nUpValues) {
+        if (lua_istable(luaState, -1 - nUpValues) != 0) {
+            push<LuaFunctionWrapper>(luaState, std::forward<T>(luaFunction), nUpValues);
+            lua_pushstring(luaState, name.c_str());
+            lua_insert(luaState, -2);
+            lua_rawset(luaState, -3);
+        } else {
+            throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
+        }
     }
     
     template<typename T>
