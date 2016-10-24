@@ -68,10 +68,6 @@ namespace integral {
             private:
                 static const char * const kMetatableName_;
             };
-            
-            // TODO is this function really necessary?
-            template<typename T>
-            void setLuaFunctionWrapper(lua_State *luaState, const std::string &name, T&& luaFunction, int nUpValues = 0);
         }
     
         //--
@@ -112,18 +108,6 @@ namespace integral {
                     // error return outside catch scope so that the exception destructor can be called
                     return lua_error(luaState);
                 }, 1 + nUpValues);
-            }
-            
-            template<typename T>
-            void setLuaFunctionWrapper(lua_State *luaState, const std::string &name, T&& luaFunction, int nUpValues) {
-                if (lua_istable(luaState, -1 - nUpValues) != 0) {
-                    push<LuaFunctionWrapper>(luaState, std::forward<T>(luaFunction), nUpValues);
-                    lua_pushstring(luaState, name.c_str());
-                    lua_insert(luaState, -2);
-                    lua_rawset(luaState, -3);
-                } else {
-                    throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
-                }
             }
         }
     }
