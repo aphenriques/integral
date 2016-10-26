@@ -38,25 +38,25 @@ namespace integral {
         public:
             template<typename ...E, unsigned ...I>
             inline DefaultArgumentManager(DefaultArgument<E, I> &&...defaultArguments);
-            
+
             void processDefaultArguments(lua_State *luaState, const unsigned numberOfFunctionArguments, const unsigned numberOfArgumentsOnStack) const;
-            
+
         private:            
             std::tuple<F...> defaultArguments_;
-            
+
             template<unsigned ...S>
             inline void processDefaultArguments(lua_State *luaState, std::integer_sequence<unsigned, S...>) const;
-            
+
             template<typename E, unsigned I>
             void processArgument(lua_State *luaState, const DefaultArgument<E, I> &defaultArgument) const;
         };
-        
+
         //--
-        
+
         template<typename ...F>
         template<typename ...E, unsigned ...I>
         inline DefaultArgumentManager<F...>::DefaultArgumentManager(DefaultArgument<E, I> &&...defaultArguments) : defaultArguments_(std::move(defaultArguments)...) {}
-        
+
         template<typename ...F>
         void DefaultArgumentManager<F...>::processDefaultArguments(lua_State *luaState, const unsigned numberOfFunctionArguments, const unsigned numberOfArgumentsOnStack) const {
             if (numberOfArgumentsOnStack < numberOfFunctionArguments) {
@@ -67,13 +67,13 @@ namespace integral {
             }
             processDefaultArguments(luaState, std::make_integer_sequence<unsigned, sizeof...(F)>());
         }
-        
+
         template<typename ...F>
         template<unsigned ...S>
         inline void DefaultArgumentManager<F...>::processDefaultArguments(lua_State *luaState, std::integer_sequence<unsigned, S...>) const {
             generic::expandDummyTemplatePack((processArgument(luaState, std::get<S>(defaultArguments_)), 0)...);
         }
-        
+
         template<typename ...F>
         template<typename E, unsigned I>
         void DefaultArgumentManager<F...>::processArgument(lua_State *luaState, const DefaultArgument<E, I> &defaultArgument) const {

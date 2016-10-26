@@ -42,7 +42,7 @@ namespace integral {
             const char * const gkInheritanceSearchTagKey = "integral_InheritanceSearchTagKey";
             const char * const gkInheritanceKey = "integral_InheritanceKey";
             const char * const gkInheritanceIndexMetamethodKey = "integral_InheritanceIndexMetamethodKey";
-            
+
             const std::type_index * getClassMetatableType(lua_State *luaState) {
                 //stack: metatable
                 lua_pushstring(luaState, gkTypeIndexKey);
@@ -81,7 +81,7 @@ namespace integral {
                     return false;
                 }
             }
-            
+
             bool checkClassMetatableExistence(lua_State *luaState, const std::type_index &typeIndex) {
                 lua_pushstring(luaState, gkTypeMangerRegistryKey);
                 lua_rawget(luaState, LUA_REGISTRYINDEX);
@@ -122,13 +122,13 @@ namespace integral {
                     return false;
                 }
             }
-            
+
             void pushTypeIndexUserData(lua_State *luaState, const std::type_index &typeIndex) {
                 basic::pushUserData<std::type_index>(luaState, typeIndex);
                 basic::pushClassMetatable<std::type_index>(luaState, gkTypeIndexMetatableName);
                 lua_setmetatable(luaState, -2);
             }
-            
+
             void setTypeFunctionHashTable(lua_State *luaState, std::size_t baseTypeHash) {
                 // stack: metatable | typeFunctionTable
                 lua_pushinteger(luaState, baseTypeHash);
@@ -142,7 +142,7 @@ namespace integral {
                 lua_pop(luaState, 1);
                 // stack: metatable | typeFunctionHashTable
             }
-            
+
             void pushTypeFunctionHashTable(lua_State *luaState, const std::type_index &baseTypeIndex) {
                 // stack: metatable
                 const std::size_t baseTypeHash = baseTypeIndex.hash_code();
@@ -176,7 +176,7 @@ namespace integral {
                     // stack: metatable | typeFunctionHashTable
                 }
             }
-            
+
             // not allowed to throw exception (this function is used in callInheritanceIndexMetamethod)
             // noexcept modifier is not suited because if lua is compiled with exceptions (c++) its functions can throw exceptions (this is not a problem)
             bool checkInheritanceSearchTag(lua_State *luaState, int index) {
@@ -195,7 +195,7 @@ namespace integral {
                     return true;
                 }
             }
-            
+
             // not allowed to throw exception (this function is used in callInheritanceIndexMetamethod)
             // noexcept modifier is not suited because if lua is compiled with exceptions (c++) its functions can throw exceptions (this is not a problem)
             void tagInheritanceSearch(lua_State *luaState, int index) {
@@ -209,7 +209,7 @@ namespace integral {
                 // stack: metatable
                 lua_pop(luaState, 1);
             }
-            
+
             // not allowed to throw exception (this function is used in callInheritanceIndexMetamethod)
             // noexcept modifier is not suited because if lua is compiled with exceptions (c++) its functions can throw exceptions (this is not a problem)
             void untagInheritanceSearch(lua_State *luaState, int index) {
@@ -223,7 +223,7 @@ namespace integral {
                 // stack: metatable
                 lua_pop(luaState, 1);
             }
-            
+
             bool pushDirectConvertibleType(lua_State *luaState, int index, const std::type_index &convertibleTypeIndex, bool isUnderlyingLightUserData) {
                 // stack: metatable
                 lua_pushvalue(luaState, index);
@@ -313,7 +313,7 @@ namespace integral {
                 }
                 return false;
             }
-            
+
             bool pushConvertibleOrInheritedType(lua_State *luaState, int index, const std::type_index &convertibleTypeIndex, bool isRecursion) {
                 // stack: metatable
                 if (isRecursion == true && checkInheritanceSearchTag(luaState, -1) == true) {
@@ -434,7 +434,7 @@ namespace integral {
                     }
                 }
             }
-            
+
             UserDataWrapperBase * getUserDataWrapperBase(lua_State *luaState, int index) {
                 lua_pushvalue(luaState, index);
                 // stack: userdata
@@ -496,7 +496,7 @@ namespace integral {
                 }
                 return nullptr;
             }
-            
+
             bool pushUnderlyingTypeLightUserData(lua_State *luaState, int index) {
                 // stack: metatable
                 lua_pushvalue(luaState, index);
@@ -599,7 +599,7 @@ namespace integral {
                     return 1;
                 }
             }
-            
+
             void pushInheritanceIndexMetamethod(lua_State *luaState) {
                 lua_pushstring(luaState, gkInheritanceIndexMetamethodKey);
                 // stack: gkInheritanceIndexMetamethodKey
@@ -619,7 +619,7 @@ namespace integral {
                     // stack: callInheritanceIndexMetamethod
                 }
             }
-            
+
             void setInheritanceIndexMetatable(lua_State *luaState) {
                 // stack: metatable
                 if (lua_getmetatable(luaState, -1) == 0) {

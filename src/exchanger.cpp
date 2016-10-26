@@ -22,6 +22,11 @@
 //
 
 #include "exchanger.hpp"
+#include <string>
+#include <lua.hpp>
+#include "ArgumentException.hpp"
+#include "type_manager.hpp"
+
 
 namespace integral {
     namespace detail {
@@ -43,7 +48,7 @@ namespace integral {
                     }
                 }
             }
-            
+
             std::string Exchanger<std::string>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     const char * const string = lua_tostring(luaState, index);
@@ -61,7 +66,7 @@ namespace integral {
                     }
                 }
             }
-            
+
             bool Exchanger<bool>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     return lua_toboolean(luaState, index);

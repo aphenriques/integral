@@ -41,17 +41,17 @@ namespace integral {
         public:
             static decltype(auto) call(lua_State *luaState, const A &...arguments);
         };
-        
+
         template<typename ...A>
         class Caller<void, A...> {
         public:
             static void call(lua_State *luaState, const A &...arguments);
         };
-        
+
         using CallerException = exception::TemplateClassException<Caller, std::runtime_error>;
-        
+
         //--
-        
+
         template<typename R, typename ...A>
         decltype(auto) Caller<R, A...>::call(lua_State *luaState, const A &...arguments) {
             static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
@@ -72,7 +72,7 @@ namespace integral {
                 throw CallerException(errorMessage);
             }
         }
-        
+
         template<typename ...A>
         void Caller<void, A...>::call(lua_State *luaState, const A &...arguments) {
             static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");

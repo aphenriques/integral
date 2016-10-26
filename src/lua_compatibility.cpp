@@ -26,7 +26,7 @@
 namespace integral {
     namespace detail {
         namespace lua_compatibility {
-            
+
 #if LUA_VERSION_NUM == 501
             void * testudata(lua_State *luaState, int index, const char *metatableName) {
                 void *userData = lua_touserdata(luaState, index);
@@ -43,13 +43,13 @@ namespace integral {
                 return nullptr;
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             int absindex(lua_State *luaState, int index) {
                 return index > 0 || index <= LUA_REGISTRYINDEX ? index : lua_gettop(luaState) + index + 1;
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             void copy(lua_State *luaState, int fromIndex, int toIndex) {
                 // TODO test this
@@ -57,21 +57,21 @@ namespace integral {
                 lua_replace(luaState, absindex(luaState, toIndex));
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             lua_Integer tointegerx(lua_State *luaState, int index, int *isNumber) {
                 *isNumber = lua_isnumber(luaState, index);
                 return lua_tointeger(luaState, index);
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             unsigned long tounsignedx(lua_State *luaState, int index, int *isNumber) {
                 *isNumber = lua_isnumber(luaState, index);
                 return static_cast<unsigned long>(lua_tointeger(luaState, index));
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             lua_Number tonumberx(lua_State *luaState, int index, int *isNumber) {
                 *isNumber = lua_isnumber(luaState, index);

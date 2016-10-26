@@ -2,7 +2,7 @@
 //  LuaFunctionWrapper.cpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2015, 2016  André Pereira Henriques
+//  Copyright (C) 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -22,51 +22,34 @@
 //
 
 #include "LuaFunctionWrapper.hpp"
-#include <exception>
-#include <string>
-#include <lua.hpp>
-#include "exception/Exception.hpp"
-#include "basic.hpp"
-#include "lua_compatibility.hpp"
-#include "message.hpp"
 
 namespace integral {
     namespace detail {
-        const char * const LuaFunctionWrapper::kMetatableName_ = "integral_LuaFunctionWrapperMetatableName";
-        
-        void LuaFunctionWrapper::pushFunction(lua_State *luaState, const LuaFunctionWrapper &luaFunction, int nUpValues) {
-            basic::pushUserData<LuaFunctionWrapper>(luaState, luaFunction);
-            basic::pushClassMetatable<LuaFunctionWrapper>(luaState, kMetatableName_);
-            lua_setmetatable(luaState, -2);
-            if (nUpValues != 0) {
-                lua_insert(luaState, -1 - nUpValues);
-            }
-            lua_pushcclosure(luaState, [](lua_State *luaState) {
-                try {
-                    LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState, lua_upvalueindex(1), kMetatableName_));
-                    if (luaFunctionWrapper != nullptr) {
-                        return luaFunctionWrapper->call(luaState);
+        namespace exchanger {
+            const char * const Exchanger<LuaFunctionWrapper>::kMetatableName_ = "integral_LuaFunctionWrapperMetatableName";
+
+            LuaFunctionWrapper Exchanger<LuaFunctionWrapper>::get(lua_State *luaState, int index) {
+                if (lua_iscfunction(luaState, index) == 0) {
+                    if (lua_getupvalue(luaState, index, 1) != nullptr) {
+                        // stack: upvalue
+                        LuaFunctionWrapper *luaFunctionWrapperPointer = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState, -1, kMetatableName_));
+                        if (luaFunctionWrapperPointer != nullptr) {
+                            LuaFunctionWrapper luaFunctionWrapper = *luaFunctionWrapperPointer;
+                            lua_pop(luaState, 1);
+                            // stack:
+                            return luaFunctionWrapper;
+                        } else {
+                            ArgumentException argumentException = ArgumentException::createTypeErrorException(luaState, index, "LuaFunctionWrapper");
+                            lua_pop(luaState, 1);
+                            // stack:
+                            throw argumentException;
+                        }
                     } else {
-                        throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted LuaFunctionWrapper");
+                        throw ArgumentException::createTypeErrorException(luaState, index, "LuaFunctionWrapper (no upvalue)");
                     }
-                } catch (const std::exception &exception) {
-                    lua_pushstring(luaState, (std::string("[integral] ") + exception.what()).c_str());
-                } catch (...) {
-                    lua_pushstring(luaState, message::gkUnknownExceptionMessage);
+                } else {
+                    throw ArgumentException::createTypeErrorException(luaState, index, "lua_CFuntion");
                 }
-                // error return outside catch scope so that the exception destructor can be called
-                return lua_error(luaState);
-            }, 1 + nUpValues);
-        }
-        
-        void LuaFunctionWrapper::setFunction(lua_State *luaState, const std::string &name, const LuaFunctionWrapper &luaFunction, int nUpValues) {
-            if (lua_istable(luaState, -1 - nUpValues) != 0) {
-                pushFunction(luaState, luaFunction, nUpValues);
-                lua_pushstring(luaState, name.c_str());
-                lua_insert(luaState, -2);
-                lua_rawset(luaState, -3);
-            } else {
-                throw exception::LogicException(__FILE__, __LINE__, __func__, message::gkInvalidStackExceptionMessage);
             }
         }
     }

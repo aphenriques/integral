@@ -33,27 +33,27 @@ namespace integral {
         class GlobalReference {
         public:
             inline GlobalReference(const std::shared_ptr<lua_State> &luaState);
-            
+
             inline lua_State * getLuaState() const;
             inline void push() const;
             inline std::string getReferenceString() const;
-            
+
         private:
             std::shared_ptr<lua_State> luaState_;
         };
-        
+
         //--
-        
+
         inline GlobalReference::GlobalReference(const std::shared_ptr<lua_State> &luaState) : luaState_(luaState) {}
-        
+
         inline lua_State * GlobalReference::getLuaState() const {
             return luaState_.get();
         }
-        
+
         inline void GlobalReference::push() const {
             lua_pushglobaltable(getLuaState());
         }
-        
+
         inline std::string GlobalReference::getReferenceString() const {
             return std::string("_G");
         }

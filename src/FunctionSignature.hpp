@@ -1,8 +1,8 @@
 //
-//  IsStringLiteral.hpp
+//  FunctionSignature.hpp
 //  integral
 //
-//  Copyright (C) 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -21,18 +21,19 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_IsStringLiteral_hpp
-#define integral_IsStringLiteral_hpp
-
-#include <type_traits>
+#ifndef integral_FunctionSignature_hpp
+#define integral_FunctionSignature_hpp
 
 namespace integral {
     namespace detail {
         template<typename T>
-        class IsStringLiteral : public std::false_type {};
+        class FunctionSignature;
 
-        template<unsigned N>
-        class IsStringLiteral<const char (&) [N]> : public std::true_type {};
+        template<typename R, typename ...A>
+        class FunctionSignature<R(A...)> {
+        public:
+            using Signature = R(A...);
+        };
     }
 }
 

@@ -34,27 +34,28 @@ namespace integral {
     class DefaultArgument {
     public:
         using ArgumentTag = detail::ArgumentTag<T, I>;
-        
+
         // Arguments are forwarded to typename T constructor
         template<typename ...A>
         inline DefaultArgument(A &&...arguments);
-        
+
         // Avoids template constructor ambiguity
         DefaultArgument(const DefaultArgument<T, I> &) = default;
+        DefaultArgument(DefaultArgument<T, I> &) = default;
         DefaultArgument(DefaultArgument<T, I> &&) = default;
-        
+
         inline const T & getArgument() const;
-        
+
     private:
         T argument_;
     };
-    
+
     //--
-    
+
     template<typename T, unsigned I>
     template<typename ...A>
     inline DefaultArgument<T, I>::DefaultArgument(A &&...arguments) : argument_(std::forward<A>(arguments)...) {}
-    
+
     template<typename T, unsigned I>
     inline const T & DefaultArgument<T, I>::getArgument() const {
         return argument_;

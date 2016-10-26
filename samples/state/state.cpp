@@ -29,7 +29,7 @@
 #include "utility.hpp"
 
 static const char * const luaTestCode = R"(
-require("usr")
+--require("usr")
 print(x)
 y = {{1, 2}, x = 'string'}
 )";
@@ -38,17 +38,22 @@ int main(int argc, char* argv[]) {
     try {
         integral::State luaState;
         try {
+            std::cout << lua_typename(luaState.getLuaState(), LUA_TLIGHTUSERDATA) << std::endl;
             luaState.openLibs();
             luaState.doFile("test.lua");
             luaState["x"].set(42);
             luaState.doString(luaTestCode);
             int x = luaState["x"].get<int>();
             std::cout << "c++: " << x << std::endl;
-            std::cout << "c++: " << luaState["y"]["2"].get<const char*>() << std::endl;
+            std::cout << "c++: " << luaState["y"]["x"].get<const char*>() << std::endl;
             std::cout << "c++: " << luaState["y"][1][2].get<unsigned>() << std::endl;
             auto xRef = luaState["x"];
-            auto yRef = luaState["y"][1][2];
             std::cout << "c++: " << xRef.get<int>() << std::endl;
+            luaState["get42"].set(integral::FunctionWrapper<int()>([]() -> int {
+                return 42;
+            }));
+            luaState.doString(R"(print("lua get42(): " .. get42()))");
+            luaState.doString("print(y.x)");
             integral::utility::printStack(luaState.getLuaState());
             std::cout << "fim" << std::endl;
             return EXIT_SUCCESS;

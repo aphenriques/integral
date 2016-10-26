@@ -46,20 +46,20 @@ namespace integral {
                     case LUA_TSTRING:
                         std::cout << '"' << lua_tostring(luaState, i) << '"';
                         break;
-                        
+
                     case LUA_TBOOLEAN:
                         std::cout <<(lua_toboolean(luaState, i) ? "true" : "false");
                         break;
-                        
+
                     case LUA_TNUMBER:
                         std::cout << lua_tonumber(luaState, i);
                         break;
-                        
+
                     case LUA_TLIGHTUSERDATA:
                         // this is necessary because lua_typename(luaState, LUA_TLIGHTUSERDATA) returns "userdata"
                         std::cout << "lightuserdata";
                         break;
-                        
+
                     default:
                         if (lua_iscfunction(luaState, i) == 0)  {
                             std::cout << lua_typename(luaState, t);
@@ -73,7 +73,7 @@ namespace integral {
             std::cout << std::endl;
             return 0;
         }
-        
+
         void setHelp(lua_State *luaState, const char *field, const char *fieldDescription) {
             if (lua_istable(luaState, -1) != 0) {
                 lua_pushstring(luaState, gkHelpKey);
@@ -94,7 +94,7 @@ namespace integral {
                 throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
             }
         }
-        
+
         void setWithHelp(lua_State *luaState, const char *field, const char *fieldDescription) {
             // stack argument: ? | ?
             if (lua_istable(luaState, -2) != 0) {
@@ -119,7 +119,7 @@ namespace integral {
                 lua_rawset(luaState, -3);
             }
         }
-        
+
         void setNameAndValueListWithHelp(lua_State *luaState, const char *field, std::initializer_list<std::tuple<const char *, int>> nameAndValueList) {
             if (lua_istable(luaState, -1) != 0) {
                 std::ostringstream fieldDescription;

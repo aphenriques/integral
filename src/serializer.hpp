@@ -42,7 +42,7 @@ namespace integral {
                     return stringStream.str();
                 }
             };
-            
+
             template <typename T>
             class Serializer<T, typename std::enable_if<std::is_arithmetic<T>::value>::type> {
             public:
@@ -52,7 +52,7 @@ namespace integral {
                     return stringStream.str();
                 }
             };
-            
+
             template <typename T>
             class Serializer<T, typename std::enable_if<std::is_same<T, std::string>::value || std::is_same<T, const char *>::value>::type> {
             public:
@@ -62,7 +62,7 @@ namespace integral {
                     return stringStream.str();
                 }
             };
-            
+
             template<typename T>
             std::string getString(T &&t) {
                 return Serializer<generic::BasicType<T>>::getString(std::forward<T>(t));

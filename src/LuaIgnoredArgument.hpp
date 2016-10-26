@@ -35,13 +35,13 @@ namespace integral {
             // non-copyable
             LuaIgnoredArgument(const LuaIgnoredArgument &) = delete;
             LuaIgnoredArgument & operator=(const LuaIgnoredArgument &) = delete;
-            
+
             LuaIgnoredArgument(LuaIgnoredArgument &&) = default;
-            
+
         protected:
             LuaIgnoredArgument() = default;
         };
-        
+
         namespace exchanger {
             template<>
             class Exchanger<LuaIgnoredArgument> {
@@ -50,9 +50,9 @@ namespace integral {
                 //Caution! If a possible (not recommended) push method that pushes nothing onto the lua stack is defined, exchanger::singlePush, Reference Key template parameter and TypeCounter should be checked for adaptations
             };
         }
-        
+
         //--
-        
+
         namespace exchanger {
             inline LuaIgnoredArgument Exchanger<LuaIgnoredArgument>::get(lua_State *luaState, int index) {
                 // Adaptor<LuaIgnoredArgument> is utilized to acces protected constructor of LuaIgnoredArgument

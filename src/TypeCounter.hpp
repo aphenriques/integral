@@ -34,20 +34,20 @@ namespace integral {
         public:
             static constexpr unsigned getCount();
         };
-        
+
         template<typename ...T>
         class TypeCounter<LuaPack<T...>> {
         public:
             static constexpr unsigned getCount();
         };
-        
+
         //--
-        
+
         template<typename T>
         constexpr unsigned TypeCounter<T>::getCount() {
             return 1;
         }
-        
+
         template<typename ...T>
         constexpr unsigned TypeCounter<LuaPack<T...>>::getCount() {
             return sizeof...(T);

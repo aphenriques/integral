@@ -34,16 +34,16 @@ namespace integral {
         public:
             template<typename ...A>
             inline UserDataWrapper(A &&...arguments);
-            
+
             inline ~UserDataWrapper() override;
         };
 
         //--
-        
+
         template<typename T>
         template<typename ...A>
         inline UserDataWrapper<T>::UserDataWrapper(A &&...arguments) : T(std::forward<A>(arguments)...) {}
-        
+
         template<typename T>
         inline UserDataWrapper<T>::~UserDataWrapper() {}
     }

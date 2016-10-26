@@ -33,9 +33,9 @@ namespace integral {
         namespace type_count {
             template<typename ...T>
             constexpr unsigned getTypeCount();
-            
+
             //--
-            
+
             template<typename ...T>
             constexpr unsigned getTypeCount() {
                 return generic::getSum(TypeCounter<generic::BasicType<T>>::getCount()...);
