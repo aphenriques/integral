@@ -69,7 +69,7 @@ namespace integral {
             K key_;
             R chainedReference_;
         };
-        
+
         using ReferenceException = exception::TemplateClassException<Reference, exception::RuntimeException>;
 
         //--
@@ -98,7 +98,7 @@ namespace integral {
                 throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] reference ") + chainedReference_.getReferenceString() + " is not a table");
             }
         }
-        
+
         template<typename K, typename R>
         std::string Reference<K, R>::getReferenceString() const {
             return chainedReference_.getReferenceString() + "[" + serializer::getString(key_) + "]";
@@ -154,7 +154,7 @@ namespace integral {
                 throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] invalid type getting reference  " ) + getReferenceString() + ": " + argumentException.what());
             }
         }
-        
+
         template<typename K, typename R>
         inline Reference<K, R>::Reference(K &&key, R &&chainedReference) : key_(std::forward<K>(key)),  chainedReference_(std::forward<R>(chainedReference)) {}
     }

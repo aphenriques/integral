@@ -57,100 +57,100 @@ namespace integral {
     namespace detail {
         namespace type_manager {
             extern const char * const gkTypeMangerRegistryKey;
-            
+
             extern const char * const gkTypeIndexKey;
-            
+
             extern const char * const gkTypeManagerVersionKey;
-            
+
             extern const char * const gkTypeManagerVersion;
-            
+
             extern const char * const gkTypeIndexMetatableName;
-            
+
             extern const char * const gkTypeFunctionsKey;
-            
+
             extern const char * const gkUserDataWrapperBaseTableKey;
-            
+
             extern const char * const gkUnderlyingTypeFunctionKey;
-            
+
             extern const char * const gkInheritanceSearchTagKey;
-            
+
             extern const char * const gkInheritanceKey;
-            
+
             extern const char * const gkInheritanceIndexMetamethodKey;
-            
+
             enum class InheritanceTable : int {
                 kTypeIndexIndex = 1,
                 kMetatableIndex = 2
             };
-                
+
             enum class UserDataWrapperBaseTable : int {
                 kTypeIndexIndex = 1,
                 kFunctionIndex = 2
             };
-            
+
             // stack argument: metatable
             const std::type_index * getClassMetatableType(lua_State *luaState);
-            
+
             // stack argument: metatable
             bool checkClassMetatableType(lua_State *luaState, const std::type_index &typeIndex);
-            
+
             // typeIndex is the class metatable type (typeIndex = std::type_index(typeid(UserDataWrapper<T>)))
             bool checkClassMetatableExistence(lua_State *luaState, const std::type_index &typeIndex);
-            
+
             // T is the underlying type
             template<typename T>
             inline bool checkClassMetatableExistence(lua_State *luaState);
-            
+
             template<typename T>
             UserDataWrapper<T> * getUserDataWrapper(lua_State *luaState, int index);
-            
+
             template<typename T>
             void pushRootMetatableFromTypeHashTable(lua_State *luaState, const std::type_index &typeIndex);
-            
+
             template<typename T>
             void pushRootMetatableFromTypeManager(lua_State *luaState, const std::type_index &typeIndex, std::size_t typeHash);
-            
+
             template<typename T>
             bool pushClassMetatable(lua_State *luaState);
-            
+
             void pushTypeIndexUserData(lua_State *luaState, const std::type_index &typeIndex);
-            
+
             template<typename T>
             inline void pushTypeIndexUserData(lua_State *luaState);
-            
+
             void setTypeFunctionHashTable(lua_State *luaState, std::size_t baseTypeHash);
-            
+
             // stack argument: metatable
             void pushTypeFunctionHashTable(lua_State *luaState, const std::type_index &baseTypeIndex);
-            
+
             // stack argument: metatable
             template<typename D, typename B>
             void setTypeFunction(lua_State *luaState);
-            
+
             // stack argument: metatable
             template<typename T, typename U, typename F>
             void setTypeFunctionGeneric(lua_State *luaState, F &&typeFunction);
-            
+
             // stack argument: metatable
             template<typename T, typename U>
             inline void setTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
-            
+
             // stack argument: metatable
             template<typename T, typename U>
             inline void setTypeFunction(lua_State *luaState, std::function<U *(T *)> &&typeFunction);
-            
+
             template<typename D, typename B>
             void defineTypeFunction(lua_State *luaState);
-            
+
             template<typename T, typename U, typename F>
             void defineTypeFunctionGeneric(lua_State *luaState, F &&typeFunction);
-            
+
             template<typename T, typename U>
             inline void defineTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
-            
+
             template<typename T, typename U>
             inline void defineTypeFunction(lua_State *luaState, std::function<U *(T *)> &&typeFunction);
-            
+
             // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic'inheritance)
             // index: metatable to be tagged
             bool checkInheritanceSearchTag(lua_State *luaState, int index);
@@ -158,29 +158,29 @@ namespace integral {
             // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic'inheritance)
             // index: metatable to be tagged
             void tagInheritanceSearch(lua_State *luaState, int index);
-            
+
             // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic'inheritance)
             // index: metatable to be tagged
             void untagInheritanceSearch(lua_State *luaState, int index);
-            
+
             // index: userdata (isUnderlyingLightUserData = false) or lightuserdata (isUnderlyingLightUserData = true) of the underlying type of a userdata stack index
             // stack argument: metatable
             // returns true if the convertible type is pushed onto the stack, and false otherwise
             // metatable will be popped from stack in either case
             bool pushDirectConvertibleType(lua_State *luaState, int index, const std::type_index &convertibleTypeIndex, bool isUnderlyingLightUserData);
-            
+
             // index: userdata (recursion = false) or lightuserdata (recursion = true) of the underlying type of a userdata stack index
             // stack argument: metatable
             // returns true if the convertible type is pushed onto the stack, and false otherwise
             // metatable will be popped from stack in either case
             bool pushConvertibleOrInheritedType(lua_State *luaState, int index, const std::type_index &convertibleTypeIndex, bool isRecursion);
-            
+
             // stack argument: metatable
             template<typename T>
             void setUserDataWrapperBaseTable(lua_State *luaState);
-            
+
             UserDataWrapperBase * getUserDataWrapperBase(lua_State *luaState, int index);
-            
+
             // stack argument: metatable
             // returns true if the underlying type is pushed onto the stack, and false otherwise
             // metatable will be popped from stack in either case
@@ -192,49 +192,49 @@ namespace integral {
             // stack argument: metatable
             template<typename D, typename B>
             void setInheritance(lua_State *luaState);
-            
+
             // stack argument: metatable
             template<typename T, typename U, typename F>
             void setInheritanceGeneric(lua_State *luaState, F &&typeFunction);
-            
+
             // stack argument: metatable
             template<typename T, typename U>
             inline void setInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
-            
+
             // stack argument: metatable
             template<typename T, typename U>
             inline void setInheritance(lua_State *luaState, std::function<U *(T *)> &&typeFunction);
-            
+
             template<typename D, typename B>
             void defineInheritance(lua_State *luaState);
-            
+
             template<typename T, typename U, typename F>
             void defineInheritanceGeneric(lua_State *luaState, F &&typeFunction);
-            
+
             template<typename T, typename U>
             inline void defineInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
-            
+
             template<typename T, typename U>
             inline void defineInheritance(lua_State *luaState, std::function<U *(T *)> &&typeFunction);
 
             // stack argument: metatable
             template<typename B>
             void setInheritanceTable(lua_State *luaState);
-            
+
             int callInheritanceIndexMetamethod(lua_State *luaState);
-            
+
             void pushInheritanceIndexMetamethod(lua_State *luaState);
-            
+
             // stack argument: metatable
             void setInheritanceIndexMetatable(lua_State *luaState);
-            
+
             //--
-            
+
             template<typename T>
             inline bool checkClassMetatableExistence(lua_State *luaState) {
                 return checkClassMetatableExistence(luaState, std::type_index(typeid(UserDataWrapper<T>)));
             }
-            
+
             template<typename T>
             UserDataWrapper<T> * getUserDataWrapper(lua_State *luaState, int index) {
                 void * userData = lua_touserdata(luaState, index);
@@ -288,7 +288,7 @@ namespace integral {
                 }, 0);
                 // stack: rootMetatable
             }
-            
+
             template<typename T>
             void pushRootMetatableFromTypeManager(lua_State *luaState, const std::type_index &typeIndex, std::size_t typeHash) {
                 // stack: typeManager
@@ -305,7 +305,7 @@ namespace integral {
                 pushRootMetatableFromTypeHashTable<T>(luaState, typeIndex);
                 // stack: rootMetatable
             }
-            
+
             template<typename T>
             bool pushClassMetatable(lua_State *luaState) {
                 // Attention! The stored type_index is UserDataWrapper<T>
@@ -371,12 +371,12 @@ namespace integral {
                 }
                 return true;
             }
-            
+
             template<typename T>
             inline void pushTypeIndexUserData(lua_State *luaState) {
                 pushTypeIndexUserData(luaState, typeid(T));
             }
-            
+
             // metatable[gkTypeFunctionsKey] = {[typeHash] = {[type_index_udata] = typeFunction}}
             // metatable[gkTypeFunctionsKey] = {[typeHash] = typeFunctionHashTable}
             // metatable[gkTypeFunctionsKey] = typeFunctionTable
@@ -402,7 +402,7 @@ namespace integral {
                 lua_pop(luaState, 1);
                 // stack: metatable
             }
-            
+
             template<typename T, typename U, typename F>
             void setTypeFunctionGeneric(lua_State *luaState, F &&typeFunction) {
                 static_assert(std::is_same<typename std::decay<F>::type, std::function<U *(T *)>>::value == true, "invalid typeFunction type");
@@ -430,17 +430,17 @@ namespace integral {
                 lua_pop(luaState, 1);
                 // stack: metatable
             }
-            
+
             template<typename T, typename U>
             inline void setTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction) {
                 setTypeFunctionGeneric<T, U>(luaState, typeFunction);
             }
-            
+
             template<typename T, typename U>
             inline void setTypeFunction(lua_State *luaState, std::function<U *(T *)> &&typeFunction) {
                 setTypeFunctionGeneric<T, U>(luaState, std::move(typeFunction));
             }
-            
+
             template<typename D, typename B>
             void defineTypeFunction(lua_State *luaState) {
                 static_assert(std::is_same<D, B>::value == false, "conversion to itself");
@@ -452,7 +452,7 @@ namespace integral {
                     lua_pop(luaState, 1);
                 }
             }
-            
+
             template<typename T, typename U, typename F>
             void defineTypeFunctionGeneric(lua_State *luaState, F &&typeFunction) {
                 static_assert(std::is_same<typename std::decay<F>::type, std::function<U *(T *)>>::value == true, "invalid typeFunction type");
@@ -465,17 +465,17 @@ namespace integral {
                     lua_pop(luaState, 1);
                 }
             }
-            
+
             template<typename T, typename U>
             inline void defineTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction) {
                 defineTypeFunctionGeneric<T, U>(luaState, typeFunction);
             }
-            
+
             template<typename T, typename U>
             inline void defineTypeFunction(lua_State *luaState, std::function<U *(T *)> &&typeFunction) {
                 defineTypeFunctionGeneric<T, U>(luaState, std::move(typeFunction));
             }
-            
+
             // metatable[gkUserDataWrapperBaseTableKey] = {userDataWrapperBaseTypeIndex, userDataWrapperBaseConversionFunction}
             // metatable[gkUserDataWrapperBaseTableKey] = userDataWrapperBaseTable
             // provides conversion: UserDataWrapper<T> -> UserDataWrapperBase
@@ -499,7 +499,7 @@ namespace integral {
                 lua_rawset(luaState, -3);
                 // stack: metatable
             }
-            
+
             template<typename T>
             T * getConvertibleType(lua_State *luaState, int index) {
                 lua_pushvalue(luaState, index);
@@ -521,7 +521,7 @@ namespace integral {
                 }
                 return nullptr;
             }
-            
+
             template<typename D, typename B>
             void setInheritance(lua_State *luaState) {
                 static_assert(std::is_const<D>::value == false || std::is_const<B>::value == false, "types can not be constant");
@@ -533,7 +533,7 @@ namespace integral {
                 setInheritanceIndexMetatable(luaState);
                 // stack: metatable
             }
-            
+
             template<typename T, typename U, typename F>
             void setInheritanceGeneric(lua_State *luaState, F &&typeFunction) {
                 static_assert(std::is_const<T>::value == false || std::is_const<U>::value == false, "types can not be constant");
@@ -546,17 +546,17 @@ namespace integral {
                 setInheritanceIndexMetatable(luaState);
                 // stack: metatable
             }
-            
+
             template<typename T, typename U>
             inline void setInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction) {
                 setInheritanceGeneric<T, U>(luaState, typeFunction);
             }
-            
+
             template<typename T, typename U>
             inline void setInheritance(lua_State *luaState, std::function<U *(T *)> &&typeFunction) {
                 setInheritanceGeneric<T, U>(luaState, std::move(typeFunction));
             }
-            
+
             template<typename D, typename B>
             void defineInheritance(lua_State *luaState) {
                 static_assert(std::is_const<D>::value == false || std::is_const<B>::value == false, "types can not be constant");
@@ -569,7 +569,7 @@ namespace integral {
                     lua_pop(luaState, 1);
                 }
             }
-            
+
             template<typename T, typename U, typename F>
             void defineInheritanceGeneric(lua_State *luaState, F &&typeFunction) {
                 static_assert(std::is_const<T>::value == false || std::is_const<U>::value == false, "types can not be constant");
@@ -583,17 +583,17 @@ namespace integral {
                     lua_pop(luaState, 1);
                 }
             }
-            
+
             template<typename T, typename U>
             inline void defineInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction) {
                 defineInheritanceGeneric<T, U>(luaState, typeFunction);
             }
-            
+
             template<typename T, typename U>
             inline void defineInheritance(lua_State *luaState, std::function<U *(T *)> &&typeFunction) {
                 defineInheritanceGeneric<T, U>(luaState, std::move(typeFunction));
             }
-            
+
             // metatable[gkInheritanceKey] = {[number] = {baseTypeIndex, baseMetatable}}
             // metatable[gkInheritanceKey] = {[number] = baseTable}
             // metatable[gkInheritanceKey] = inheritanceTable

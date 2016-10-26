@@ -40,49 +40,49 @@ namespace integral {
             // Gets adjusted upvalue index.
             // Exchanger<LuaFunctionWrapper>::push offsets the upvalues to insert the bound function userdata in the first position.
             static inline int getUpValueIndex(int index);
-            
+
             // "luaFunction": lua_CFunction like function or functor.
             template<typename T>
             inline LuaFunctionWrapper(T &&luaFunction);
-            
+
             // necessary because of the template constructor
             LuaFunctionWrapper(const LuaFunctionWrapper &) = default;
             LuaFunctionWrapper(LuaFunctionWrapper &) = default;
             LuaFunctionWrapper(LuaFunctionWrapper &&) = default;
-            
+
             inline const std::function<int(lua_State *)> & getLuaFunction() const;
-            
+
         private:
             std::function<int(lua_State *)> luaFunction_;
         };
-        
+
         namespace exchanger {
             template<>
             class Exchanger<LuaFunctionWrapper> {
             public:
                 static LuaFunctionWrapper get(lua_State *luaState, int index);
-                
+
                 template<typename F>
                 static void push(lua_State *luaState, F &&luaFunction, int nUpValues = 0);
-                
+
             private:
                 static const char * const kMetatableName_;
             };
         }
-    
+
         //--
-        
+
         inline int LuaFunctionWrapper::getUpValueIndex(int index) {
             return lua_upvalueindex(index + 1);
         }
-        
+
         template<typename T>
         inline LuaFunctionWrapper::LuaFunctionWrapper(T &&luaFunction) : luaFunction_(std::forward<T>(luaFunction)) {}
 
         inline const std::function<int(lua_State *)> & LuaFunctionWrapper::getLuaFunction() const {
             return luaFunction_;
         }
-        
+
         namespace exchanger {
             template<typename F>
             void Exchanger<LuaFunctionWrapper>::push(lua_State *luaState, F &&luaFunction, int nUpValues) {

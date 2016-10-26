@@ -99,7 +99,7 @@ namespace integral {
         lua_pop(luaState, 1);
         throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string("[integral] lua panic error: ") + errorMessage);
     }
-    
+
     const char * const State::kErrorStackArgument = "[integral] could not retrieve error message from lua stack: { ";
     const char * const State::kErrorStackMiscellanous = "[integral] miscellaneous exception thrown retrieving error message from lua stack: { ";
     const char * const State::kErrorStackUnspecified = "[integral] unspecified exception thrown retrieving error message from lua stack";

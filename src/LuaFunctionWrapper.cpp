@@ -27,7 +27,7 @@ namespace integral {
     namespace detail {
         namespace exchanger {
             const char * const Exchanger<LuaFunctionWrapper>::kMetatableName_ = "integral_LuaFunctionWrapperMetatableName";
-            
+
             LuaFunctionWrapper Exchanger<LuaFunctionWrapper>::get(lua_State *luaState, int index) {
                 if (lua_iscfunction(luaState, index) == 0) {
                     if (lua_getupvalue(luaState, index, 1) != nullptr) {

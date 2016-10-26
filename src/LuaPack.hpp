@@ -35,9 +35,9 @@ namespace integral {
             template<typename ...A>
             inline LuaPack(A &&...arguments);
         };
-        
+
         //--
-        
+
         template<typename ...T>
         template<typename ...A>
         inline LuaPack<T...>::LuaPack(A &&...arguments) : std::tuple<T...>(std::forward<A>(arguments)...) {}

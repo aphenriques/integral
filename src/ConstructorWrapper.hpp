@@ -40,25 +40,25 @@ namespace integral {
     namespace detail {
         template<typename T, typename ...A>
         class ConstructorWrapper {};
-        
+
         namespace exchanger {
             template<typename T, typename ...A>
             class Exchanger<ConstructorWrapper<T, A...>> {
             public:
                 template<typename ...E, unsigned ...I>
                 static void push(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments);
-                
+
                 template<typename ...E, unsigned ...I>
                 inline static void push(lua_State *luaState, const ConstructorWrapper<T, A...>, DefaultArgument<E, I> &&...defaultArguments);
-                
+
             private:
                 template<unsigned ...S>
                 static void callConstructor(lua_State *luaState, std::integer_sequence<unsigned, S...>);
             };
         }
-        
+
         //--
-        
+
         namespace exchanger {
             template<typename T, typename ...A>
             template<typename ...E, unsigned ...I>
@@ -79,13 +79,13 @@ namespace integral {
                     }
                 });
             }
-            
+
             template<typename T, typename ...A>
             template<typename ...E, unsigned ...I>
             void Exchanger<ConstructorWrapper<T, A...>>::push(lua_State *luaState, const ConstructorWrapper<T, A...>, DefaultArgument<E, I> &&...defaultArguments) {
                 push(luaState, std::move(defaultArguments)...);
             }
-            
+
             template<typename T, typename ...A>
             template<unsigned ...S>
             void Exchanger<ConstructorWrapper<T, A...>>::callConstructor(lua_State *luaState, std::integer_sequence<unsigned, S...>) {

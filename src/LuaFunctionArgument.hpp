@@ -35,20 +35,20 @@ namespace integral {
             // non-copyable
             LuaFunctionArgument(const LuaFunctionArgument &) = delete;
             LuaFunctionArgument & operator=(const LuaFunctionArgument &) = delete;
-            
+
             LuaFunctionArgument(LuaFunctionArgument &&) = default;
-            
+
             template<typename R, typename ...A>
             inline decltype(auto) call(const A &...arguments) const;
-            
+
         protected:
             LuaFunctionArgument(lua_State *luaState, int index);
-            
+
         private:
             lua_State * const luaState_;
             const int luaAbsoluteStackIndex_;
         };
-        
+
         namespace exchanger {
             template<>
             class Exchanger<LuaFunctionArgument> {
@@ -56,9 +56,9 @@ namespace integral {
                 static LuaFunctionArgument get(lua_State *luaState, int index);
             };
         }
-        
+
         // --
-        
+
         template<typename R, typename ...A>
         inline decltype(auto) LuaFunctionArgument::call(const A &...arguments) const {
             lua_pushvalue(luaState_, luaAbsoluteStackIndex_);

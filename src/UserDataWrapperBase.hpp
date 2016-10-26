@@ -31,16 +31,16 @@ namespace integral {
             // non-copyable
             UserDataWrapperBase(const UserDataWrapperBase &) = delete;
             UserDataWrapperBase & operator=(const UserDataWrapperBase &) = delete;
-            
+
             inline virtual ~UserDataWrapperBase() = 0;
-            
+
         protected:
             UserDataWrapperBase() = default;
-            
+
         };
-        
+
         //--
-        
+
         inline UserDataWrapperBase::~UserDataWrapperBase() {}
     }
 }

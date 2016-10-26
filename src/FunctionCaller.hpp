@@ -38,14 +38,14 @@ namespace integral {
             template<unsigned ...S>
             static unsigned call(lua_State *luaState, const std::function<R(A...)> &function, std::integer_sequence<unsigned, S...>);
         };
-        
+
         template<typename ...A>
         class FunctionCaller<void, A...> {
         public:        
             template<unsigned ...S>
             static unsigned call(lua_State *luaState, const std::function<void(A...)> &function, std::integer_sequence<unsigned, S...>);
         };
-        
+
         //--
 
         template<typename R, typename ...A>
@@ -54,7 +54,7 @@ namespace integral {
             exchanger::push<R>(luaState, function(exchanger::get<A>(luaState, S + 1)...));
             return static_cast<int>(type_count::getTypeCount<R>());
         }
-        
+
         template<typename ...A>
         template<unsigned ...S>
         unsigned FunctionCaller<void, A...>::call(lua_State *luaState, const std::function<void(A...)> &function, std::integer_sequence<unsigned, S...>) {

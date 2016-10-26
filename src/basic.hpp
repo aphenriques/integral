@@ -34,9 +34,9 @@ namespace integral {
     namespace detail {
         namespace basic {
             void setLuaFunction(lua_State *luaState, const char *name, lua_CFunction function, int nUpValues);
-            
+
             inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues);
-            
+
             template<typename T, typename ...A>
             inline void pushUserData(lua_State *luaState, A &&...arguments);
 
@@ -45,21 +45,21 @@ namespace integral {
 
             template<typename T>
             inline bool pushClassMetatable(lua_State *luaState, const std::string &name);
-            
+
             template<typename T>
             void pushClassMetatable(lua_State *luaState);
 
             //--
-            
+
             inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues) {
                 setLuaFunction(luaState, name.c_str(), function, nUpValues);
             }
-            
+
             template<typename T, typename ...A>
             inline void pushUserData(lua_State *luaState, A &&...arguments) {
                 new(lua_newuserdata(luaState, sizeof(T))) T(std::forward<A>(arguments)...);
             }
-            
+
             template<typename T>
             bool pushClassMetatable(lua_State *luaState, const char *name) {
                 if (luaL_newmetatable(luaState, name) != 0) {
@@ -75,12 +75,12 @@ namespace integral {
                 }
                 return false;
             }
-            
+
             template<typename T>
             inline bool pushClassMetatable(lua_State *luaState, const std::string &name) {
                 return pushClassMetatable<T>(luaState, name.c_str());
             }
-            
+
             template<typename T>
             void pushClassMetatable(lua_State *luaState) {
                 lua_newtable(luaState);

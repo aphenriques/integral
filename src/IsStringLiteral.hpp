@@ -30,7 +30,7 @@ namespace integral {
     namespace detail {
         template<typename T>
         class IsStringLiteral : public std::false_type {};
-        
+
         template<unsigned N>
         class IsStringLiteral<const char (&) [N]> : public std::true_type {};
     }

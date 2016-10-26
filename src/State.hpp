@@ -43,35 +43,35 @@ namespace integral {
         // throws StateException on failure
         // defines State::atPanic as lua panic function
         State();
-        
+
         inline lua_State * getLuaState() const;
         inline void openLibs() const;
-        
+
         // throws StateException on error
         void doString(const std::string &string) const;
-    
+
         // throws StateException on error
         void doFile(const std::string &fileName) const;
-        
+
         template<typename K>
         inline detail::Reference<K, detail::GlobalReference> operator[](K &&key) const;
-        
+
     private:
         static const char * const kErrorStackArgument;
         static const char * const kErrorStackMiscellanous;
         static const char * const kErrorStackUnspecified;
-        
+
         std::shared_ptr<lua_State> luaState_;
-        
+
         // throws StateException
         [[noreturn]] static int atPanic(lua_State *luaState);
     };
-    
+
     using StateException = exception::ClassException<State, exception::RuntimeException>;
     using ReferenceException = detail::ReferenceException;
-    
+
     //--
-    
+
     inline lua_State * State::getLuaState() const {
         return luaState_.get();
     }
@@ -79,7 +79,7 @@ namespace integral {
     inline void State::openLibs() const {
         luaL_openlibs(getLuaState());
     }
-    
+
     template<typename K>
     inline detail::Reference<K, detail::GlobalReference> State::operator[](K &&key) const {
         static_assert(detail::IsTemplateClass<LuaPack, detail::generic::BasicType<K>>::value == false, "integral::LuaPack cannot be a key");

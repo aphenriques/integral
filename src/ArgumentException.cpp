@@ -31,7 +31,7 @@ namespace integral {
     ArgumentException ArgumentException::createTypeErrorException(lua_State *luaState, int index, const std::string &userDataName) {
         return ArgumentException(luaState, index, std::string(userDataName) + " expected, got " + std::string(luaL_typename(luaState, index)));
     }
-    
+
     bool ArgumentException::findField(lua_State *luaState, int index, int level) {
         if (level == 0 || lua_istable(luaState, -1) == 0) {
             return false;
@@ -54,7 +54,7 @@ namespace integral {
         }
         return false;
     }
-    
+
     bool ArgumentException::pushGlobalFunctionName(lua_State *luaState, lua_Debug *debugInfo) {
         const int top = lua_gettop(luaState);
         lua_getinfo(luaState, "f", debugInfo);
@@ -68,7 +68,7 @@ namespace integral {
             return false;
         }
     }
-    
+
     std::string ArgumentException::getExceptionMessage(lua_State *luaState, int index, const std::string &extraMessage) {
         lua_Debug debugInfo;
         if (lua_getstack(luaState, 0, &debugInfo) == 0) {
@@ -92,7 +92,7 @@ namespace integral {
         messageStream << "bad argument #" << index << " to '" <<  debugInfo.name << "' (" << extraMessage << ")";
         return messageStream.str();
     }
-    
+
     std::string ArgumentException::getExceptionMessage(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments) {
         lua_Debug debugInfo;
         if (lua_getstack(luaState, 0, &debugInfo) == 0) {

@@ -33,42 +33,42 @@ namespace integral {
             // If it is no a string literal, the type is the same.
             template<typename T>
             using StringLiteralFilterType = typename std::conditional<IsStringLiteral<T>::value, const char *, T>::type;
-            
+
             template<typename T>
             using BasicType = typename std::remove_cv<typename std::remove_reference<StringLiteralFilterType<T>>::type>::type;
-                        
+
             template<typename ...T>
             inline void expandDummyTemplatePack(T...);
-            
+
             constexpr unsigned getSum();
-            
+
             template<typename ...J>
             constexpr unsigned getSum(unsigned i, J... j);
-            
+
             constexpr bool getLogicalOr();
-            
+
             template<typename ...B>
             constexpr bool getLogicalOr(bool i, B... j);
-            
+
             //--
-            
+
             template<typename ...T>
             inline void expandDummyTemplatePack(T...) {}
-            
-            
+
+
             constexpr unsigned getSum() {
                 return 0;
             }
-            
+
             template<typename ...J>
             constexpr unsigned getSum(unsigned i, J... j) {
                 return i + getSum(j...);
             }
-            
+
             constexpr bool getLogicalOr() {
                 return false;
             }
-            
+
             template<typename ...B>
             constexpr bool getLogicalOr(bool i, B... j) {
                 return i | getLogicalOr(j...);

@@ -29,13 +29,13 @@
 namespace integral {
     namespace detail {
         namespace lua_compatibility {
-            
+
 #if LUA_VERSION_NUM == 501
             constexpr int keLuaOk = 0;
 #else
             constexpr int keLuaOk = LUA_OK;
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             void * testudata(lua_State *luaState, int index, const char *metatableName);
 #else
@@ -43,7 +43,7 @@ namespace integral {
                 return luaL_testudata(luaState, index, metatableName);
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             inline size_t rawlen(lua_State *luaState, int index) {
                 return lua_objlen(luaState, index);
@@ -53,7 +53,7 @@ namespace integral {
                 return lua_rawlen(luaState, index);
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             inline void pushglobaltable(lua_State *luaState) {
                 lua_pushvalue(luaState, LUA_GLOBALSINDEX);
@@ -63,7 +63,7 @@ namespace integral {
                 lua_pushglobaltable(luaState);
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             int absindex(lua_State *luaState, int index);
 #else
@@ -71,7 +71,7 @@ namespace integral {
                 return lua_absindex(luaState, index);
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             void copy(lua_State *luaState, int fromIndex, int toIndex);
 #else
@@ -79,7 +79,7 @@ namespace integral {
                 lua_copy(luaState, fromIndex, toIndex);
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             template<typename T>
             inline void pushunsigned(lua_State *luaState, T number) {
@@ -96,7 +96,7 @@ namespace integral {
                 lua_pushinteger(luaState, static_cast<lua_Unsigned>(number));
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             lua_Integer tointegerx(lua_State *luaState, int index, int *isNumber);
 #else
@@ -104,7 +104,7 @@ namespace integral {
                 return lua_tointegerx(luaState, index, isNumber);
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             unsigned long tounsignedx(lua_State *luaState, int index, int *isNumber);
 #elif LUA_VERSION_NUM == 502
@@ -116,7 +116,7 @@ namespace integral {
                 return static_cast<lua_Unsigned>(lua_tointegerx(luaState, index, isNumber));
             }
 #endif
-            
+
 #if LUA_VERSION_NUM == 501
             lua_Number tonumberx(lua_State *luaState, int index, int *isNumber);
 #else
@@ -124,7 +124,7 @@ namespace integral {
                 return lua_tonumberx(luaState, index, isNumber);
             }
 #endif
-            
+
         }
     }
 }
