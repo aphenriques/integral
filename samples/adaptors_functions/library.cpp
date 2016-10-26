@@ -2,7 +2,7 @@
 //  library.cpp
 //  integral
 //
-//  Copyright (C) 2015  André Pereira Henriques
+//  Copyright (C) 2015, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -53,7 +53,7 @@ extern "C" {
             });
 
             lua_pushstring(luaState, "getInverse");
-            integral::push<integral::CFunction<double(double)>>(luaState, [](double x) -> double {
+            integral::push<integral::FunctionWrapper<double(double)>>(luaState, [](double x) -> double {
                 return 1.0/x;
             });
             lua_rawset(luaState, -3);

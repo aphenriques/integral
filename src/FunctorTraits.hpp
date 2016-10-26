@@ -1,5 +1,5 @@
 //
-//  FunctorTypeFinder.hpp
+//  FunctorTraits.hpp
 //  integral
 //
 //  Copyright (C) 2015, 2016  André Pereira Henriques
@@ -21,25 +21,27 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_FunctorTypeFinder_hpp
-#define integral_FunctorTypeFinder_hpp
+#ifndef integral_FunctorTraits_hpp
+#define integral_FunctorTraits_hpp
+
+#include "FunctionSignature.hpp"
 
 namespace integral {
     namespace detail {
         template<typename T>
-        class FunctorTypeFinder : public FunctorTypeFinder<decltype(&T::operator())> {};
-        
+        class FunctorTraits : public FunctorTraits<decltype(&T::operator())> {};
+
         template<typename T, typename R, typename ...A>
-        class FunctorTypeFinder<R(T::*)(A...) const> {
-        public:
-            using FunctionType = R(A...);
-        };
-        
+        class FunctorTraits<R(T::*)(A...)> : public FunctionSignature<R(A...)> {};
+
         template<typename T, typename R, typename ...A>
-        class FunctorTypeFinder<R(T::*)(A...)> {
-        public:
-            using FunctionType = R(A...);
-        };
+        class FunctorTraits<R(T::*)(A...) const> : public FunctionSignature<R(A...)> {};
+
+        template<typename T, typename R, typename ...A>
+        class FunctorTraits<R(T::*)(A...) volatile> : public FunctionSignature<R(A...)> {};
+
+        template<typename T, typename R, typename ...A>
+        class FunctorTraits<R(T::*)(A...) const volatile> : public FunctionSignature<R(A...)> {};
     }
 }
 

@@ -65,7 +65,7 @@ namespace integral {
             void Exchanger<ConstructorWrapper<T, A...>>::push(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments) {
                 argument::validateDefaultArguments<A...>(defaultArguments...);
                 exchanger::push<LuaFunctionWrapper>(luaState, [defaultArgumentManager = DefaultArgumentManager<DefaultArgument<E, I>...>(std::move(defaultArguments)...)](lua_State *luaState) -> int {
-                    // replicate code of maximum number of parameters checking in FunctionWrapper<...>::setFunction
+                    // replicate code of maximum number of parameters checking in FunctionWrapper<R(A...)>::setFunction
                     const unsigned numberOfArgumentsOnStack = static_cast<unsigned>(lua_gettop(luaState));
                     // type_count::getTypeCount provides the pack expanded count
                     constexpr unsigned keLuaNumberOfArguments = type_count::getTypeCount<A...>();

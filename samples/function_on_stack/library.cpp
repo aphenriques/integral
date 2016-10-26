@@ -2,7 +2,7 @@
 //  library.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2015  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -60,8 +60,8 @@ extern "C" {
                 return 1;
             });
 
-            // using function adaptor "integral::CFunction<T>":
-            using SuffixFunctionType = integral::CFunction<std::string(const std::string &)>;
+            // using function adaptor "integral::FunctionWrapper<T>":
+            using SuffixFunctionType = integral::FunctionWrapper<std::string(const std::string &)>;
             integral::setFunction(luaState, "getSuffixFunction2", [](const std::string &suffix) -> SuffixFunctionType {
                 return [suffix](const std::string &string) -> std::string {
                     return string + suffix;

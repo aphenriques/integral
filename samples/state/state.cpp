@@ -48,9 +48,8 @@ int main(int argc, char* argv[]) {
             std::cout << "c++: " << luaState["y"]["x"].get<const char*>() << std::endl;
             std::cout << "c++: " << luaState["y"][1][2].get<unsigned>() << std::endl;
             auto xRef = luaState["x"];
-            auto yRef = luaState["y"][1][2];
             std::cout << "c++: " << xRef.get<int>() << std::endl;
-            luaState["get42"].set(integral::CFunction<int()>([]() -> int {
+            luaState["get42"].set(integral::FunctionWrapper<int()>([]() -> int {
                 return 42;
             }));
             luaState.doString(R"(print("lua get42(): " .. get42()))");
