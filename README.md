@@ -59,7 +59,6 @@ and cloned with:
 ## Language features binding
 
 * default arguments;
-* mutiple return values;
 * adaptors for C++ vector, array, unordered_map and tuple to Lua table;
 * adaptors for C++ functions to Lua functions and vice-versa.
 
