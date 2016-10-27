@@ -2,7 +2,7 @@
 //  adaptors.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2015  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -106,15 +106,6 @@ extern "C" {
 
             integral::setFunction(luaState, "printBoolBoolTuple", [](integral::LuaTuple<bool, bool> tuple) -> void {
                 std::cout << "tuple<bool, bool> (C++): ( " << std::get<0>(tuple) << ", " << std::get<1>(tuple) << " )" << std::endl;
-            });
-
-            // LuaPack
-            integral::setFunction(luaState, "getPackSample", []() -> integral::LuaPack<int, bool, std::string> {
-                return integral::LuaPack<int, bool, std::string>(42, false, "test_string");
-            });
-
-            integral::setFunction(luaState, "printBoolBoolPack", [](integral::LuaPack<bool, bool> pack) -> void {
-                std::cout << "pack<bool, bool> (C++): " << std::get<0>(pack) << ", " << std::get<1>(pack) << std::endl;
             });
 
             return 1;

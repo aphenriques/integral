@@ -40,8 +40,6 @@ namespace integral {
     namespace detail {
         template<typename K, typename R>
         class Reference {
-            static_assert(IsTemplateClass<LuaPack, generic::BasicType<K>>::value == false, "integral::LuaPack cannot be a key");
-
         public:
             // non-copyable
             Reference(const Reference &) = delete;
@@ -86,7 +84,7 @@ namespace integral {
             if (lua_istable(getLuaState(), -1) != 0) {
                 // stack: chainedReferenceTable
                 // BasicType<K> must be used especially due to string literal type
-                exchanger::singlePush<generic::BasicType<K>>(getLuaState(), key_);
+                exchanger::push<generic::BasicType<K>>(getLuaState(), key_);
                 // stack: chainedReferenceTable | key
                 lua_rawget(getLuaState(), -2);
                 // stack: chainedReferenceTable | reference
@@ -120,9 +118,9 @@ namespace integral {
             if (lua_istable(getLuaState(), -1) != 0) {
                 // stack: chainedReferenceTable
                 // BasicType<K> must be used especially due to string literal type
-                exchanger::singlePush<generic::BasicType<K>>(getLuaState(), key_);
+                exchanger::push<generic::BasicType<K>>(getLuaState(), key_);
                 // stack: chainedReferenceTable | key
-                exchanger::singlePush<generic::BasicType<V>>(getLuaState(), std::forward<V>(value));
+                exchanger::push<generic::BasicType<V>>(getLuaState(), std::forward<V>(value));
                 // stack: chainedReferenceTable | key | value
                 lua_rawset(getLuaState(), -3);
                 // stack: chainedReferenceTable
@@ -142,7 +140,7 @@ namespace integral {
             push();
             // stack: ?
             try {
-                decltype(auto) returnValue = exchanger::singleGet<V>(getLuaState(), -1);
+                decltype(auto) returnValue = exchanger::get<V>(getLuaState(), -1);
                 // stack: value
                 lua_pop(getLuaState(), 1);
                 // stack:

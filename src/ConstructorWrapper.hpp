@@ -34,7 +34,6 @@
 #include "DefaultArgumentManager.hpp"
 #include "exchanger.hpp"
 #include "LuaFunctionWrapper.hpp"
-#include "type_count.hpp"
 
 namespace integral {
     namespace detail {
@@ -67,15 +66,13 @@ namespace integral {
                 exchanger::push<LuaFunctionWrapper>(luaState, [defaultArgumentManager = DefaultArgumentManager<DefaultArgument<E, I>...>(std::move(defaultArguments)...)](lua_State *luaState) -> int {
                     // replicate code of maximum number of parameters checking in FunctionWrapper<R(A...)>::setFunction
                     const unsigned numberOfArgumentsOnStack = static_cast<unsigned>(lua_gettop(luaState));
-                    // type_count::getTypeCount provides the pack expanded count
-                    constexpr unsigned keLuaNumberOfArguments = type_count::getTypeCount<A...>();
-                    if (numberOfArgumentsOnStack <= keLuaNumberOfArguments) {
-                        defaultArgumentManager.processDefaultArguments(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
-                        constexpr unsigned keCppNumberOfArguments = sizeof...(A);
+                    constexpr unsigned keCppNumberOfArguments = sizeof...(A);
+                    if (numberOfArgumentsOnStack <= keCppNumberOfArguments) {
+                        defaultArgumentManager.processDefaultArguments(luaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
                         callConstructor(luaState, std::make_integer_sequence<unsigned, keCppNumberOfArguments>());
                         return 1;
                     } else {
-                        throw ArgumentException(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
+                        throw ArgumentException(luaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
                     }
                 });
             }

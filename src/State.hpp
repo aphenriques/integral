@@ -82,7 +82,6 @@ namespace integral {
 
     template<typename K>
     inline detail::Reference<K, detail::GlobalReference> State::operator[](K &&key) const {
-        static_assert(detail::IsTemplateClass<LuaPack, detail::generic::BasicType<K>>::value == false, "integral::LuaPack cannot be a key");
         // Adaptor<detail::Reference<...>> is utilized to access protected constructor of detail::Reference<...>
         return detail::Adaptor<detail::Reference<K, detail::GlobalReference>>(std::forward<K>(key), detail::GlobalReference(luaState_));
     }

@@ -39,7 +39,6 @@
 #include "LuaFunctionArgument.hpp"
 #include "LuaFunctionWrapper.hpp"
 #include "LuaIgnoredArgument.hpp"
-#include "LuaPack.hpp"
 #include "message.hpp"
 #include "type_manager.hpp"
 
@@ -70,12 +69,6 @@ namespace integral {
     // LuaTuple can be seamlessly converted to std::tuple.
     template<typename ...T>
     using LuaTuple = detail::exchanger::LuaTuple<T...>;
-
-    // Adaptor to std::tuple<T...> and lua pack (multiple return values).
-    // It is used to push multiple (function return) values.
-    // LuaPack can be seamlessly converted to std::tuple.
-    template<typename ...T>
-    using LuaPack = detail::LuaPack<T...>;
 
     //lua_CFunction like function or functor wrapper
     using LuaFunctionWrapper = detail::LuaFunctionWrapper;

@@ -2,7 +2,7 @@
 --  adaptors.lua
 --  integral
 --
---  Copyright (C) 2014  André Pereira Henriques
+--  Copyright (C) 2014, 2016  André Pereira Henriques
 --  aphenriques (at) outlook (dot) com
 --
 --  This file is part of integral.
@@ -80,8 +80,3 @@ adaptors.printBoolBoolTuple({true, false})
 local _, message = pcall(function() adaptors.printBoolBoolTuple({}) end)
 print("wrong tuple size error: " .. message)
 print("--")
-
-print("# LuaPack")
-local int, bool, string = adaptors.getPackSample()
-print(int, bool, string)
-adaptors.printBoolBoolPack(true, false)

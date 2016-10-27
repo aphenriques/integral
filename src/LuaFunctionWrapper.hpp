@@ -62,6 +62,7 @@ namespace integral {
             public:
                 static LuaFunctionWrapper get(lua_State *luaState, int index);
 
+                // Attention: nUpValues > 0 distorts the premise that exchanger::push pushes a single element onto the lua stack because it removes nUpValues from the lua stack
                 template<typename F>
                 static void push(lua_State *luaState, F &&luaFunction, int nUpValues = 0);
 

@@ -39,7 +39,6 @@
 #include "FunctionCaller.hpp"
 #include "message.hpp"
 #include "LuaFunctionWrapper.hpp"
-#include "type_count.hpp"
 #include "type_manager.hpp"
 #include "UserDataWrapper.hpp"
 
@@ -93,13 +92,12 @@ namespace integral {
                 exchanger::push<LuaFunctionWrapper>(luaState, [functionWrapper = FunctionWrapper<R(A...)>(std::forward<T>(function)), defaultArgumentManager = DefaultArgumentManager<DefaultArgument<E, I>...>(std::move(defaultArguments)...)](lua_State *luaState) -> int {
                     // replicate code of maximum number of parameters checking in ConstructorWrapper<T, A...>::operator()
                     const unsigned numberOfArgumentsOnStack = static_cast<unsigned>(lua_gettop(luaState));
-                    // type_count::getTypeCount provides the pack expanded count
-                    constexpr unsigned keLuaNumberOfArguments = type_count::getTypeCount<A...>();
-                    if (numberOfArgumentsOnStack <= keLuaNumberOfArguments) {
-                         defaultArgumentManager.processDefaultArguments(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
-                        return static_cast<int>(FunctionCaller<R, A...>::call(luaState, functionWrapper.getFunction(), std::make_integer_sequence<unsigned, sizeof...(A)>()));
+                    constexpr unsigned keCppNumberOfArguments = sizeof...(A);
+                    if (numberOfArgumentsOnStack <= keCppNumberOfArguments) {
+                         defaultArgumentManager.processDefaultArguments(luaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
+                        return static_cast<int>(FunctionCaller<R, A...>::call(luaState, functionWrapper.getFunction(), std::make_integer_sequence<unsigned, keCppNumberOfArguments>()));
                     } else {
-                        throw ArgumentException(luaState, keLuaNumberOfArguments, numberOfArgumentsOnStack);
+                        throw ArgumentException(luaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
                     }
                 });
             }
