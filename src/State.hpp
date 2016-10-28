@@ -35,7 +35,6 @@
 #include "generic.hpp"
 #include "GlobalReference.hpp"
 #include "Reference.hpp"
-#include "IsTemplateClass.hpp"
 
 namespace integral {
     class State {

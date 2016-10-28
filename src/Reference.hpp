@@ -33,7 +33,6 @@
 #include "exchanger.hpp"
 #include "generic.hpp"
 #include "GlobalReference.hpp"
-#include "IsTemplateClass.hpp"
 #include "serializer.hpp"
 
 namespace integral {

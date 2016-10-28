@@ -40,7 +40,6 @@
 #include "ArgumentException.hpp"
 #include "basic.hpp"
 #include "generic.hpp"
-#include "IsTemplateClass.hpp"
 #include "lua_compatibility.hpp"
 #include "message.hpp"
 #include "type_manager.hpp"
