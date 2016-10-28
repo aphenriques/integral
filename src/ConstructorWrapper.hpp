@@ -32,23 +32,32 @@
 #include "ArgumentException.hpp"
 #include "DefaultArgument.hpp"
 #include "DefaultArgumentManager.hpp"
+#include "DefaultArgumentManagerContainer.hpp"
 #include "exchanger.hpp"
 #include "LuaFunctionWrapper.hpp"
 
 namespace integral {
     namespace detail {
-        template<typename T, typename ...A>
-        class ConstructorWrapper {};
+        template<typename T, typename M>
+        class ConstructorWrapper;
+
+        // "typename M" must be a DefaultArgumentManager<DefaultArgument<E, I>...>
+        template<typename T, typename ...A, typename M>
+        class ConstructorWrapper<T(A...), M> : public DefaultArgumentManagerContainer<M> {
+        public:
+            // reuse DefaultArgumentManagerContainer constructor
+            using DefaultArgumentManagerContainer<M>::DefaultArgumentManagerContainer;
+        };
 
         namespace exchanger {
-            template<typename T, typename ...A>
-            class Exchanger<ConstructorWrapper<T, A...>> {
+            template<typename T, typename ...A, typename M>
+            class Exchanger<ConstructorWrapper<T(A...), M>> {
             public:
                 template<typename ...E, unsigned ...I>
                 static void push(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments);
 
                 template<typename ...E, unsigned ...I>
-                inline static void push(lua_State *luaState, const ConstructorWrapper<T, A...>, DefaultArgument<E, I> &&...defaultArguments);
+                inline static void push(lua_State *luaState, const ConstructorWrapper<T(A...), M>, DefaultArgument<E, I> &&...defaultArguments);
 
             private:
                 template<unsigned ...S>
@@ -59,16 +68,16 @@ namespace integral {
         //--
 
         namespace exchanger {
-            template<typename T, typename ...A>
+            template<typename T, typename ...A, typename M>
             template<typename ...E, unsigned ...I>
-            void Exchanger<ConstructorWrapper<T, A...>>::push(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments) {
+            void Exchanger<ConstructorWrapper<T(A...), M>>::push(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments) {
                 argument::validateDefaultArguments<A...>(defaultArguments...);
-                exchanger::push<LuaFunctionWrapper>(luaState, [defaultArgumentManager = DefaultArgumentManager<DefaultArgument<E, I>...>(std::move(defaultArguments)...)](lua_State *luaState) -> int {
-                    // replicate code of maximum number of parameters checking in FunctionWrapper<R(A...)>::setFunction
+                exchanger::push<LuaFunctionWrapper>(luaState, [constructorWrapper = ConstructorWrapper<T(A...), M>(std::move(defaultArguments)...)](lua_State *luaState) -> int {
+                    // replicate code of maximum number of parameters checking in FunctionWrapper<R(A...), M>::setFunction
                     const unsigned numberOfArgumentsOnStack = static_cast<unsigned>(lua_gettop(luaState));
                     constexpr unsigned keCppNumberOfArguments = sizeof...(A);
                     if (numberOfArgumentsOnStack <= keCppNumberOfArguments) {
-                        defaultArgumentManager.processDefaultArguments(luaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
+                        constructorWrapper.getDefaultArgumentManager().processDefaultArguments(luaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
                         callConstructor(luaState, std::make_integer_sequence<unsigned, keCppNumberOfArguments>());
                         return 1;
                     } else {
@@ -77,15 +86,15 @@ namespace integral {
                 });
             }
 
-            template<typename T, typename ...A>
+            template<typename T, typename ...A, typename M>
             template<typename ...E, unsigned ...I>
-            void Exchanger<ConstructorWrapper<T, A...>>::push(lua_State *luaState, const ConstructorWrapper<T, A...>, DefaultArgument<E, I> &&...defaultArguments) {
+            void Exchanger<ConstructorWrapper<T(A...), M>>::push(lua_State *luaState, const ConstructorWrapper<T(A...), M>, DefaultArgument<E, I> &&...defaultArguments) {
                 push(luaState, std::move(defaultArguments)...);
             }
 
-            template<typename T, typename ...A>
+            template<typename T, typename ...A, typename M>
             template<unsigned ...S>
-            void Exchanger<ConstructorWrapper<T, A...>>::callConstructor(lua_State *luaState, std::integer_sequence<unsigned, S...>) {
+            void Exchanger<ConstructorWrapper<T(A...), M>>::callConstructor(lua_State *luaState, std::integer_sequence<unsigned, S...>) {
                 exchanger::push<T>(luaState, exchanger::get<A>(luaState, S + 1)...);
             }
         }

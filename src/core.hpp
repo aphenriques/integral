@@ -84,14 +84,18 @@ namespace integral {
     // Proxy to std::function<T>
     // It is used to push a function onto the lua stack
     // FunctionWrapper can not be gotten with integral::get
-    template<typename T>
-    using FunctionWrapper = detail::FunctionWrapper<T>;
+    // "typename T": function type e.g R(A...)
+    // "typename M": ArgumentManager type e.g DefaultArgumentManager<DefaultArgument<E, I>...>
+    template<typename T, typename M = detail::DefaultArgumentManager<>>
+    using FunctionWrapper = detail::FunctionWrapper<T, M>;
 
     // Proxy to class contructor
     // It is used to push a constructor onto the lua stack
     // ConstructorWrapper can not be gotten with integral::get
-    template<typename T, typename ...A>
-    using ConstructorWrapper = detail::ConstructorWrapper<T, A...>;
+    // "typename T": function type e.g R(A...)
+    // "typename M": ArgumentManager type e.g DefaultArgumentManager<DefaultArgument<E, I>...>
+    template<typename T, typename M = detail::DefaultArgumentManager<>>
+    using ConstructorWrapper = detail::ConstructorWrapper<T, M>;
 
     // Pushes class metatable of type "T".
     // The class metatable can be converted to base types EVEN when they are NOT especified with defineTypeFunction or defineInheritance.
@@ -313,7 +317,7 @@ namespace integral {
 
     template<typename T, typename ...A, typename ...E, unsigned ...I>
     inline void pushConstructor(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments) {
-        push<ConstructorWrapper<T, A...>>(luaState, std::move(defaultArguments)...);
+        push<ConstructorWrapper<T(A...), detail::DefaultArgumentManager<DefaultArgument<E, I>...>>>(luaState, std::move(defaultArguments)...);
     }
 
     template<typename T>
@@ -348,7 +352,7 @@ namespace integral {
 
     template<typename T, typename ...E, unsigned ...I>
     inline void pushFunction(lua_State *luaState, T &&function, DefaultArgument<E, I> &&...defaultArguments) {
-        push<FunctionWrapper<typename detail::FunctionTraits<T>::Signature>>(luaState, std::forward<T>(function), std::move(defaultArguments)...);
+        push<FunctionWrapper<typename detail::FunctionTraits<T>::Signature, detail::DefaultArgumentManager<DefaultArgument<E, I>...>>>(luaState, std::forward<T>(function), std::move(defaultArguments)...);
     }
 
     template<typename R, typename T>
