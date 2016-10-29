@@ -72,7 +72,7 @@ namespace integral {
     std::string ArgumentException::getExceptionMessage(lua_State *luaState, int index, const std::string &extraMessage) {
         lua_Debug debugInfo;
         if (lua_getstack(luaState, 0, &debugInfo) == 0) {
-            std::stringstream messageStream;
+            std::ostringstream messageStream;
             messageStream << "bad argument #" << index << " (" << extraMessage << ")";
             return messageStream.str();
         }
@@ -80,7 +80,7 @@ namespace integral {
         if (std::strcmp(debugInfo.namewhat, "method") == 0) {
             --index;
             if (index == 0) {
-                std::stringstream messageStream;
+                std::ostringstream messageStream;
                 messageStream << "calling '" << debugInfo.name << "' on bad self (" << extraMessage << ")";
                 return messageStream.str();
             }
@@ -88,7 +88,7 @@ namespace integral {
         if (debugInfo.name == nullptr) {
             debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
         }
-        std::stringstream messageStream;
+        std::ostringstream messageStream;
         messageStream << "bad argument #" << index << " to '" <<  debugInfo.name << "' (" << extraMessage << ")";
         return messageStream.str();
     }
@@ -96,20 +96,20 @@ namespace integral {
     std::string ArgumentException::getExceptionMessage(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments) {
         lua_Debug debugInfo;
         if (lua_getstack(luaState, 0, &debugInfo) == 0) {
-            std::stringstream messageStream;
+            std::ostringstream messageStream;
             messageStream << "excessive parameters provided to function (" << maximumNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
             return messageStream.str();
         }
         lua_getinfo(luaState, "n", &debugInfo);
         if (std::strcmp(debugInfo.namewhat, "method") == 0) {
-            std::stringstream messageStream;
+            std::ostringstream messageStream;
             messageStream << "excessive parameters provided to method " << debugInfo.name << " (" << (maximumNumberOfArguments - 1) << " expected, got " << (actualNumberOfArguments - 1) << ")";
             return messageStream.str();
         }
         if (debugInfo.name == nullptr) {
             debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
         }
-        std::stringstream messageStream;
+        std::ostringstream messageStream;
         messageStream << "excessive parameters provided to function " << debugInfo.name << " (" << maximumNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
         return messageStream.str();
     }

@@ -181,6 +181,7 @@ namespace integral {
             inline decltype(auto) get(lua_State *luaState, int index);
 
             // throws exception if more than 1 element is pushed onto the stack
+            // when "typename T" = LuaFunctionWrapper: nUpValues elements are removed from stack. That is why the stack is not checked for no element added or for elements removed
             template<typename T, typename ...A>
             void push(lua_State *luaState, A &&...arguments);
 
@@ -420,7 +421,7 @@ namespace integral {
                             lua_pop(luaState, 1);
                             return returnArray;
                         } else {
-                            std::stringstream errorMessage;
+                            std::ostringstream errorMessage;
                             errorMessage << "wrong table - LuaArray - size: expected " << N << ", got " << tableSize;
                             throw ArgumentException(luaState, index, errorMessage.str());
                         }
@@ -545,7 +546,7 @@ namespace integral {
                                 throw ArgumentException(luaState, index, std::string("invalid table - LuaTuple: " ) + argumentException.what());
                             }
                         } else {
-                            std::stringstream errorMessage;
+                            std::ostringstream errorMessage;
                             errorMessage << "wrong table - LuaTuple - size: expected " <<  keTupleSize << ", got " << tableSize;
                             throw ArgumentException(luaState, index, errorMessage.str());
                         }
@@ -608,7 +609,6 @@ namespace integral {
             }
 
 
-            // code replication of: void Exchanger<LuaTuple<T...>>::setElementInTable(lua_State *luaState, const U &element, int index);
             template<typename ...T>
             template<unsigned I, typename U>
             void Exchanger<LuaTuple<T...>>::setElementInTable(lua_State *luaState, U &&element, int index) {
@@ -616,14 +616,13 @@ namespace integral {
                 // stack: table
                 lua_compatibility::pushunsigned(luaState, I);
                 // stack: table | I
-                exchanger::push<U>(luaState, element);
+                exchanger::push<U>(luaState, std::forward<U>(element));
                 // stack: table | I | element
                 lua_rawset(luaState, -3);
                 // stack: table
                 lua_pop(luaState, 1);
             }
 
-            // code replication of: void Exchanger<LuaTuple<T...>>::setElementInTable(lua_State *luaState, U &&element, int index);
             template<typename ...T>
             template<unsigned I, typename U>
             void Exchanger<LuaTuple<T...>>::setElementInTable(lua_State *luaState, const U &element, int index) {
