@@ -389,7 +389,6 @@ namespace integral {
                 pushTypeIndexUserData(luaState, typeIndex);
                 // stack: metatable | typeFunctionHashTable| type_index_udata*
                 lua_pushcclosure(luaState, [](lua_State *luaState) -> int {
-                    // no need for exception checking. Possible exceptions thrown by conversion function will be caught in [Lua]FunctionWrapperCaller. Type functions are only called by exchanger.
                     if (lua_islightuserdata(luaState, 1) != 0) {
                         lua_pushlightuserdata(luaState, static_cast<void *>(static_cast<B *>(static_cast<D *>(lua_touserdata(luaState, 1)))));
                         return 1;
