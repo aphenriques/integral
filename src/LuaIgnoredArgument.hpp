@@ -47,7 +47,7 @@ namespace integral {
             class Exchanger<LuaIgnoredArgument> {
             public:
                 inline static LuaIgnoredArgument get(lua_State *luaState, int index);
-                //Caution! A possible (not recommended) push method that pushes nothing onto the lua stack would require adaptations in the whole codebase because exchanger::push is expected to push a single element on the stack
+                //Caution! A possible (not recommended) push method that pushes nothing onto the lua stack would require adaptations in the whole codebase because exchanger::push is (mostly) expected to push a single element on the stack
             };
         }
 
