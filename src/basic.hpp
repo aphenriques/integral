@@ -67,7 +67,7 @@ namespace integral {
                     lua_pushstring(luaState, "__index");
                     lua_pushvalue(luaState, -2); // duplicates the metatable
                     lua_rawset(luaState, -3);
-                    setLuaFunction(luaState, "__gc", [](lua_State *luaState) {
+                    setLuaFunction(luaState, "__gc", [](lua_State *luaState) -> int {
                         static_cast<T *>(lua_touserdata(luaState, 1))->~T();
                         return 0;
                     }, 0);
@@ -88,7 +88,7 @@ namespace integral {
                 lua_pushstring(luaState, "__index");
                 lua_pushvalue(luaState, -2); // duplicates the metatable
                 lua_rawset(luaState, -3);
-                setLuaFunction(luaState, "__gc", [](lua_State *luaState) {
+                setLuaFunction(luaState, "__gc", [](lua_State *luaState) -> int {
                     static_cast<T *>(lua_touserdata(luaState, 1))->~T();
                     return 0;
                 }, 0);

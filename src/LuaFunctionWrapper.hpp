@@ -93,7 +93,7 @@ namespace integral {
                 if (nUpValues != 0) {
                     lua_insert(luaState, -1 - nUpValues);
                 }
-                lua_pushcclosure(luaState, [](lua_State *luaState) {
+                lua_pushcclosure(luaState, [](lua_State *luaState) -> int {
                     try {
                         LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState, lua_upvalueindex(1), kMetatableName_));
                         if (luaFunctionWrapper != nullptr) {
