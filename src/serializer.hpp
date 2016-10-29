@@ -36,35 +36,49 @@ namespace integral {
             template <typename T, typename Enable = void>
             class Serializer {
             public:
-                static std::string getString(const T &t) {
-                    std::stringstream stringStream;
-                    stringStream << "object:"<< typeid(t).name();
-                    return stringStream.str();
-                }
+                static std::string getString(const T &t);
             };
 
             template <typename T>
             class Serializer<T, typename std::enable_if<std::is_arithmetic<T>::value>::type> {
             public:
-                static std::string getString(const T &value) {
-                    std::stringstream stringStream;
-                    stringStream << std::boolalpha << value;
-                    return stringStream.str();
-                }
+                static std::string getString(const T &value);
             };
 
             template <typename T>
             class Serializer<T, typename std::enable_if<std::is_same<T, std::string>::value || std::is_same<T, const char *>::value>::type> {
             public:
-                static std::string getString(const T &value) {
-                    std::stringstream stringStream;
-                    stringStream << '"' << value << '"';
-                    return stringStream.str();
-                }
+                static std::string getString(const T &value);
             };
 
             template<typename T>
-            std::string getString(T &&t) {
+            inline std::string getString(T &&t);
+            
+            //--
+            
+            template <typename T, typename Enable>
+            std::string Serializer<T, Enable>::getString(const T &t) {
+                std::ostringstream stringStream;
+                stringStream << "object:["<< typeid(t).name() << "]";
+                return stringStream.str();
+            }
+
+            template<typename T>
+            std::string Serializer<T, typename std::enable_if<std::is_arithmetic<T>::value>::type>::getString(const T &value) {
+                std::ostringstream stringStream;
+                stringStream << std::boolalpha << value;
+                return stringStream.str();
+            }
+
+            template<typename T>
+            std::string Serializer<T, typename std::enable_if<std::is_same<T, std::string>::value || std::is_same<T, const char *>::value>::type>::getString(const T &value) {
+                std::ostringstream stringStream;
+                stringStream << '"' << value << '"';
+                return stringStream.str();
+            }
+            
+            template<typename T>
+            inline std::string getString(T &&t) {
                 return Serializer<generic::BasicType<T>>::getString(std::forward<T>(t));
             }
         }
