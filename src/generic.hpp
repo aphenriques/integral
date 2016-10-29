@@ -24,6 +24,7 @@
 #ifndef integral_generic_hpp
 #define integral_generic_hpp
 
+#include <type_traits>
 #include "IsStringLiteral.hpp"
 
 namespace integral {

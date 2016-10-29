@@ -28,7 +28,6 @@
 #include <type_traits>
 #include <utility>
 #include <lua.hpp>
-#include "IsStringLiteral.hpp"
 
 namespace integral {
     namespace detail {

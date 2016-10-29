@@ -24,8 +24,6 @@
 #ifndef integral_ConstructorWrapper_hpp
 #define integral_ConstructorWrapper_hpp
 
-#include <functional>
-#include <string>
 #include <utility>
 #include <lua.hpp>
 #include "argument.hpp"
@@ -88,7 +86,7 @@ namespace integral {
 
             template<typename T, typename ...A, typename M>
             template<typename ...E, unsigned ...I>
-            void Exchanger<ConstructorWrapper<T(A...), M>>::push(lua_State *luaState, const ConstructorWrapper<T(A...), M>, DefaultArgument<E, I> &&...defaultArguments) {
+            inline void Exchanger<ConstructorWrapper<T(A...), M>>::push(lua_State *luaState, const ConstructorWrapper<T(A...), M>, DefaultArgument<E, I> &&...defaultArguments) {
                 push(luaState, std::move(defaultArguments)...);
             }
 

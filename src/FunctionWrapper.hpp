@@ -24,24 +24,16 @@
 #ifndef integral_FunctionWrapper_hpp
 #define integral_FunctionWrapper_hpp
 
-#include <exception>
 #include <functional>
-#include <string>
 #include <utility>
 #include <lua.hpp>
-#include "exception/Exception.hpp"
 #include "argument.hpp"
 #include "ArgumentException.hpp"
-#include "basic.hpp"
 #include "DefaultArgument.hpp"
-#include "DefaultArgumentManager.hpp"
 #include "DefaultArgumentManagerContainer.hpp"
 #include "exchanger.hpp"
 #include "FunctionCaller.hpp"
-#include "message.hpp"
 #include "LuaFunctionWrapper.hpp"
-#include "type_manager.hpp"
-#include "UserDataWrapper.hpp"
 
 namespace integral {
     namespace detail {

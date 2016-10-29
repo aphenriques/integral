@@ -26,7 +26,6 @@
 
 #include <functional>
 #include <string>
-#include <typeindex>
 #include <utility>
 #include <lua.hpp>
 #include "Caller.hpp"

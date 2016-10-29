@@ -31,8 +31,6 @@
 #include "exception/ClassException.hpp"
 #include "exception/Exception.hpp"
 #include "Adaptor.hpp"
-#include "core.hpp"
-#include "generic.hpp"
 #include "GlobalReference.hpp"
 #include "Reference.hpp"
 
