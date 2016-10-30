@@ -522,6 +522,7 @@ namespace integral {
 
 
             // lua_CFunction style function: no exceptions and no objects (with destructors)
+            // noexcept specifier is not used because if lua is compiled as c++, some of its functions might throw an exception
             int callInheritanceIndexMetamethod(lua_State *luaState) {
                 // arguments: table (1), key (2)
                 if (checkInheritanceSearchTag(luaState, -2) == false) {
