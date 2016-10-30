@@ -30,6 +30,7 @@
 #include <lua.hpp>
 #include "Caller.hpp"
 #include "ConstructorWrapper.hpp"
+#include "ConversionFunctionTraits.hpp"
 #include "DefaultArgument.hpp"
 #include "DefaultArgumentManager.hpp"
 #include "exchanger.hpp"
@@ -91,7 +92,7 @@ namespace integral {
     // Proxy to class contructor
     // It is used to push a constructor onto the lua stack
     // ConstructorWrapper can not be gotten with integral::get
-    // "typename T": function type e.g R(A...)
+    // "typename T": function type e.g R(A...) (it is an abstraction. The constructor is not a function)
     // "typename M": ArgumentManager type e.g DefaultArgumentManager<DefaultArgument<E, I>...>
     template<typename T, typename M = detail::DefaultArgumentManager<>>
     using ConstructorWrapper = detail::ConstructorWrapper<T, M>;
@@ -106,51 +107,39 @@ namespace integral {
     // Sets a type conversion function of derived class D to base class B.
     // typename D class metatable need not be on the stack
     // The conversion to base types still happens even if this function is not used
-    // This function is mostly useful when using 'synthetic' inheritance
+    // This function is mostly useful when using 'synthetic' conversion:
+    // type -synthetic-conversion-> D -conversion-> B
     // Methods are not inherited with this function.
     // If D -> B is not a possible conversion, there will be a compilation error.
     template<typename D, typename B>
     inline void defineTypeFunction(lua_State *luaState);
 
+    // "function" type in the form of: U *(T *)
     // Sets a type conversion function of class T to class U.
     // typename T class metatable need not be on the stack
     // Class U can be any class, not necessarily a base class
-    template<typename T, typename U>
-    inline void defineTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
-
-    template<typename T, typename U>
-    inline void defineTypeFunction(lua_State *luaState, std::function<U *(T *)> &&typeFunction);
-
-    template<typename T, typename U>
-    inline void defineTypeFunction(lua_State *luaState, U *(*typeFunction)(T *));
-
-    template<typename T>
-    inline void defineTypeFunction(lua_State *luaState, T &&typeFunction);
+    // Caution! Registering a typeFunction of the form &T::getU, if getU was inherited from class 'X' the actual registered conversion will be X->U (U *(X *)). That is why is safer to register typeFunction as std::function<U *(T *)>
+    template<typename F>
+    inline void defineTypeFunction(lua_State *luaState, F &&typeFunction);
 
     // Sets inheritance between derived class D to base class B.
     // typename D class metatable need not be on the stack
     // Methods are inherited with this function.
     // If D -> B is not a possible conversion, there will be a compilation error.
-    // the __index metamethod of the metatable of the class metatable if overriden
+    // the __index metamethod of D class metatable is overriden (preserving its previous behaviour)
     template<typename D, typename B>
     inline void defineInheritance(lua_State *luaState);
 
+    // "function" type in the form of: U *(T *)
     // Sets 'synthetic' inheritance between class T to class U using typeFunction conversion function.
     // typename T class metatable need not be on the stack
     // Methods are inherited with this function.
     // Class U can be any class, not necessarily a base class
-    // the __index metamethod of the metatable of the class metatable if overriden
-    template<typename T, typename U>
-    inline void defineInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction);
+    // the __index metamethod of T class metatable is overriden (preserving its previous behaviour)
+    // Caution! Registering a typeFunction of the form &T::getU, if getU was inherited from class 'X' the actual registered conversion will be X->U (U *(X *)). That is why is safer to register typeFunction as std::function<U *(T *)>
 
-    template<typename T, typename U>
-    inline void defineInheritance(lua_State *luaState, std::function<U *(T *)> &&typeFunction);
-
-    template<typename T, typename U>
-    inline void defineInheritance(lua_State *luaState, U *(*typeFunction)(T *));
-
-    template<typename T>
-    inline void defineInheritance(lua_State *luaState, T &&typeFunction);
+    template<typename F>
+    inline void defineInheritance(lua_State *luaState, F &&typeFunction);
 
     // Pushes a type "T" value (string or number) or object onto the stack.
     // References and pointers (except const char *) can not be pushed.
@@ -247,24 +236,9 @@ namespace integral {
         detail::type_manager::defineTypeFunction<D, B>(luaState);
     }
 
-    template<typename T, typename U>
-    inline void defineTypeFunction(lua_State *luaState, const std::function<U *(T *)> &typeFunction) {
-        detail::type_manager::defineTypeFunction(luaState, typeFunction);
-    }
-
-    template<typename T, typename U>
-    inline void defineTypeFunction(lua_State *luaState, std::function<U *(T *)> &&typeFunction) {
-        detail::type_manager::defineTypeFunction(luaState, std::move(typeFunction));
-    }
-
-    template<typename T, typename U>
-    inline void defineTypeFunction(lua_State *luaState, U *(*typeFunction)(T *)) {
-        detail::type_manager::defineTypeFunction(luaState, std::function<U *(T *)>(typeFunction));
-    }
-
-    template<typename T>
-    inline void defineTypeFunction(lua_State *luaState, T &&typeFunction) {
-        detail::type_manager::defineTypeFunction(luaState, std::function<typename detail::FunctionTraits<T>::Signature>(std::forward<T>(typeFunction)));
+    template<typename F>
+    inline void defineTypeFunction(lua_State *luaState, F &&typeFunction) {
+        detail::type_manager::defineTypeFunction(luaState, std::forward<F>(typeFunction));
     }
 
     template<typename D, typename B>
@@ -272,24 +246,9 @@ namespace integral {
         detail::type_manager::defineInheritance<D, B>(luaState);
     }
 
-    template<typename T, typename U>
-    inline void defineInheritance(lua_State *luaState, const std::function<U *(T *)> &typeFunction) {
-        detail::type_manager::defineInheritance(luaState, typeFunction);
-    }
-
-    template<typename T, typename U>
-    inline void defineInheritance(lua_State *luaState, std::function<U *(T *)> &&typeFunction) {
-        detail::type_manager::defineInheritance(luaState, std::move(typeFunction));
-    }
-
-    template<typename T, typename U>
-    inline void defineInheritance(lua_State *luaState, U *(*typeFunction)(T *)) {
-        detail::type_manager::defineInheritance(luaState, std::function<U *(T *)>(typeFunction));
-    }
-
-    template<typename T>
-    inline void defineInheritance(lua_State *luaState, T &&typeFunction) {
-        detail::type_manager::defineInheritance(luaState, std::function<typename detail::FunctionTraits<T>::Signature>(std::forward<T>(typeFunction)));
+    template<typename F>
+    inline void defineInheritance(lua_State *luaState, F &&typeFunction) {
+        detail::type_manager::defineInheritance(luaState, std::forward<F>(typeFunction));
     }
 
     template<typename T, typename ...A>
