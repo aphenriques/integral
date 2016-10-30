@@ -44,8 +44,8 @@ namespace integral {
         template<typename R, typename ...A, typename M>
         class FunctionWrapper<R(A...), M> : public DefaultArgumentManagerContainer<M> {
         public:
-            template<typename T, typename ...E, unsigned ...I>
-            inline FunctionWrapper(T &&function, DefaultArgument<E, I> &&...defaultArguments);
+            template<typename F, typename ...E, unsigned ...I>
+            inline FunctionWrapper(F &&function, DefaultArgument<E, I> &&...defaultArguments);
 
             // necessary because of the template constructor
             FunctionWrapper(const FunctionWrapper &) = default;
@@ -62,16 +62,16 @@ namespace integral {
             template<typename R, typename ...A, typename M>
             class Exchanger<FunctionWrapper<R(A...), M>> {
             public:
-                template<typename T, typename ...E, unsigned ...I>
-                static void push(lua_State *luaState, T &&function, DefaultArgument<E, I> &&...defaultArguments);
+                template<typename F, typename ...E, unsigned ...I>
+                static void push(lua_State *luaState, F &&function, DefaultArgument<E, I> &&...defaultArguments);
             };
         }
 
         //--
 
         template<typename R, typename ...A, typename M>
-        template<typename T, typename ...E, unsigned ...I>
-        inline FunctionWrapper<R(A...), M>::FunctionWrapper(T &&function, DefaultArgument<E, I> &&...defaultArguments) : function_(std::forward<T>(function)), DefaultArgumentManagerContainer<M>(std::move(defaultArguments)...) {}
+        template<typename F, typename ...E, unsigned ...I>
+        inline FunctionWrapper<R(A...), M>::FunctionWrapper(F &&function, DefaultArgument<E, I> &&...defaultArguments) : function_(std::forward<F>(function)), DefaultArgumentManagerContainer<M>(std::move(defaultArguments)...) {}
 
         template<typename R, typename ...A, typename M>
         inline const std::function<R(A...)> & FunctionWrapper<R(A...), M>::getFunction() const {
@@ -80,11 +80,11 @@ namespace integral {
 
         namespace exchanger {
             template<typename R, typename ...A, typename M>
-            template<typename T, typename ...E, unsigned ...I>
-            void Exchanger<FunctionWrapper<R(A...), M>>::push(lua_State *luaState, T &&function, DefaultArgument<E, I> &&...defaultArguments) {
+            template<typename F, typename ...E, unsigned ...I>
+            void Exchanger<FunctionWrapper<R(A...), M>>::push(lua_State *luaState, F &&function, DefaultArgument<E, I> &&...defaultArguments) {
                 argument::validateDefaultArguments<A...>(defaultArguments...);
-                exchanger::push<LuaFunctionWrapper>(luaState, [functionWrapper = FunctionWrapper<R(A...), M>(std::forward<T>(function), std::move(defaultArguments)...)](lua_State *luaState) -> int {
-                    // replicate code of maximum number of parameters checking in ConstructorWrapper<T, A...>::operator()
+                exchanger::push<LuaFunctionWrapper>(luaState, [functionWrapper = FunctionWrapper<R(A...), M>(std::forward<F>(function), std::move(defaultArguments)...)](lua_State *luaState) -> int {
+                    // replicate code of maximum number of parameters checking in Exchanger<ConstructorWrapper<T(A...), M>>::push
                     const unsigned numberOfArgumentsOnStack = static_cast<unsigned>(lua_gettop(luaState));
                     constexpr unsigned keCppNumberOfArguments = sizeof...(A);
                     if (numberOfArgumentsOnStack <= keCppNumberOfArguments) {
