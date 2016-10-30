@@ -73,10 +73,10 @@ extern "C" {
             lua_pop(luaState, 1);
 
             integral::push<std::string>(luaState, "newObject");
-            integral::pushConstructor<Object, std::string>(luaState);
+            integral::pushConstructor<Object(std::string)>(luaState);
             lua_rawset(luaState, -3);
             // equivalent to:
-            //integral::setConstructor<Object, std::string>(luaState, "newObject");
+            //integral::setConstructor<Object(std::string)>(luaState, "newObject");
 
             return 1;
         } catch (const std::exception &exception) {

@@ -65,7 +65,7 @@ extern "C" {
             integral::pushClassMetatable<Base>(luaState);
             // stack: table (module table) | string (Base class metatable field name on module table) | metatable (Base class metatable)
 
-            integral::setConstructor<Base, double>(luaState, "new");
+            integral::setConstructor<Base(double)>(luaState, "new");
             integral::setCopyGetter(luaState, "getNumber", &Base::number_);
             integral::setSetter(luaState, "setNumber", &Base::number_);
 
@@ -87,7 +87,7 @@ extern "C" {
             integral::pushClassMetatable<Derived>(luaState);
             // stack: table (module table) | string (Derived class metatable field name on module table) | metatable (Derived class metatable)
 
-            integral::setConstructor<Derived, double, const char *>(luaState, "new");
+            integral::setConstructor<Derived(double, const char *)>(luaState, "new");
             integral::setCopyGetter(luaState, "getString", &Derived::string_);
 
             // Automatic conversion between lua string and "[cv] std::string" or "const char *"

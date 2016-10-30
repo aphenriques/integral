@@ -31,7 +31,7 @@ extern "C" {
         try {
             using VectorOfDoubles = std::vector<double>;
             integral::pushClassMetatable<VectorOfDoubles>(luaState);
-            integral::setConstructor<VectorOfDoubles>(luaState, "new");
+            integral::setConstructor<VectorOfDoubles()>(luaState, "new");
             // because of some legacy lua implementation details, __len receives two arguments, the second argument can be safely ignored
             integral::setFunction(luaState, "__len", [](const VectorOfDoubles &vector, integral::LuaIgnoredArgument) -> std::size_t {
                 return vector.size();

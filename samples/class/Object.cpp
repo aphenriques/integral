@@ -70,8 +70,8 @@ extern "C" {
 
             // overloading is not supported, so diferent constructors names must be provided
             // assigning a registered constructor name will override it
-            integral::setConstructor<Object, const std::string &, double>(luaState, "new");
-            integral::setConstructor<Object, const Persistence &>(luaState, "newFromPersistence");
+            integral::setConstructor<Object(const std::string &, double)>(luaState, "new");
+            integral::setConstructor<Object(const Persistence &)>(luaState, "newFromPersistence");
 
             // static_cast is necessary for function overload ambiguity resolving
             // const char * and std::string are seamlessly converted to and from lua string type

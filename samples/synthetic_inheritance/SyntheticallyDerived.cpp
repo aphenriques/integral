@@ -77,7 +77,7 @@ extern "C" {
             integral::defineInheritance<SyntheticBase, BaseOfSyntheticBase>(luaState);
 
             integral::pushClassMetatable<SyntheticallyDerived>(luaState);
-            integral::setConstructor<SyntheticallyDerived>(luaState, "new");
+            integral::setConstructor<SyntheticallyDerived()>(luaState, "new");
             integral::setFunction(luaState, "syntheticallyDerivedMethod", &SyntheticallyDerived::syntheticallyDerivedMethod);
 
             // 'synthetic inheritance' can be viewed as a transformation from composition in c++ to inheritance in lua

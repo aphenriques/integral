@@ -161,10 +161,10 @@ namespace integral {
     // "name": name of the bound Lua function.
     // "defaultArguments...": pack of default arguments. Each with its own specific type E at index I (every type is deduced from the function arguments). DefaultArgument Index I starts with 1 (like lua). Static checking is performed, so the invalid type or/and index causes compilation error. DefaultArgument<E, I> constructor arguments are forwarded for T type object constructor (check DefaultConstructor.h for details)
     // defaultArguments... argument is a rvalue in order to utilize move constructors whenever possible. Moreover, forcing the declaration of DefaultArgument in-place adds clarity.
-    template<typename T, typename ...A, typename ...E, unsigned ...I>
+    template<typename T, typename ...E, unsigned ...I>
     void setConstructor(lua_State *luaState, const std::string &name, DefaultArgument<E, I> &&...defaultArguments);
 
-    template<typename T, typename ...A, typename ...E, unsigned ...I>
+    template<typename T, typename ...E, unsigned ...I>
     inline void pushConstructor(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments);
 
     // Sets a lua_CFunction style function in the table or metatable on top of the stack.
@@ -261,10 +261,10 @@ namespace integral {
         return detail::exchanger::get<T>(luaState, index);
     }
 
-    template<typename T, typename ...A, typename ...E, unsigned ...I>
+    template<typename T, typename ...E, unsigned ...I>
     void setConstructor(lua_State *luaState, const std::string &name, DefaultArgument<E, I> &&...defaultArguments) {
         if (lua_istable(luaState, -1) != 0) {
-            pushConstructor<T, A...>(luaState, std::move(defaultArguments)...);
+            pushConstructor<T>(luaState, std::move(defaultArguments)...);
             lua_pushstring(luaState, name.c_str());
             lua_insert(luaState, -2);
             lua_rawset(luaState, -3);
@@ -273,9 +273,9 @@ namespace integral {
         }
     }
 
-    template<typename T, typename ...A, typename ...E, unsigned ...I>
+    template<typename T, typename ...E, unsigned ...I>
     inline void pushConstructor(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments) {
-        push<ConstructorWrapper<T(A...), detail::DefaultArgumentManager<DefaultArgument<E, I>...>>>(luaState, std::move(defaultArguments)...);
+        push<ConstructorWrapper<T, detail::DefaultArgumentManager<DefaultArgument<E, I>...>>>(luaState, std::move(defaultArguments)...);
     }
 
     template<typename T>

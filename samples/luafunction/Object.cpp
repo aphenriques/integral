@@ -38,7 +38,7 @@ extern "C" {
     LUALIB_API int luaopen_libObject(lua_State *luaState) {
         try {
             integral::pushClassMetatable<Object>(luaState);
-            integral::setConstructor<Object, std::string>(luaState, "new");
+            integral::setConstructor<Object(std::string)>(luaState, "new");
             integral::setCopyGetter(luaState, "getString", &Object::string_);
 
             // lua function
@@ -66,7 +66,7 @@ extern "C" {
             // LuaFunctions accepts upvalues. Though their indices are different than Lua API (as follows)
             integral::push<std::string>(luaState, "upvalue!");
             integral::setLuaFunction(luaState, "printUpvalue", [](lua_State *luaState) -> int {
-                // upvalue index is offset by 1 (because of integral internals). integral::LuaUpValuesIndex or lua_upvalueindex(index + 1) should be used to index upvalues
+                // upvalue index is offset by 1 (because of integral internals). integral::LuaFunctionWrapper::getUpValueIndex or lua_upvalueindex(index + 1) should be used to index upvalues
                 std::cout << integral::get<std::string>(luaState, integral::LuaFunctionWrapper::getUpValueIndex(1)) << std::endl;
                 return 0;
             }, 1); // 1 upvalue

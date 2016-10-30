@@ -67,7 +67,7 @@ extern "C" {
         try {
 
             integral::pushClassMetatable<Derived>(luaState);
-            integral::setConstructor<Derived>(luaState, "new");
+            integral::setConstructor<Derived()>(luaState, "new");
             integral::setFunction(luaState, "baseOfBase1Method", &Derived::baseOfBase1Method);
             integral::setFunction(luaState, "base1Method", &Derived::base1Method);
             integral::setFunction(luaState, "base2Method", &Derived::base2Method);

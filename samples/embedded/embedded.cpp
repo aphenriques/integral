@@ -42,7 +42,7 @@ int main(int argc, char * argv[]) {
         }
 
         integral::pushClassMetatable<Object>(luaState);
-        integral::setConstructor<Object>(luaState, "new");
+        integral::setConstructor<Object()>(luaState, "new");
         // lua function name need not be the same as the C++ function name
         integral::setFunction(luaState, "print", &Object::printMessage);
         lua_setglobal(luaState, "Object");

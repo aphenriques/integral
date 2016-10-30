@@ -53,7 +53,7 @@ extern "C" {
             // Regex class
             integral::pushClassMetatable<Regex>(luaState);
             // Constructor
-            integral::setConstructor<Regex, std::string>(luaState, "new");
+            integral::setConstructor<Regex(std::string)>(luaState, "new");
 
             const std::pair<const char *, Match::Mode> namesAndModes[] = {{"match" , Match::Mode::EXACT  },
                                                                           {"search", Match::Mode::PARTIAL}};

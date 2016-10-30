@@ -74,7 +74,7 @@ extern "C" {
 
             integral::pushClassMetatable<Derived>(luaState);
             integral::setFunction(luaState, "derivedMethod", &Derived::derivedMethod);
-            integral::setConstructor<Derived>(luaState, "new");
+            integral::setConstructor<Derived()>(luaState, "new");
 
             integral::defineInheritance<Derived, Base1>(luaState);
 

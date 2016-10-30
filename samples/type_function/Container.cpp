@@ -42,7 +42,7 @@ extern "C" {
     LUALIB_API int luaopen_libContainer(lua_State *luaState) {
         try {
             integral::pushClassMetatable<Container>(luaState);
-            integral::setConstructor<Container, double>(luaState, "new");
+            integral::setConstructor<Container(double)>(luaState, "new");
 
             // type function from Container to Id (similar to C++ type operator)
             integral::defineTypeFunction(luaState, [](Container *container) -> Id * {

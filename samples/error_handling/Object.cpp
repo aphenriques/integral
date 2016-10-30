@@ -41,7 +41,7 @@ extern "C" {
     LUALIB_API int luaopen_libObject(lua_State *luaState) {
         try {
             integral::pushClassMetatable<Object>(luaState);
-            integral::setConstructor<Object, std::string>(luaState, "new");
+            integral::setConstructor<Object(std::string)>(luaState, "new");
             integral::setCopyGetter(luaState, "getString", &Object::string_);
 
             // lua function

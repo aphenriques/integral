@@ -44,15 +44,15 @@ extern "C" {
             integral::pushClassMetatable<Object>(luaState);
 
             // default argument in constructor
-            integral::setConstructor<Object, const std::string &>(luaState, "new", integral::DefaultArgument<std::string, 1>("default Object.new argument"));
+            integral::setConstructor<Object(const std::string &)>(luaState, "new", integral::DefaultArgument<std::string, 1>("default Object.new argument"));
 
             // DefaultArgument template parameters are checked at compile time. If there is type or index inconsistency, there will be compilation error. E.g:
             // will fail:
-            //integral::setConstructor<Object, const std::string &>(luaState, "new", integral::DefaultArgument<std::string, 2>("default Object.new argument"));
+            //integral::setConstructor<Object(const std::string &)>(luaState, "new", integral::DefaultArgument<std::string, 2>("default Object.new argument"));
             // will fail:
-            //integral::setConstructor<Object, const std::string &>(luaState, "new", integral::DefaultArgument<double, 1>(42.0));
+            //integral::setConstructor<Object(const std::string &)>(luaState, "new", integral::DefaultArgument<double, 1>(42.0));
             // will fail:
-            //integral::setConstructor<Object, const std::string &>(luaState, "new", integral::DefaultArgument<std::string, 1>("default Object.new argument"), integral::DefaultArgument<std::string, 1>("wrong redefinition of default argument"));
+            //integral::setConstructor<Object(const std::string &)>(luaState, "new", integral::DefaultArgument<std::string, 1>("default Object.new argument"), integral::DefaultArgument<std::string, 1>("wrong redefinition of default argument"));
 
             integral::setCopyGetter(luaState, "getString", &Object::string_);
 
