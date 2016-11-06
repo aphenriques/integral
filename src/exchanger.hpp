@@ -88,6 +88,7 @@ namespace integral {
             template<>
             class Exchanger<const char *> {
             public:
+                // If the value on the stack is a number, then lua_tostring also changes the actual value in the stack to a string. (This change confuses lua_next when lua_tolstring is applied to keys during a table traversal.)
                 static const char * get(lua_State *luaState, int index);
                 inline static void push(lua_State *luaState, const char *string);
             };
@@ -95,6 +96,7 @@ namespace integral {
             template<>
             class Exchanger<std::string> {
             public:
+                // If the value on the stack is a number, then lua_tolstring also changes the actual value in the stack to a string. (This change confuses lua_next when lua_tolstring is applied to keys during a table traversal.)
                 static std::string get(lua_State *luaState, int index);
                 inline static void push(lua_State *luaState, const std::string &string);
             };
@@ -246,7 +248,7 @@ namespace integral {
             }
 
             inline void Exchanger<std::string>::push(lua_State *luaState, const std::string &string) {
-                lua_pushstring(luaState, string.c_str());
+                lua_pushlstring(luaState, string.c_str(), string.length());
             }
 
             template<typename T>

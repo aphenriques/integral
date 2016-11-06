@@ -22,6 +22,7 @@
 //
 
 #include "exchanger.hpp"
+#include <cstddef>
 #include <string>
 #include <lua.hpp>
 #include "ArgumentException.hpp"
@@ -51,9 +52,11 @@ namespace integral {
 
             std::string Exchanger<std::string>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
-                    const char * const string = lua_tostring(luaState, index);
+                    std::size_t length;
+                    const char * const string = lua_tolstring(luaState, index, &length);
                     if (string != nullptr) {
-                        return string;
+                        // the returned std:string can contain null characters. The length of the string is length
+                        return std::string(string, length);
                     } else {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
                     }
