@@ -45,16 +45,16 @@ extern "C" {
             integral::setCopyGetter(luaState, "getString", &Object::string_);
 
             // lua function
-            integral::setLuaFunction(luaState, "createSuffixedObjectLuaFunction", [](lua_State *luaState) -> int {
+            integral::setLuaFunction(luaState, "createSuffixedObjectLuaFunction", [](lua_State *lambdaLuaState) -> int {
                     // Exceptions can be thrown normally from this function (integral manages it)
                     // integral::get performs type checking
-                    Object &object = integral::get<Object>(luaState, 1);
-                    std::string suffix = integral::get<std::string>(luaState, 2);
+                    Object &object = integral::get<Object>(lambdaLuaState, 1);
+                    std::string suffix = integral::get<std::string>(lambdaLuaState, 2);
                     // lua api works as usual, e.g:
-                    // std::string suffix(lua_checkstring(luaState, 2));
+                    // std::string suffix(lua_checkstring(lambdaLuaState, 2));
                     // Though it is not recommended because, in case of an error, destructors of the objets inside this function scope will not be called (lua_error performs long jump)
                     // integral::push and integral::get are safer
-                    integral::push<Object>(luaState, object.string_ + suffix);
+                    integral::push<Object>(lambdaLuaState, object.string_ + suffix);
                 return 1;
             });
 

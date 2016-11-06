@@ -24,6 +24,7 @@
 #ifndef integral_FunctionWrapper_hpp
 #define integral_FunctionWrapper_hpp
 
+#include <cstddef>
 #include <functional>
 #include <utility>
 #include <lua.hpp>
@@ -44,7 +45,7 @@ namespace integral {
         template<typename R, typename ...A, typename M>
         class FunctionWrapper<R(A...), M> : public DefaultArgumentManagerContainer<M> {
         public:
-            template<typename F, typename ...E, unsigned ...I>
+            template<typename F, typename ...E, std::size_t ...I>
             inline FunctionWrapper(F &&function, DefaultArgument<E, I> &&...defaultArguments);
 
             // necessary because of the template constructor
@@ -62,7 +63,7 @@ namespace integral {
             template<typename R, typename ...A, typename M>
             class Exchanger<FunctionWrapper<R(A...), M>> {
             public:
-                template<typename F, typename ...E, unsigned ...I>
+                template<typename F, typename ...E, std::size_t ...I>
                 static void push(lua_State *luaState, F &&function, DefaultArgument<E, I> &&...defaultArguments);
             };
         }
@@ -70,8 +71,8 @@ namespace integral {
         //--
 
         template<typename R, typename ...A, typename M>
-        template<typename F, typename ...E, unsigned ...I>
-        inline FunctionWrapper<R(A...), M>::FunctionWrapper(F &&function, DefaultArgument<E, I> &&...defaultArguments) : function_(std::forward<F>(function)), DefaultArgumentManagerContainer<M>(std::move(defaultArguments)...) {}
+        template<typename F, typename ...E, std::size_t ...I>
+        inline FunctionWrapper<R(A...), M>::FunctionWrapper(F &&function, DefaultArgument<E, I> &&...defaultArguments) : DefaultArgumentManagerContainer<M>(std::move(defaultArguments)...), function_(std::forward<F>(function)) {}
 
         template<typename R, typename ...A, typename M>
         inline const std::function<R(A...)> & FunctionWrapper<R(A...), M>::getFunction() const {
@@ -80,18 +81,18 @@ namespace integral {
 
         namespace exchanger {
             template<typename R, typename ...A, typename M>
-            template<typename F, typename ...E, unsigned ...I>
+            template<typename F, typename ...E, std::size_t ...I>
             void Exchanger<FunctionWrapper<R(A...), M>>::push(lua_State *luaState, F &&function, DefaultArgument<E, I> &&...defaultArguments) {
                 argument::validateDefaultArguments<A...>(defaultArguments...);
-                exchanger::push<LuaFunctionWrapper>(luaState, [functionWrapper = FunctionWrapper<R(A...), M>(std::forward<F>(function), std::move(defaultArguments)...)](lua_State *luaState) -> int {
+                exchanger::push<LuaFunctionWrapper>(luaState, [functionWrapper = FunctionWrapper<R(A...), M>(std::forward<F>(function), std::move(defaultArguments)...)](lua_State *lambdaLuaState) -> int {
                     // replicate code of maximum number of parameters checking in Exchanger<ConstructorWrapper<T(A...), M>>::push
-                    const unsigned numberOfArgumentsOnStack = static_cast<unsigned>(lua_gettop(luaState));
-                    constexpr unsigned keCppNumberOfArguments = sizeof...(A);
+                    const std::size_t numberOfArgumentsOnStack = static_cast<std::size_t>(lua_gettop(lambdaLuaState));
+                    constexpr std::size_t keCppNumberOfArguments = sizeof...(A);
                     if (numberOfArgumentsOnStack <= keCppNumberOfArguments) {
-                         functionWrapper.getDefaultArgumentManager().processDefaultArguments(luaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
-                        return static_cast<int>(FunctionCaller<R, A...>::call(luaState, functionWrapper.getFunction(), std::make_integer_sequence<unsigned, keCppNumberOfArguments>()));
+                         functionWrapper.getDefaultArgumentManager().processDefaultArguments(lambdaLuaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
+                        return FunctionCaller<R, A...>::call(lambdaLuaState, functionWrapper.getFunction(), std::make_integer_sequence<std::size_t, keCppNumberOfArguments>());
                     } else {
-                        throw ArgumentException(luaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
+                        throw ArgumentException(lambdaLuaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
                     }
                 });
             }

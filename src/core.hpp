@@ -24,6 +24,7 @@
 #ifndef integral_core_hpp
 #define integral_core_hpp
 
+#include <cstddef>
 #include <functional>
 #include <string>
 #include <utility>
@@ -159,10 +160,10 @@ namespace integral {
     // "name": name of the bound Lua function.
     // "defaultArguments...": pack of default arguments. Each with its own specific type E at index I (every type is deduced from the function arguments). DefaultArgument Index I starts with 1 (like lua). Static checking is performed, so the invalid type or/and index causes compilation error.
     // defaultArguments... argument is a rvalue in order to utilize move constructors whenever possible. Moreover, forcing the declaration of DefaultArgument in-place adds clarity.
-    template<typename F, typename ...E, unsigned ...I>
+    template<typename F, typename ...E, std::size_t ...I>
     void setConstructor(lua_State *luaState, const std::string &name, DefaultArgument<E, I> &&...defaultArguments);
 
-    template<typename F, typename ...E, unsigned ...I>
+    template<typename F, typename ...E, std::size_t ...I>
     inline void pushConstructor(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments);
 
     // Sets a lua_CFunction style function in the table or metatable on top of the stack.
@@ -186,10 +187,10 @@ namespace integral {
     // "function": function to be bound
     // "defaultArguments...": pack of default arguments. Each with its own specific type E at index I (every type is deduced from the function arguments). DefaultArgument Index I starts with 1 (like lua). Static checking is performed, so the invalid type or/and index causes compilation error.
     // defaultArguments... argument is a rvalue in order to utilize move constructors whenever possible. Moreover, forcing the declaration of DefaultArgument in-place adds clarity.
-    template<typename F, typename ...E, unsigned ...I>
+    template<typename F, typename ...E, std::size_t ...I>
     void setFunction(lua_State *luaState, const std::string &name, F &&function, DefaultArgument<E, I> &&...defaultArguments);
 
-    template<typename F, typename ...E, unsigned ...I>
+    template<typename F, typename ...E, std::size_t ...I>
     inline void pushFunction(lua_State *luaState, F &&function, DefaultArgument<E, I> &&...defaultArguments);
 
     // Binds a getter function in the table or metatable on top of the stack.
@@ -259,7 +260,7 @@ namespace integral {
         return detail::exchanger::get<T>(luaState, index);
     }
 
-    template<typename F, typename ...E, unsigned ...I>
+    template<typename F, typename ...E, std::size_t ...I>
     void setConstructor(lua_State *luaState, const std::string &name, DefaultArgument<E, I> &&...defaultArguments) {
         if (lua_istable(luaState, -1) != 0) {
             pushConstructor<F>(luaState, std::move(defaultArguments)...);
@@ -271,7 +272,7 @@ namespace integral {
         }
     }
 
-    template<typename F, typename ...E, unsigned ...I>
+    template<typename F, typename ...E, std::size_t ...I>
     inline void pushConstructor(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments) {
         push<ConstructorWrapper<F, detail::DefaultArgumentManager<DefaultArgument<E, I>...>>>(luaState, std::move(defaultArguments)...);
     }
@@ -294,7 +295,7 @@ namespace integral {
     }
 
 
-    template<typename F, typename ...E, unsigned ...I>
+    template<typename F, typename ...E, std::size_t ...I>
     void setFunction(lua_State *luaState, const std::string &name, F &&function, DefaultArgument<E, I> &&...defaultArguments) {
         if (lua_istable(luaState, -1) != 0) {
             pushFunction(luaState, std::forward<F>(function), std::move(defaultArguments)...);
@@ -306,7 +307,7 @@ namespace integral {
         }
     }
 
-    template<typename F, typename ...E, unsigned ...I>
+    template<typename F, typename ...E, std::size_t ...I>
     inline void pushFunction(lua_State *luaState, F &&function, DefaultArgument<E, I> &&...defaultArguments) {
         push<FunctionWrapper<typename detail::FunctionTraits<F>::Signature, detail::DefaultArgumentManager<DefaultArgument<E, I>...>>>(luaState, std::forward<F>(function), std::move(defaultArguments)...);
     }

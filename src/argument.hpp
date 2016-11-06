@@ -24,6 +24,7 @@
 #ifndef integral_argument_hpp
 #define integral_argument_hpp
 
+#include <cstddef>
 #include <type_traits>
 #include <utility>
 #include "ArgumentTag.hpp"
@@ -34,38 +35,38 @@
 namespace integral {
     namespace detail {
         namespace argument {
-            template<typename ...T, unsigned ...S>
-            constexpr auto createArgumentTagPack(std::integer_sequence<unsigned, S...>);
+            template<typename ...T, std::size_t ...S>
+            constexpr auto createArgumentTagPack(std::integer_sequence<std::size_t, S...>);
 
-            template<typename ...T, unsigned ...I>
+            template<typename ...T, std::size_t ...I>
             inline void checkDefaultArgumentTypeAndIndex(const MultipleInheritancePack<ArgumentTag<T, I>...> &);
 
-            template<typename E, typename ...T, unsigned ...I>
+            template<typename E, typename ...T, std::size_t ...I>
             inline void checkDefaultArgumentTypeAndIndex(const MultipleInheritancePack<ArgumentTag<T, I>...> &);
 
-            template<typename ...A, typename ...T, unsigned ...I>
+            template<typename ...A, typename ...T, std::size_t ...I>
             inline void validateDefaultArguments(const DefaultArgument<T, I> &...defaultArguments);
 
             //--
 
-            template<typename ...T, unsigned ...S>
-            constexpr auto createArgumentTagPack(std::integer_sequence<unsigned, S...>) {
+            template<typename ...T, std::size_t ...S>
+            constexpr auto createArgumentTagPack(std::integer_sequence<std::size_t, S...>) {
                 return MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>();
             }
 
-            template<typename ...T, unsigned ...I>
+            template<typename ...T, std::size_t ...I>
             inline void checkDefaultArgumentTypeAndIndex(const MultipleInheritancePack<ArgumentTag<T, I>...> &) {}
 
-            template<typename E, typename ...T, unsigned ...I>
+            template<typename E, typename ...T, std::size_t ...I>
             inline void checkDefaultArgumentTypeAndIndex(const MultipleInheritancePack<ArgumentTag<T, I>...> &) {
                 static_assert(std::is_base_of<typename E::ArgumentTag, MultipleInheritancePack<ArgumentTag<T, I>...>>::value == true, "invalid default argument");
             }
 
-            template<typename ...A, typename ...T, unsigned ...I>
+            template<typename ...A, typename ...T, std::size_t ...I>
             inline void validateDefaultArguments(const DefaultArgument<T, I> &...defaultArguments) {
                 // comma operator in "(checkDefaultArgumentTypeAndIndex<E>(...), 0)" is used for function call expansion
                 // check if each default argument type and index is valid
-                generic::expandDummyTemplatePack((checkDefaultArgumentTypeAndIndex<DefaultArgument<T, I>>(createArgumentTagPack<A...>(std::make_integer_sequence<unsigned, sizeof...(A)>())), 0)...);
+                generic::expandDummyTemplatePack((checkDefaultArgumentTypeAndIndex<DefaultArgument<T, I>>(createArgumentTagPack<A...>(std::make_integer_sequence<std::size_t, sizeof...(A)>())), 0)...);
                 // check if there is only one default argument for each index
                 MultipleInheritancePack<typename DefaultArgument<T, I>::ArgumentTag...>();
             }

@@ -24,6 +24,7 @@
 #ifndef integral_IsStringLiteral_hpp
 #define integral_IsStringLiteral_hpp
 
+#include <cstddef>
 #include <type_traits>
 
 namespace integral {
@@ -31,7 +32,7 @@ namespace integral {
         template<typename T>
         class IsStringLiteral : public std::false_type {};
 
-        template<unsigned N>
+        template<std::size_t N>
         class IsStringLiteral<const char (&) [N]> : public std::true_type {};
     }
 }

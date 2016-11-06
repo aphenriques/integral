@@ -24,13 +24,14 @@
 #ifndef integral_DefaultArgument_hpp
 #define integral_DefaultArgument_hpp
 
+#include <cstddef>
 #include <utility>
 #include "ArgumentTag.hpp"
 
 namespace integral {
     // "T": type of default argument
     // "I": lua index (starts with 1) of the default argument
-    template<typename T, unsigned I>
+    template<typename T, std::size_t I>
     class DefaultArgument {
     public:
         using ArgumentTag = detail::ArgumentTag<T, I>;
@@ -52,11 +53,11 @@ namespace integral {
 
     //--
 
-    template<typename T, unsigned I>
+    template<typename T, std::size_t I>
     template<typename ...A>
     inline DefaultArgument<T, I>::DefaultArgument(A &&...arguments) : argument_(std::forward<A>(arguments)...) {}
 
-    template<typename T, unsigned I>
+    template<typename T, std::size_t I>
     inline const T & DefaultArgument<T, I>::getArgument() const {
         return argument_;
     }

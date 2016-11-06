@@ -25,6 +25,7 @@
 #ifndef DefaultArgumentManagerContainer_hpp
 #define DefaultArgumentManagerContainer_hpp
 
+#include <cstddef>
 #include <utility>
 #include "DefaultArgumentManager.hpp"
 #include "IsTemplateClass.hpp"
@@ -35,7 +36,7 @@ namespace integral {
         class DefaultArgumentManagerContainer {
             static_assert(IsTemplateClass<DefaultArgumentManager, T>::value == true, "typename T in DefaultArgumentManagerContainer must be a DefaultArgumentManager");
         public:
-            template<typename ...E, unsigned ...I>
+            template<typename ...E, std::size_t ...I>
             inline DefaultArgumentManagerContainer(DefaultArgument<E, I> &&...defaultArguments);
 
             inline const T & getDefaultArgumentManager() const;
@@ -47,7 +48,7 @@ namespace integral {
         //--
 
         template<typename T>
-        template<typename ...E, unsigned ...I>
+        template<typename ...E, std::size_t ...I>
         inline DefaultArgumentManagerContainer<T>::DefaultArgumentManagerContainer(DefaultArgument<E, I> &&...defaultArguments) : defaultArgumentManager_(std::move(defaultArguments)...) {}
 
         template<typename T>

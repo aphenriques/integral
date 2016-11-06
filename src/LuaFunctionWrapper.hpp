@@ -93,21 +93,21 @@ namespace integral {
                 if (nUpValues != 0) {
                     lua_insert(luaState, -1 - nUpValues);
                 }
-                lua_pushcclosure(luaState, [](lua_State *luaState) -> int {
+                lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
                     try {
-                        LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState, lua_upvalueindex(1), kMetatableName_));
+                        LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(lambdaLuaState, lua_upvalueindex(1), kMetatableName_));
                         if (luaFunctionWrapper != nullptr) {
-                            return luaFunctionWrapper->getLuaFunction()(luaState);
+                            return luaFunctionWrapper->getLuaFunction()(lambdaLuaState);
                         } else {
                             throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted LuaFunctionWrapper");
                         }
                     } catch (const std::exception &exception) {
-                        lua_pushstring(luaState, (std::string("[integral] ") + exception.what()).c_str());
+                        lua_pushstring(lambdaLuaState, (std::string("[integral] ") + exception.what()).c_str());
                     } catch (...) {
-                        lua_pushstring(luaState, message::gkUnknownExceptionMessage);
+                        lua_pushstring(lambdaLuaState, message::gkUnknownExceptionMessage);
                     }
                     // error return outside catch scope so that the exception destructor can be called
-                    return lua_error(luaState);
+                    return lua_error(lambdaLuaState);
                 }, 1 + nUpValues);
             }
         }

@@ -42,44 +42,44 @@ extern "C" {
             integral::setCopyGetter(luaState, "getString", &Object::string_);
 
             // lua function
-            integral::setLuaFunction(luaState, "createSuffixedObjectLuaFunction", [](lua_State *luaState) -> int {
+            integral::setLuaFunction(luaState, "createSuffixedObjectLuaFunction", [](lua_State *lambdaLuaState) -> int {
                     // Exceptions can be thrown normally from this function (integral manages it)
-                    Object &object = integral::get<Object>(luaState, 1);
-                    std::string suffix = integral::get<std::string>(luaState, 2);
+                    Object &object = integral::get<Object>(lambdaLuaState, 1);
+                    std::string suffix = integral::get<std::string>(lambdaLuaState, 2);
                     // lua api works as usual, e.g:
-                    // std::string suffix(lua_checkstring(luaState, 2));
+                    // std::string suffix(lua_checkstring(lambdaLuaState, 2));
                     // Though it is not recommended because, in case of an error, destructors of the objects inside this function scope will not be called (lua_error performs long jump)
                     // integral::push and integral::get are safer
-                    integral::push<Object>(luaState, object.string_ + suffix);
+                    integral::push<Object>(lambdaLuaState, object.string_ + suffix);
                 return 1;
             });
             //
             // lua function
-            integral::setLuaFunction(luaState, "addSuffixLuaFunction", [](lua_State *luaState) -> int {
+            integral::setLuaFunction(luaState, "addSuffixLuaFunction", [](lua_State *lambdaLuaState) -> int {
                     // get by reference
-                    Object &object = integral::get<Object>(luaState, 1);
-                    std::string suffix = integral::get<std::string>(luaState, 2);
+                    Object &object = integral::get<Object>(lambdaLuaState, 1);
+                    std::string suffix = integral::get<std::string>(lambdaLuaState, 2);
                     object.string_ += suffix;
                 return 0;
             });
 
             // LuaFunctions accepts upvalues. Though their indices are different than Lua API (as follows)
             integral::push<std::string>(luaState, "upvalue!");
-            integral::setLuaFunction(luaState, "printUpvalue", [](lua_State *luaState) -> int {
+            integral::setLuaFunction(luaState, "printUpvalue", [](lua_State *lambdaLuaState) -> int {
                 // upvalue index is offset by 1 (because of integral internals). integral::LuaFunctionWrapper::getUpValueIndex or lua_upvalueindex(index + 1) should be used to index upvalues
-                std::cout << integral::get<std::string>(luaState, integral::LuaFunctionWrapper::getUpValueIndex(1)) << std::endl;
+                std::cout << integral::get<std::string>(lambdaLuaState, integral::LuaFunctionWrapper::getUpValueIndex(1)) << std::endl;
                 return 0;
             }, 1); // 1 upvalue
 
             // LuaFunctions can be pushed onto the stack
             integral::push<std::string>(luaState, "getPrinter");
-            integral::pushLuaFunction(luaState, [](lua_State *luaState) -> int {
+            integral::pushLuaFunction(luaState, [](lua_State *lambdaLuaState) -> int {
                 // LuaFunctions can be pushed onto the stack to be returned
                 // lambda captures can be used as well as upvalues
-                std::string printerName = integral::get<std::string>(luaState, 1);
-                integral::push<std::string>(luaState, "upvalue_message!");
-                integral::pushLuaFunction(luaState, [printerName](lua_State *luaState) -> int {
-                    std::cout << printerName << ": " << integral::get<std::string>(luaState, integral::LuaFunctionWrapper::getUpValueIndex(1)) << std::endl;
+                std::string printerName = integral::get<std::string>(lambdaLuaState, 1);
+                integral::push<std::string>(lambdaLuaState, "upvalue_message!");
+                integral::pushLuaFunction(lambdaLuaState, [printerName](lua_State *lambdaLambdaLuaState) -> int {
+                    std::cout << printerName << ": " << integral::get<std::string>(lambdaLambdaLuaState, integral::LuaFunctionWrapper::getUpValueIndex(1)) << std::endl;
                     return 0;
                 }, 1);
                 return 1;
@@ -88,7 +88,7 @@ extern "C" {
 
             // alternative way to push LuaFunctions
             lua_pushstring(luaState, "printMessage");
-            integral::push<integral::LuaFunctionWrapper>(luaState, [](lua_State *luaState) -> int {
+            integral::push<integral::LuaFunctionWrapper>(luaState, [](lua_State *lambdaLuaState) -> int {
                 std::cout << "message from CLuaFunction" << std::endl;
                 return 0;
             });

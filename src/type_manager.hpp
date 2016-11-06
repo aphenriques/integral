@@ -24,6 +24,7 @@
 #ifndef integral_type_manager_hpp
 #define integral_type_manager_hpp
 
+#include <cstddef>
 #include <functional>
 #include <string>
 #include <typeindex>
@@ -235,8 +236,8 @@ namespace integral {
                 lua_pushstring(luaState, "__index");
                 lua_pushvalue(luaState, -2); // duplicates the metatable
                 lua_rawset(luaState, -3); // metatable.__index = metatable
-                basic::setLuaFunction(luaState, "__gc", [](lua_State *luaState) -> int {
-                    static_cast<UserDataWrapper<T> *>(lua_touserdata(luaState, 1))->~UserDataWrapper<T>();
+                basic::setLuaFunction(luaState, "__gc", [](lua_State *lambdaLuaState) -> int {
+                    static_cast<UserDataWrapper<T> *>(lua_touserdata(lambdaLuaState, 1))->~UserDataWrapper<T>();
                     return 0;
                 }, 0);
                 // stack: typeFunctionHashTable | type_index_udata* | rootMetatable*
@@ -256,8 +257,8 @@ namespace integral {
                 setUserDataWrapperBaseTable<T>(luaState);
                 // stack: rootMetatable
                 // Underlying type pointer conversion function
-                basic::setLuaFunction(luaState, gkUnderlyingTypeFunctionKey, [](lua_State *luaState) -> int {
-                    lua_pushlightuserdata(luaState, static_cast<void *>(static_cast<T *>(static_cast<UserDataWrapper<T> *>(lua_touserdata(luaState, 1)))));
+                basic::setLuaFunction(luaState, gkUnderlyingTypeFunctionKey, [](lua_State *lambdaLuaState) -> int {
+                    lua_pushlightuserdata(lambdaLuaState, static_cast<void *>(static_cast<T *>(static_cast<UserDataWrapper<T> *>(lua_touserdata(lambdaLuaState, 1)))));
                     return 1;
                 }, 0);
                 // stack: rootMetatable
@@ -266,7 +267,8 @@ namespace integral {
             template<typename T>
             void pushRootMetatableFromTypeManager(lua_State *luaState, const std::type_index &typeIndex, std::size_t typeHash) {
                 // stack: typeManager
-                lua_pushinteger(luaState, typeHash);
+                static_assert(sizeof(typeHash) <= sizeof(lua_Integer), "lua_Integer cannot accommodate typeHash");
+                lua_pushinteger(luaState, static_cast<lua_Integer>(typeHash));
                 lua_newtable(luaState);
                 lua_pushvalue(luaState, -1);
                 // stack: typeManager | typeHash | typeFunctionHashTable* | typeFunctionHashTable*
@@ -292,7 +294,8 @@ namespace integral {
                 lua_rawget(luaState, LUA_REGISTRYINDEX);
                 if (lua_istable(luaState, -1) != 0) {
                     // stack: typeManager
-                    lua_pushinteger(luaState, typeHash);
+                    static_assert(sizeof(typeHash) <= sizeof(lua_Integer), "lua_Integer cannot accommodate typeHash");
+                    lua_pushinteger(luaState, static_cast<lua_Integer>(typeHash));
                     lua_rawget(luaState, -2);
                     if (lua_istable(luaState, -1) != 0) {
                         // stack: typeManager | typeFunctionHashTable
@@ -363,9 +366,9 @@ namespace integral {
                 // stack: metatable | typeFunctionHashTable
                 pushTypeIndexUserData(luaState, typeIndex);
                 // stack: metatable | typeFunctionHashTable| type_index_udata*
-                lua_pushcclosure(luaState, [](lua_State *luaState) -> int {
-                    if (lua_islightuserdata(luaState, 1) != 0) {
-                        lua_pushlightuserdata(luaState, static_cast<void *>(static_cast<B *>(static_cast<D *>(lua_touserdata(luaState, 1)))));
+                lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
+                    if (lua_islightuserdata(lambdaLuaState, 1) != 0) {
+                        lua_pushlightuserdata(lambdaLuaState, static_cast<void *>(static_cast<B *>(static_cast<D *>(lua_touserdata(lambdaLuaState, 1)))));
                         return 1;
                     } else {
                         throw exception::LogicException(__FILE__, __LINE__, __func__, "conversion function expected underlying lightuserdata");
@@ -393,10 +396,10 @@ namespace integral {
                 basic::pushClassMetatable<std::function<ConversionType *(OriginalType *)>>(luaState);
                 lua_setmetatable(luaState, -2);
                 // stack: metatable | typeFunctionHashTable| type_index_udata* | typeFunction_udata
-                lua_pushcclosure(luaState, [](lua_State *luaState) -> int {
+                lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
                     // no need for exception checking. Possible exceptions thrown by conversion function will be caught in [Lua]FunctionWrapperCaller. Type functions are only called by exchanger.
-                    if (lua_islightuserdata(luaState, 1) != 0) {
-                        lua_pushlightuserdata(luaState, static_cast<void *>((*static_cast<std::function<ConversionType *(OriginalType *)> *>(lua_touserdata(luaState, lua_upvalueindex(1))))(static_cast<OriginalType *>(lua_touserdata(luaState, 1)))));
+                    if (lua_islightuserdata(lambdaLuaState, 1) != 0) {
+                        lua_pushlightuserdata(lambdaLuaState, static_cast<void *>((*static_cast<std::function<ConversionType *(OriginalType *)> *>(lua_touserdata(lambdaLuaState, lua_upvalueindex(1))))(static_cast<OriginalType *>(lua_touserdata(lambdaLuaState, 1)))));
                         return 1;
                     } else {
                         throw exception::LogicException(__FILE__, __LINE__, __func__, "custom conversion function expected underlying lightuserdata");
@@ -443,14 +446,14 @@ namespace integral {
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable*
                 pushTypeIndexUserData<UserDataWrapperBase>(luaState);
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable* | userDataWrapperBaseTypeIndex*
-                lua_rawseti(luaState, -2, static_cast<int>(UserDataWrapperBaseTable::kTypeIndexIndex));
+                lua_rawseti(luaState, -2, static_cast<lua_Integer>(UserDataWrapperBaseTable::kTypeIndexIndex));
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable*
-                lua_pushcclosure(luaState, [](lua_State *luaState) -> int {
-                    lua_pushlightuserdata(luaState, static_cast<UserDataWrapperBase *>(static_cast<UserDataWrapper<T> *>(lua_touserdata(luaState, 1))));
+                lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
+                    lua_pushlightuserdata(lambdaLuaState, static_cast<UserDataWrapperBase *>(static_cast<UserDataWrapper<T> *>(lua_touserdata(lambdaLuaState, 1))));
                     return 1;
                 }, 0);
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable* | userDataWrapperBaseFunction*
-                lua_rawseti(luaState, -2, static_cast<int>(UserDataWrapperBaseTable::kFunctionIndex));
+                lua_rawseti(luaState, -2, static_cast<lua_Integer>(UserDataWrapperBaseTable::kFunctionIndex));
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable*
                 lua_rawset(luaState, -3);
                 // stack: metatable
@@ -557,11 +560,11 @@ namespace integral {
                 // stack: metatable | inheritanceTable | baseTable
                 pushTypeIndexUserData<B>(luaState);
                 // stack: metatable | inheritanceTable | baseTable | baseTypeIndex*
-                lua_rawseti(luaState, -2, static_cast<int>(InheritanceTable::kTypeIndexIndex));
+                lua_rawseti(luaState, -2, static_cast<lua_Integer>(InheritanceTable::kTypeIndexIndex));
                 // stack: metatable | inheritanceTable | baseTable
                 pushClassMetatable<B>(luaState);
                 // stack: metatable | inheritanceTable | baseTable | baseMetatable*
-                lua_rawseti(luaState, -2, static_cast<int>(InheritanceTable::kMetatableIndex));
+                lua_rawseti(luaState, -2, static_cast<lua_Integer>(InheritanceTable::kMetatableIndex));
                 // stack: metatable | inheritanceTable | baseTable
                 lua_pop(luaState, 2);
                 // stack: metatable

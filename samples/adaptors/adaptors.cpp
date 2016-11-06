@@ -71,13 +71,13 @@ extern "C" {
             // LuaArray
             // adaptors with integral::get/integral::push
             // nested adaptors will also work as expected
-            integral::setLuaFunction(luaState, "getArrayOf3VectorsSample", [](lua_State *luaState) -> int {
-                integral::push<integral::LuaArray<integral::LuaVector<int>, 3>>(luaState, std::array<integral::LuaVector<int>, 3>{{std::vector<int>({11}), std::vector<int>({21, 22}), std::vector<int>({31, 32, 33})}});
+            integral::setLuaFunction(luaState, "getArrayOf3VectorsSample", [](lua_State *lambdaLuaState) -> int {
+                integral::push<integral::LuaArray<integral::LuaVector<int>, 3>>(lambdaLuaState, std::array<integral::LuaVector<int>, 3>{{std::vector<int>({11}), std::vector<int>({21, 22}), std::vector<int>({31, 32, 33})}});
                 return 1;
             });
 
-            integral::setLuaFunction(luaState, "printArrayOf2Numbers", [](lua_State *luaState) -> int {
-                std::array<int, 2> array = integral::get<integral::LuaArray<int, 2>>(luaState, 1);
+            integral::setLuaFunction(luaState, "printArrayOf2Numbers", [](lua_State *lambdaLuaState) -> int {
+                std::array<int, 2> array = integral::get<integral::LuaArray<int, 2>>(lambdaLuaState, 1);
                 std::cout << "array (C++): {";
                 for (const auto &element : array ) {
                     std::cout << " " << element;

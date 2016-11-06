@@ -22,12 +22,17 @@
 //
 
 #include "ArgumentException.hpp"
+#include <cstddef>
 #include <cstring>
 #include <sstream>
 #include <lua.hpp>
 #include "lua_compatibility.hpp"
 
 namespace integral {
+    // If a class is defined in a header file and has a vtable (either it has virtual methods or it derives from classes with virtual methods), it must always have at least one out-of-line virtual method in the class. Without this, the compiler will copy the vtable and RTTI into every .o file that #includes the header, bloating .o file sizes and increasing link times.
+    // source: http://llvm.org/docs/CodingStandards.html#provide-a-virtual-method-anchor-for-classes-in-headers
+    ArgumentException::~ArgumentException() {}
+
     ArgumentException ArgumentException::createTypeErrorException(lua_State *luaState, int index, const std::string &userDataName) {
         return ArgumentException(luaState, index, std::string(userDataName) + " expected, got " + std::string(luaL_typename(luaState, index)));
     }
@@ -93,7 +98,7 @@ namespace integral {
         return messageStream.str();
     }
 
-    std::string ArgumentException::getExceptionMessage(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments) {
+    std::string ArgumentException::getExceptionMessage(lua_State *luaState, std::size_t maximumNumberOfArguments, std::size_t actualNumberOfArguments) {
         lua_Debug debugInfo;
         if (lua_getstack(luaState, 0, &debugInfo) == 0) {
             std::ostringstream messageStream;

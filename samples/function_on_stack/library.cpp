@@ -43,18 +43,17 @@ extern "C" {
             lua_newtable(luaState);
             // stack: table (module table)
 
-            integral::setLuaFunction(luaState, "getPrefixFunction", [](lua_State *luaState) -> int {
-                integral::pushLuaFunction(luaState,[](lua_State *luaState) -> int {
-                    integral::push<std::string>(luaState, integral::get<std::string>(luaState, integral::LuaFunctionWrapper::getUpValueIndex(1))
-                                                          + integral::get<std::string>(luaState, 1));
+            integral::setLuaFunction(luaState, "getPrefixFunction", [](lua_State *lambdaLuaState) -> int {
+                integral::pushLuaFunction(lambdaLuaState, [](lua_State *lambdaLambdaLuaState) -> int {
+                    integral::push<std::string>(lambdaLambdaLuaState, integral::get<std::string>(lambdaLambdaLuaState, integral::LuaFunctionWrapper::getUpValueIndex(1)) + integral::get<std::string>(lambdaLambdaLuaState, 1));
                     return 1;
                 }, 1);
                 return 1;
             });
 
-            integral::setLuaFunction(luaState, "getSuffixFunction1", [](lua_State *luaState) -> int {
-                std::string suffix = integral::get<std::string>(luaState, 1);
-                integral::pushFunction(luaState, [suffix](const std::string &string) -> std::string {
+            integral::setLuaFunction(luaState, "getSuffixFunction1", [](lua_State *lambdaLuaState) -> int {
+                std::string suffix = integral::get<std::string>(lambdaLuaState, 1);
+                integral::pushFunction(lambdaLuaState, [suffix](const std::string &string) -> std::string {
                     return string + suffix;
                 });
                 return 1;

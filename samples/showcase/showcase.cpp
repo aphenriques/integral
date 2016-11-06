@@ -99,10 +99,10 @@ extern "C" {
             });
 
             // Lua functions can be registered. Similarly to luaL_setfuncs (lua_CFunction). But, in integral, they can also be functors, and handle exceptions and invalid arguments (with integral::get) graciously
-            integral::setLuaFunction(luaState, "getNumberAndString", [](lua_State * luaState) -> int {
-                Derived &derived = integral::get<Derived>(luaState, 1);
-                integral::push<double>(luaState, derived.number_);
-                integral::push<std::string>(luaState, derived.string_);
+            integral::setLuaFunction(luaState, "getNumberAndString", [](lua_State * lambdaLuaState) -> int {
+                Derived &derived = integral::get<Derived>(lambdaLuaState, 1);
+                integral::push<double>(lambdaLuaState, derived.number_);
+                integral::push<std::string>(lambdaLuaState, derived.string_);
                 return 2; // 2 return values
             });
 

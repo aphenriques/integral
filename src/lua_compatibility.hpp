@@ -93,7 +93,7 @@ namespace integral {
 #else
             template<typename T>
             inline void pushunsigned(lua_State *luaState, T number) {
-                lua_pushinteger(luaState, static_cast<lua_Unsigned>(number));
+                lua_pushinteger(luaState, static_cast<lua_Integer>(number));
             }
 #endif
 

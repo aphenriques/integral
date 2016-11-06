@@ -24,6 +24,7 @@
 #ifndef integral_DefaultArgumentManager_hpp
 #define integral_DefaultArgumentManager_hpp
 
+#include <cstddef>
 #include <tuple>
 #include <utility>
 #include <lua.hpp>
@@ -36,46 +37,46 @@ namespace integral {
         template<typename ...F>
         class DefaultArgumentManager {
         public:
-            template<typename ...E, unsigned ...I>
+            template<typename ...E, std::size_t ...I>
             inline DefaultArgumentManager(DefaultArgument<E, I> &&...defaultArguments);
 
-            void processDefaultArguments(lua_State *luaState, const unsigned numberOfFunctionArguments, const unsigned numberOfArgumentsOnStack) const;
+            void processDefaultArguments(lua_State *luaState, const std::size_t numberOfFunctionArguments, const std::size_t numberOfArgumentsOnStack) const;
 
         private:            
             std::tuple<F...> defaultArguments_;
 
-            template<unsigned ...S>
-            inline void processDefaultArguments(lua_State *luaState, std::integer_sequence<unsigned, S...>) const;
+            template<std::size_t ...S>
+            inline void processDefaultArguments(lua_State *luaState, std::integer_sequence<std::size_t, S...>) const;
 
-            template<typename E, unsigned I>
+            template<typename E, std::size_t I>
             void processArgument(lua_State *luaState, const DefaultArgument<E, I> &defaultArgument) const;
         };
 
         //--
 
         template<typename ...F>
-        template<typename ...E, unsigned ...I>
+        template<typename ...E, std::size_t ...I>
         inline DefaultArgumentManager<F...>::DefaultArgumentManager(DefaultArgument<E, I> &&...defaultArguments) : defaultArguments_(std::move(defaultArguments)...) {}
 
         template<typename ...F>
-        void DefaultArgumentManager<F...>::processDefaultArguments(lua_State *luaState, const unsigned numberOfFunctionArguments, const unsigned numberOfArgumentsOnStack) const {
+        void DefaultArgumentManager<F...>::processDefaultArguments(lua_State *luaState, const std::size_t numberOfFunctionArguments, const std::size_t numberOfArgumentsOnStack) const {
             if (numberOfArgumentsOnStack < numberOfFunctionArguments) {
-                const unsigned numberOfArgumentsDifference = numberOfFunctionArguments - numberOfArgumentsOnStack;
-                for (unsigned i = 0; i < numberOfArgumentsDifference; ++i) {
+                const std::size_t numberOfArgumentsDifference = numberOfFunctionArguments - numberOfArgumentsOnStack;
+                for (std::size_t i = 0; i < numberOfArgumentsDifference; ++i) {
                     lua_pushnil(luaState);
                 }
             }
-            processDefaultArguments(luaState, std::make_integer_sequence<unsigned, sizeof...(F)>());
+            processDefaultArguments(luaState, std::make_integer_sequence<std::size_t, sizeof...(F)>());
         }
 
         template<typename ...F>
-        template<unsigned ...S>
-        inline void DefaultArgumentManager<F...>::processDefaultArguments(lua_State *luaState, std::integer_sequence<unsigned, S...>) const {
+        template<std::size_t ...S>
+        inline void DefaultArgumentManager<F...>::processDefaultArguments(lua_State *luaState, std::integer_sequence<std::size_t, S...>) const {
             generic::expandDummyTemplatePack((processArgument(luaState, std::get<S>(defaultArguments_)), 0)...);
         }
 
         template<typename ...F>
-        template<typename E, unsigned I>
+        template<typename E, std::size_t I>
         void DefaultArgumentManager<F...>::processArgument(lua_State *luaState, const DefaultArgument<E, I> &defaultArgument) const {
             if (lua_isnil(luaState, I) != 0) {
                 exchanger::push<E>(luaState, defaultArgument.getArgument());

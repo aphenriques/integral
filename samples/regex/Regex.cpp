@@ -60,18 +60,18 @@ extern "C" {
             for (auto &nameAndMode : namesAndModes) {
                 Match::Mode mode = nameAndMode.second;
                 // Lua functions can be registered. Just like luaL_setfuncs (lua_CFunction). But they can also be functors and can handle exceptions graciously
-                integral::setLuaFunction(luaState, nameAndMode.first, [mode](lua_State *luaState) -> int {
+                integral::setLuaFunction(luaState, nameAndMode.first, [mode](lua_State *lambdaLuaState) -> int {
                     // Get fisrt lua function argument
-                    Regex pattern = integral::get<Regex>(luaState, 1);
+                    Regex pattern = integral::get<Regex>(lambdaLuaState, 1);
                     // Get second lua function argument
-                    const char * string = integral::get<const char *>(luaState, 2);
+                    const char * string = integral::get<const char *>(lambdaLuaState, 2);
                     Match match(string, pattern, mode);
                     if (match.empty() == false) {
                         // Push return value
-                        integral::push<Match>(luaState, match);
+                        integral::push<Match>(lambdaLuaState, match);
                     } else {
                         // Push return value
-                        lua_pushnil(luaState);
+                        lua_pushnil(lambdaLuaState);
                     }
                     return 1;
                 });

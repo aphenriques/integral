@@ -24,6 +24,7 @@
 #ifndef integral_utility_hpp
 #define integral_utility_hpp
 
+#include <cstddef>
 #include <functional>
 #include <initializer_list>
 #include <tuple>
@@ -42,11 +43,11 @@ namespace integral {
         void setWithHelp(lua_State *luaState, const char *field, const char *fieldDescription);
 
         // stack argument: table
-        template<typename T, typename ...E, unsigned ...I>
+        template<typename T, typename ...E, std::size_t ...I>
         void setLuaFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&luafunction, DefaultArgument<E, I> &&...defaultArguments);
 
         // stack argument: table
-        template<typename T, typename ...E, unsigned ...I>
+        template<typename T, typename ...E, std::size_t ...I>
         void setFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&function, DefaultArgument<E, I> &&...defaultArguments);
 
         void pushNameAndValueList(lua_State *luaState, std::initializer_list<std::tuple<const char *, int>> nameAndValueList);
@@ -56,13 +57,13 @@ namespace integral {
 
         //--
 
-        template<typename T, typename ...E, unsigned ...I>
+        template<typename T, typename ...E, std::size_t ...I>
         void setFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&function, DefaultArgument<E, I> &&...defaultArguments) {
             integral::setFunction(luaState, functionName, std::forward<T>(function), std::move(defaultArguments)...);
             setHelp(luaState, functionName, functionDescription);
         }
 
-        template<typename T, typename ...E, unsigned ...I>
+        template<typename T, typename ...E, std::size_t ...I>
         void setLuaFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&function, DefaultArgument<E, I> &&...defaultArguments) {
             integral::setLuaFunction(luaState, functionName, std::forward<T>(function), std::move(defaultArguments)...);
             setHelp(luaState, functionName, functionDescription);

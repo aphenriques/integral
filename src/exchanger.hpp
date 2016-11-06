@@ -24,6 +24,7 @@
 #ifndef integral_exchanger_hpp
 #define integral_exchanger_hpp
 
+#include <cstddef>
 #include <array>
 #include <limits>
 #include <sstream>
@@ -155,22 +156,22 @@ namespace integral {
                 inline static void push(lua_State *luaState, T &&...t);
 
             private:
-                template<unsigned ...S>
-                static LuaTuple<T...> get(lua_State *luaState, int index, std::integer_sequence<unsigned, S...>);
+                template<std::size_t ...S>
+                static LuaTuple<T...> get(lua_State *luaState, int index, std::integer_sequence<std::size_t, S...>);
 
-                template<unsigned I, typename U>
+                template<std::size_t I, typename U>
                 static U getElementFromTable(lua_State *luaState, int index);
 
-                template<unsigned ...S>
-                static void push(lua_State *luaState, const LuaTuple<T...> &tuple, std::integer_sequence<unsigned, S...>);
+                template<std::size_t ...S>
+                static void push(lua_State *luaState, const LuaTuple<T...> &tuple, std::integer_sequence<std::size_t, S...>);
 
-                template<unsigned ...S>
-                static void push(lua_State *luaState, T &&...t, std::integer_sequence<unsigned, S...>);
+                template<std::size_t ...S>
+                static void push(lua_State *luaState, T &&...t, std::integer_sequence<std::size_t, S...>);
 
-                template<unsigned I, typename U>
+                template<std::size_t I, typename U>
                 static void setElementInTable(lua_State *luaState, U &&element, int index);
 
-                template<unsigned I, typename U>
+                template<std::size_t I, typename U>
                 static void setElementInTable(lua_State *luaState, const U &element, int index);
             };
 
@@ -519,26 +520,26 @@ namespace integral {
 
             template<typename ...T>
             inline LuaTuple<T...> Exchanger<LuaTuple<T...>>::get(lua_State *luaState, int index) {
-                return Exchanger<LuaTuple<T...>>::get(luaState, index, std::make_integer_sequence<unsigned, sizeof...(T)>());
+                return Exchanger<LuaTuple<T...>>::get(luaState, index, std::make_integer_sequence<std::size_t, sizeof...(T)>());
             }
 
             template<typename ...T>
             inline void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, const LuaTuple<T...> &tuple) {
-                Exchanger<LuaTuple<T...>>::push(luaState, tuple, std::make_integer_sequence<unsigned, sizeof...(T)>());
+                Exchanger<LuaTuple<T...>>::push(luaState, tuple, std::make_integer_sequence<std::size_t, sizeof...(T)>());
             }
 
             template<typename ...T>
             inline void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, T &&...t) {
-                Exchanger<LuaTuple<T...>>::push(luaState, std::forward<T>(t)..., std::make_integer_sequence<unsigned, sizeof...(T)>());
+                Exchanger<LuaTuple<T...>>::push(luaState, std::forward<T>(t)..., std::make_integer_sequence<std::size_t, sizeof...(T)>());
             }
 
             template<typename ...T>
-            template<unsigned ...S>
-            LuaTuple<T...> Exchanger<LuaTuple<T...>>::get(lua_State *luaState, int index, std::integer_sequence<unsigned, S...>) {
+            template<std::size_t ...S>
+            LuaTuple<T...> Exchanger<LuaTuple<T...>>::get(lua_State *luaState, int index, std::integer_sequence<std::size_t, S...>) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     if (lua_istable(luaState, index) != 0) {
                         const std::size_t tableSize = lua_compatibility::rawlen(luaState, index);
-                        constexpr unsigned keTupleSize = sizeof...(T);
+                        constexpr std::size_t keTupleSize = sizeof...(T);
                         if (tableSize == keTupleSize) {
                             try {
                                 return LuaTuple<T...>(getElementFromTable<S + 1, T>(luaState, index)...);
@@ -564,7 +565,7 @@ namespace integral {
             }
 
             template<typename ...T>
-            template<unsigned I, typename U>
+            template<std::size_t I, typename U>
             U Exchanger<LuaTuple<T...>>::getElementFromTable(lua_State *luaState, int index) {
                 if (lua_istable(luaState, index) != 0) {
                     lua_pushvalue(luaState, index);
@@ -583,10 +584,10 @@ namespace integral {
             }
 
             template<typename ...T>
-            template<unsigned ...S>
-            void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, const LuaTuple<T...> &tuple, std::integer_sequence<unsigned, S...>) {
-                constexpr unsigned keTupleSize = sizeof...(T);
-                if (keTupleSize <= std::numeric_limits<int>::max() || static_cast<int>(keTupleSize) < 0) {
+            template<std::size_t ...S>
+            void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, const LuaTuple<T...> &tuple, std::integer_sequence<std::size_t, S...>) {
+                constexpr std::size_t keTupleSize = sizeof...(T);
+                if (keTupleSize <= std::numeric_limits<int>::max()) {
                     lua_createtable(luaState, static_cast<int>(keTupleSize), 0);
                     // stack: table
                     generic::expandDummyTemplatePack((setElementInTable<S + 1, T>(luaState, std::get<S>(tuple), -1), 0)...);
@@ -596,10 +597,10 @@ namespace integral {
             }
 
             template<typename ...T>
-            template<unsigned ...S>
-            void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, T &&...t, std::integer_sequence<unsigned, S...>) {
-                constexpr unsigned keTupleSize = sizeof...(T);
-                if (keTupleSize <= std::numeric_limits<int>::max() || static_cast<int>(keTupleSize) < 0) {
+            template<std::size_t ...S>
+            void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, T &&...t, std::integer_sequence<std::size_t, S...>) {
+                constexpr std::size_t keTupleSize = sizeof...(T);
+                if (keTupleSize <= std::numeric_limits<int>::max()) {
                     lua_createtable(luaState, static_cast<int>(keTupleSize), 0);
                     // stack: table
                     generic::expandDummyTemplatePack((setElementInTable<S + 1, T>(luaState, std::forward<T>(t), -1), 0)...);
@@ -610,7 +611,7 @@ namespace integral {
 
 
             template<typename ...T>
-            template<unsigned I, typename U>
+            template<std::size_t I, typename U>
             void Exchanger<LuaTuple<T...>>::setElementInTable(lua_State *luaState, U &&element, int index) {
                 lua_pushvalue(luaState, index);
                 // stack: table
@@ -624,7 +625,7 @@ namespace integral {
             }
 
             template<typename ...T>
-            template<unsigned I, typename U>
+            template<std::size_t I, typename U>
             void Exchanger<LuaTuple<T...>>::setElementInTable(lua_State *luaState, const U &element, int index) {
                 lua_pushvalue(luaState, index);
                 // stack: table

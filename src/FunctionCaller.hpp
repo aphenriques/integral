@@ -24,6 +24,7 @@
 #ifndef integral_FunctionCaller_hpp
 #define integral_FunctionCaller_hpp
 
+#include <cstddef>
 #include <functional>
 #include <utility>
 #include <lua.hpp>
@@ -34,29 +35,29 @@ namespace integral {
         template<typename R, typename ...A>
         class FunctionCaller {
         public:        
-            template<unsigned ...S>
-            static unsigned call(lua_State *luaState, const std::function<R(A...)> &function, std::integer_sequence<unsigned, S...>);
+            template<std::size_t ...S>
+            static int call(lua_State *luaState, const std::function<R(A...)> &function, std::integer_sequence<std::size_t, S...>);
         };
 
         template<typename ...A>
         class FunctionCaller<void, A...> {
         public:        
-            template<unsigned ...S>
-            static unsigned call(lua_State *luaState, const std::function<void(A...)> &function, std::integer_sequence<unsigned, S...>);
+            template<std::size_t ...S>
+            static int call(lua_State *luaState, const std::function<void(A...)> &function, std::integer_sequence<std::size_t, S...>);
         };
 
         //--
 
         template<typename R, typename ...A>
-        template<unsigned ...S>
-        unsigned FunctionCaller<R, A...>::call(lua_State *luaState, const std::function<R(A...)> &function, std::integer_sequence<unsigned, S...>) {
+        template<std::size_t ...S>
+        int FunctionCaller<R, A...>::call(lua_State *luaState, const std::function<R(A...)> &function, std::integer_sequence<std::size_t, S...>) {
             exchanger::push<R>(luaState, function(exchanger::get<A>(luaState, S + 1)...));
             return 1;
         }
 
         template<typename ...A>
-        template<unsigned ...S>
-        unsigned FunctionCaller<void, A...>::call(lua_State *luaState, const std::function<void(A...)> &function, std::integer_sequence<unsigned, S...>) {
+        template<std::size_t ...S>
+        int FunctionCaller<void, A...>::call(lua_State *luaState, const std::function<void(A...)> &function, std::integer_sequence<std::size_t, S...>) {
             function(exchanger::get<A>(luaState, S + 1)...);
             return 0;
         }

@@ -24,6 +24,7 @@
 #ifndef integral_ArgumentException_hpp
 #define integral_ArgumentException_hpp
 
+#include <cstddef>
 #include <stdexcept>
 #include <exception>
 #include <string>
@@ -32,16 +33,24 @@
 namespace integral {
     class ArgumentException : public std::invalid_argument {
     public:
+        // necessary because of the user-defined destructor
+        ArgumentException(const ArgumentException &) = default;
+        ArgumentException(ArgumentException &) = default;
+        ArgumentException(ArgumentException &&) = default;
+
+        // this is necessary (see definition)
+        ~ArgumentException() override;
+
         static ArgumentException createTypeErrorException(lua_State *luaState, int index, const std::string &userDataName);
 
         inline ArgumentException(lua_State *luaState, int index, const std::string &extraMessage);
-        inline ArgumentException(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments);
+        inline ArgumentException(lua_State *luaState, std::size_t maximumNumberOfArguments, std::size_t actualNumberOfArguments);
 
     private:
-        static bool findField (lua_State *luaState, int index, int level);        
+        static bool findField (lua_State *luaState, int index, int level);
         static bool pushGlobalFunctionName (lua_State *L, lua_Debug *debugInfo);
         static std::string getExceptionMessage(lua_State *luaState, int index, const std::string &extraMessage);
-        static std::string getExceptionMessage(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments);
+        static std::string getExceptionMessage(lua_State *luaState, std::size_t maximumNumberOfArguments, std::size_t actualNumberOfArguments);
     };
 
     //--
@@ -49,7 +58,7 @@ namespace integral {
 
     inline ArgumentException::ArgumentException(lua_State *luaState, int index, const std::string &extraMessage) : std::invalid_argument(getExceptionMessage(luaState, index, extraMessage)) {}
 
-    inline ArgumentException::ArgumentException(lua_State *luaState, unsigned maximumNumberOfArguments, unsigned actualNumberOfArguments) : std::invalid_argument(getExceptionMessage(luaState, maximumNumberOfArguments, actualNumberOfArguments)) {}
+    inline ArgumentException::ArgumentException(lua_State *luaState, std::size_t maximumNumberOfArguments, std::size_t actualNumberOfArguments) : std::invalid_argument(getExceptionMessage(luaState, maximumNumberOfArguments, actualNumberOfArguments)) {}
 }
 
 
