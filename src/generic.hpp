@@ -41,11 +41,6 @@ namespace integral {
             template<typename ...T>
             inline void expandDummyTemplatePack(T...);
 
-            constexpr unsigned getSum();
-
-            template<typename ...J>
-            constexpr unsigned getSum(unsigned i, J... j);
-
             constexpr bool getLogicalOr();
 
             template<typename ...B>
@@ -56,15 +51,6 @@ namespace integral {
             template<typename ...T>
             inline void expandDummyTemplatePack(T...) {}
 
-
-            constexpr unsigned getSum() {
-                return 0;
-            }
-
-            template<typename ...J>
-            constexpr unsigned getSum(unsigned i, J... j) {
-                return i + getSum(j...);
-            }
 
             constexpr bool getLogicalOr() {
                 return false;
