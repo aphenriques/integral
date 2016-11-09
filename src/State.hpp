@@ -24,64 +24,22 @@
 #ifndef integral_State_hpp
 #define integral_State_hpp
 
-#include <memory>
-#include <string>
-#include <utility>
+
 #include <lua.hpp>
-#include "exception/ClassException.hpp"
-#include "exception/Exception.hpp"
-#include "Adaptor.hpp"
-#include "GlobalReference.hpp"
-#include "Reference.hpp"
+#include "StateView.hpp"
 
 namespace integral {
-    class State {
+    // State owns de luaState_ it creates
+    class State : public StateView {
     public:
-        // throws StateException on failure
-        // defines State::atPanic as lua panic function
+        // non-copyable
+        State(const State &) = delete;
+        State & operator=(const State &) = delete;
+        
+        // throws exception::RuntimeException if cannot create lua state
         State();
-
-        inline lua_State * getLuaState() const;
-        inline void openLibs() const;
-
-        // throws StateException on error
-        void doString(const std::string &string) const;
-
-        // throws StateException on error
-        void doFile(const std::string &fileName) const;
-
-        template<typename K>
-        inline detail::Reference<K, detail::GlobalReference> operator[](K &&key) const;
-
-    private:
-        static const char * const kErrorStackArgument;
-        static const char * const kErrorStackMiscellanous;
-        static const char * const kErrorStackUnspecified;
-
-        std::shared_ptr<lua_State> luaState_;
-
-        // throws StateException
-        [[noreturn]] static int atPanic(lua_State *luaState);
+        ~State();
     };
-
-    using StateException = exception::ClassException<State, exception::RuntimeException>;
-    using ReferenceException = detail::ReferenceException;
-
-    //--
-
-    inline lua_State * State::getLuaState() const {
-        return luaState_.get();
-    }
-
-    inline void State::openLibs() const {
-        luaL_openlibs(getLuaState());
-    }
-
-    template<typename K>
-    inline detail::Reference<K, detail::GlobalReference> State::operator[](K &&key) const {
-        // Adaptor<detail::Reference<...>> is utilized to access protected constructor of detail::Reference<...>
-        return detail::Adaptor<detail::Reference<K, detail::GlobalReference>>(std::forward<K>(key), detail::GlobalReference(luaState_));
-    }
 }
 
 #endif

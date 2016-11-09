@@ -24,7 +24,6 @@
 #ifndef integral_GlobalReference_hpp
 #define integral_GlobalReference_hpp
 
-#include <memory>
 #include <string>
 #include <lua.hpp>
 
@@ -32,22 +31,27 @@ namespace integral {
     namespace detail {
         class GlobalReference {
         public:
-            inline GlobalReference(const std::shared_ptr<lua_State> &luaState);
+            // non-copyable
+            GlobalReference(const GlobalReference &) = delete;
+            GlobalReference & operator=(const GlobalReference &) = delete;
+            
+            GlobalReference(GlobalReference &&) = default;
 
             inline lua_State * getLuaState() const;
             inline void push() const;
             inline std::string getReferenceString() const;
 
+        protected:
+            inline GlobalReference(lua_State *luaState);
+
         private:
-            std::shared_ptr<lua_State> luaState_;
+            lua_State *luaState_;
         };
 
         //--
 
-        inline GlobalReference::GlobalReference(const std::shared_ptr<lua_State> &luaState) : luaState_(luaState) {}
-
         inline lua_State * GlobalReference::getLuaState() const {
-            return luaState_.get();
+            return luaState_;
         }
 
         inline void GlobalReference::push() const {
@@ -57,6 +61,9 @@ namespace integral {
         inline std::string GlobalReference::getReferenceString() const {
             return std::string("_G");
         }
+        
+        inline GlobalReference::GlobalReference(lua_State *luaState) : luaState_(luaState) {}
+
     }
 }
 

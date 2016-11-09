@@ -28,5 +28,6 @@
 #include "core.hpp"
 #include "DefaultArgument.hpp"
 #include "State.hpp"
+#include "StateView.hpp"
 
 #endif

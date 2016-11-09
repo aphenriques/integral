@@ -26,81 +26,16 @@
 #include <string>
 #include <lua.hpp>
 #include "exception/Exception.hpp"
-#include "ArgumentException.hpp"
-#include "core.hpp"
 
 namespace integral {
-    State::State() : luaState_(luaL_newstate(), [](lua_State *luaState) -> void {
-        if (luaState != nullptr) {
-            lua_close(luaState);
-        }
-    }) {
-        if (luaState_.get() != nullptr) {
-           lua_atpanic(getLuaState(), &State::atPanic);
-        } else {
-            throw exception::RuntimeException(__FILE__, __LINE__, __func__, "[integral] failed to allocate integral::State");
-        }
+    State::State() try : StateView(luaL_newstate()) {
+    } catch (const std::exception &exception) {
+        throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string("[integral] failed to create new lua state: { ") + exception.what() + " }");
     }
 
-    void State::doString(const std::string &string) const {
-        if (luaL_dostring(getLuaState(), string.c_str()) != LUA_OK) {
-            std::string errorMessage;
-            try {
-                errorMessage = integral::get<std::string>(getLuaState(), -1);
-            } catch (const ArgumentException &argumentException) {
-                lua_pop(getLuaState(), 1);
-                throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string(kErrorStackArgument) + argumentException.what() + " }");
-            } catch (const std::exception &exception) {
-                lua_pop(getLuaState(), 1);
-                throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string(kErrorStackMiscellanous) + exception.what() + " }");
-            } catch (...) {
-                lua_pop(getLuaState(), 1);
-                throw exception::RuntimeException(__FILE__, __LINE__, __func__, kErrorStackUnspecified);
-            }
-            lua_pop(getLuaState(), 1);
-            throw StateException(__FILE__, __LINE__, __func__, std::string("[integral] ") + errorMessage);
+    State::~State() {
+        if (getLuaState() != nullptr) {
+            lua_close(getLuaState());
         }
     }
-
-    void State::doFile(const std::string &fileName) const {
-        if (luaL_dofile(getLuaState(), fileName.c_str()) != LUA_OK) {
-            std::string errorMessage;
-            try {
-                errorMessage = integral::get<std::string>(getLuaState(), -1);
-            } catch (const ArgumentException &argumentException) {
-                lua_pop(getLuaState(), 1);
-                throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string(kErrorStackArgument) + argumentException.what() + " }");
-            } catch (const std::exception &exception) {
-                lua_pop(getLuaState(), 1);
-                throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string(kErrorStackMiscellanous) + exception.what() + " }");
-            } catch (...) {
-                lua_pop(getLuaState(), 1);
-                throw exception::RuntimeException(__FILE__, __LINE__, __func__, kErrorStackUnspecified);
-            }
-            lua_pop(getLuaState(), 1);
-            throw StateException(__FILE__, __LINE__, __func__, std::string("[integral] ") + errorMessage);
-        }
-    }
-
-    int State::atPanic(lua_State *luaState) {
-        std::string errorMessage;
-        try {
-            errorMessage = integral::get<std::string>(luaState, -1);
-        } catch (const ArgumentException &argumentException) {
-            lua_pop(luaState, 1);
-            throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string(kErrorStackArgument) + argumentException.what() + " }");
-        } catch (const std::exception &exception) {
-            lua_pop(luaState, 1);
-            throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string(kErrorStackMiscellanous) + exception.what() + " }");
-        } catch (...) {
-            lua_pop(luaState, 1);
-            throw exception::RuntimeException(__FILE__, __LINE__, __func__, kErrorStackUnspecified);
-        }
-        lua_pop(luaState, 1);
-        throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string("[integral] lua panic error: ") + errorMessage);
-    }
-
-    const char * const State::kErrorStackArgument = "[integral] could not retrieve error message from lua stack: { ";
-    const char * const State::kErrorStackMiscellanous = "[integral] miscellaneous exception thrown retrieving error message from lua stack: { ";
-    const char * const State::kErrorStackUnspecified = "[integral] unspecified exception thrown retrieving error message from lua stack";
 }
