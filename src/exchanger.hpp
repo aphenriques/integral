@@ -255,7 +255,7 @@ namespace integral {
             T Exchanger<T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value>::type>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     int isNumber;
-                    lua_Integer integer = lua_compatibility::tointegerx(luaState, index, &isNumber);
+                    const lua_Integer integer = lua_compatibility::tointegerx(luaState, index, &isNumber);
                     if (isNumber != 0) {
                         return static_cast<T>(integer);
                     } else {
@@ -281,7 +281,7 @@ namespace integral {
                 if (lua_isuserdata(luaState, index) == 0) {
                     int isNumber;
                     // "auto" keyword for lua compatibility
-                    auto unsignedNumber = lua_compatibility::tounsignedx(luaState, index, &isNumber);
+                    const auto unsignedNumber = lua_compatibility::tounsignedx(luaState, index, &isNumber);
                     if (isNumber != 0) {
                         return static_cast<T>(unsignedNumber);
                     } else {
@@ -310,7 +310,7 @@ namespace integral {
             T Exchanger< T, typename std::enable_if<std::is_floating_point<T>::value>::type>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     int isNumber;
-                    lua_Number number = lua_compatibility::tonumberx(luaState, index, &isNumber);
+                    const lua_Number number = lua_compatibility::tonumberx(luaState, index, &isNumber);
                     if (isNumber != 0) {
                         return static_cast<T>(number);
                     } else {
@@ -364,7 +364,7 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TTABLE));
                     }
                 } else {
-                    LuaVector<T> *userData = type_manager::getConvertibleType<LuaVector<T>>(luaState, index);
+                    const LuaVector<T> *userData = type_manager::getConvertibleType<LuaVector<T>>(luaState, index);
                     if (userData != nullptr) {
                         return *userData;
                     } else {
@@ -432,7 +432,7 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TTABLE));
                     }
                 } else {
-                    LuaArray<T, N> *userData = type_manager::getConvertibleType<LuaArray<T, N>>(luaState, index);
+                    const LuaArray<T, N> *userData = type_manager::getConvertibleType<LuaArray<T, N>>(luaState, index);
                     if (userData != nullptr) {
                         return *userData;
                     } else {
@@ -490,7 +490,7 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TTABLE));
                     }
                 } else {
-                    LuaUnorderedMap<T, U> *userData = type_manager::getConvertibleType<LuaUnorderedMap<T, U>>(luaState, index);
+                    const LuaUnorderedMap<T, U> *userData = type_manager::getConvertibleType<LuaUnorderedMap<T, U>>(luaState, index);
                     if (userData != nullptr) {
                         return *userData;
                     } else {

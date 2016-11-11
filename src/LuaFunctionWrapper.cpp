@@ -32,14 +32,14 @@ namespace integral {
                 if (lua_iscfunction(luaState, index) == 0) {
                     if (lua_getupvalue(luaState, index, 1) != nullptr) {
                         // stack: upvalue
-                        LuaFunctionWrapper *luaFunctionWrapperPointer = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState, -1, kMetatableName_));
+                        const LuaFunctionWrapper *luaFunctionWrapperPointer = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState, -1, kMetatableName_));
                         if (luaFunctionWrapperPointer != nullptr) {
                             LuaFunctionWrapper luaFunctionWrapper = *luaFunctionWrapperPointer;
                             lua_pop(luaState, 1);
                             // stack:
-                            return luaFunctionWrapper;
+                            return std::move(luaFunctionWrapper);
                         } else {
-                            ArgumentException argumentException = ArgumentException::createTypeErrorException(luaState, index, "LuaFunctionWrapper");
+                            const ArgumentException argumentException = ArgumentException::createTypeErrorException(luaState, index, "LuaFunctionWrapper");
                             lua_pop(luaState, 1);
                             // stack:
                             throw argumentException;

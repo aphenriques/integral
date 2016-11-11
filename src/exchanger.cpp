@@ -61,7 +61,7 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
                     }
                 } else {
-                    std::string *userData = type_manager::getConvertibleType<std::string>(luaState, index);
+                    const std::string *userData = type_manager::getConvertibleType<std::string>(luaState, index);
                     if (userData != nullptr) {
                         return *userData;
                     } else {
@@ -72,9 +72,9 @@ namespace integral {
 
             bool Exchanger<bool>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
-                    return lua_toboolean(luaState, index);
+                    return static_cast<bool>(lua_toboolean(luaState, index));
                 } else {
-                    bool *userData = type_manager::getConvertibleType<bool>(luaState, index);
+                    const bool *userData = type_manager::getConvertibleType<bool>(luaState, index);
                     if (userData != nullptr) {
                         return *userData;
                     } else {

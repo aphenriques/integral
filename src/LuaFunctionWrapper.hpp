@@ -95,7 +95,7 @@ namespace integral {
                 }
                 lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
                     try {
-                        LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(lambdaLuaState, lua_upvalueindex(1), kMetatableName_));
+                        const LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(lambdaLuaState, lua_upvalueindex(1), kMetatableName_));
                         if (luaFunctionWrapper != nullptr) {
                             return luaFunctionWrapper->getLuaFunction()(lambdaLuaState);
                         } else {
