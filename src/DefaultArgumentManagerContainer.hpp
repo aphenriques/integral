@@ -22,8 +22,8 @@
 //
 
 
-#ifndef DefaultArgumentManagerContainer_hpp
-#define DefaultArgumentManagerContainer_hpp
+#ifndef integral_DefaultArgumentManagerContainer_hpp
+#define integral_DefaultArgumentManagerContainer_hpp
 
 #include <cstddef>
 #include <utility>
@@ -58,4 +58,4 @@ namespace integral {
     }
 }
 
-#endif /* DefaultArgumentManagerContainer_hpp */
+#endif /* integral_DefaultArgumentManagerContainer_hpp */

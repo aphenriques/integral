@@ -21,8 +21,8 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef IsTemplateClass_hpp
-#define IsTemplateClass_hpp
+#ifndef integral_IsTemplateClass_hpp
+#define integral_IsTemplateClass_hpp
 
 #include <type_traits>
 
@@ -36,4 +36,4 @@ namespace integral {
     }
 }
 
-#endif /* IsTemplateClass_hpp */
+#endif /* integral_IsTemplateClass_hpp */
