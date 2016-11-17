@@ -37,7 +37,7 @@ namespace integral {
                             LuaFunctionWrapper luaFunctionWrapper = *luaFunctionWrapperPointer;
                             lua_pop(luaState, 1);
                             // stack:
-                            return std::move(luaFunctionWrapper);
+                            return luaFunctionWrapper;
                         } else {
                             const ArgumentException argumentException = ArgumentException::createTypeErrorException(luaState, index, "LuaFunctionWrapper");
                             lua_pop(luaState, 1);
