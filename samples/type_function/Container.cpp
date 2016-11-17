@@ -2,7 +2,7 @@
 //  Container.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2015  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -50,17 +50,17 @@ extern "C" {
             });
 
             // this function takes an Id object as parameter
-            integral::setFunction(luaState, "getNumberFromId", [](const Id &id) {
+            integral::setFunction(luaState, "getNumberFromId", [](const Id &id) -> double {
                 return id.number_;
             });
 
             // type function from Container to double
-            integral::defineTypeFunction(luaState, [](Container *container) {
+            integral::defineTypeFunction(luaState, [](Container *container) -> double * {
                 return &container->id_.number_;
             });
 
             // this function takes a double as parameter
-            integral::setFunction(luaState, "getNegativeNumber", [](double number) {
+            integral::setFunction(luaState, "getNegativeNumber", [](double number) -> double {
                 return -number;
             });
 

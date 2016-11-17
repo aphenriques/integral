@@ -2,7 +2,7 @@
 //  SyntheticallyDerived.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2015  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -44,6 +44,8 @@ public:
 // SyntheticallyDerived does NOT have base classes in c++
 class SyntheticallyDerived {
 public:
+    SyntheticBase syntheticBase_;
+
     void syntheticallyDerivedMethod() const {
         std::cout << "syntheticallyDerivedMethod" << std::endl;
     }
@@ -51,8 +53,6 @@ public:
     SyntheticBase * getSyntheticBasePointer() {
         return &syntheticBase_;
     }
-
-    SyntheticBase syntheticBase_;
 };
 
 SyntheticBase * getSyntheticInheritance(SyntheticallyDerived *syntheticallyDerived) {
