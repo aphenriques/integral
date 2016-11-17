@@ -104,7 +104,7 @@ namespace integral {
                     } catch (const std::exception &exception) {
                         lua_pushstring(lambdaLuaState, (std::string("[integral] ") + exception.what()).c_str());
                     } catch (...) {
-                        lua_pushstring(lambdaLuaState, message::gkUnknownExceptionMessage);
+                        lua_pushstring(lambdaLuaState, "[integral] unknown exception thrown");
                     }
                     // error return outside catch scope so that the exception destructor can be called
                     return lua_error(lambdaLuaState);
