@@ -29,7 +29,7 @@
 
 namespace integral {
     State::State() try : StateView(luaL_newstate()) {
-    } catch (const std::exception &exception) {
+    } catch (const exception::RuntimeException &exception) {
         throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string("[integral] failed to create new lua state: { ") + exception.what() + " }");
     }
 
