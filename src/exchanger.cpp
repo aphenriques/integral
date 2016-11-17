@@ -72,7 +72,7 @@ namespace integral {
 
             bool Exchanger<bool>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
-                    return static_cast<bool>(lua_toboolean(luaState, index));
+                    return lua_toboolean(luaState, index) != 0;
                 } else {
                     const bool *userData = type_manager::getConvertibleType<bool>(luaState, index);
                     if (userData != nullptr) {
