@@ -27,8 +27,6 @@
 #include <sstream>
 #include <tuple>
 #include "core.hpp"
-#include "exception/Exception.hpp"
-#include "message.hpp"
 
 namespace integral {
     namespace utility {
@@ -36,40 +34,45 @@ namespace integral {
             const char * const gkHelpKey = "help";
         }
 
-        int printStack(lua_State *luaState) {
-            int top = lua_gettop(luaState);
-            std::cout << "stack dump: ";
+        std::string getStackString(lua_State *luaState) {
+            const int top = lua_gettop(luaState);
+            std::ostringstream stackString;
+            stackString << "stack dump: ";
             for (int i = 1; i <= top; ++i) {
-                int t = lua_type(luaState, i);
-                switch (t) {
+                const int luaType = lua_type(luaState, i);
+                switch (luaType) {
                     case LUA_TSTRING:
-                        std::cout << '"' << lua_tostring(luaState, i) << '"';
-                        break;
-
-                    case LUA_TBOOLEAN:
-                        std::cout <<(lua_toboolean(luaState, i) ? "true" : "false");
+                        stackString << '"' << lua_tostring(luaState, i) << '"';
                         break;
 
                     case LUA_TNUMBER:
-                        std::cout << lua_tonumber(luaState, i);
+                        stackString << lua_tonumber(luaState, i);
+                        break;
+                        
+                    case LUA_TBOOLEAN:
+                        stackString << (lua_toboolean(luaState, i) != 0 ? "true" : "false");
                         break;
 
                     case LUA_TLIGHTUSERDATA:
                         // this is necessary because lua_typename(luaState, LUA_TLIGHTUSERDATA) returns "userdata"
-                        std::cout << "lightuserdata";
+                        stackString << "lightuserdata";
                         break;
 
                     default:
                         if (lua_iscfunction(luaState, i) == 0)  {
-                            std::cout << lua_typename(luaState, t);
+                            stackString << lua_typename(luaState, luaType);
                         } else {
-                            std::cout << "cfunction";
+                            stackString << "cfunction";
                         }
                         break;
                 }
-                std::cout << "  ";
+                stackString << "  ";
             }
-            std::cout << std::endl;
+            return stackString.str();
+        }
+        
+        int printStack(lua_State *luaState) {
+            std::cout << getStackString(luaState) << std::endl;
             return 0;
         }
 
@@ -90,7 +93,7 @@ namespace integral {
                 lua_rawset(luaState, -3);
                 lua_pop(luaState, 1);
             } else {
-                throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
+                throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "missing table to set help");
             }
         }
 
@@ -106,7 +109,7 @@ namespace integral {
                 // stack argument: table
                 setHelp(luaState, field, fieldDescription);
             } else {
-                throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
+                throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "missing table to set item with help");
             }
         }
 
@@ -136,7 +139,7 @@ namespace integral {
                 pushNameAndValueList(luaState, nameAndValueList);
                 setWithHelp(luaState, field, fieldDescription.str().c_str());
             } else {
-                throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
+                throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "missing table to set name and value list with help");
             }
         }
     }

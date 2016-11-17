@@ -1,5 +1,5 @@
 //
-//  message.hpp
+//  UnexpectedStackException.hpp
 //  integral
 //
 //  Copyright (C) 2016  André Pereira Henriques
@@ -21,16 +21,21 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_message_hpp
-#define integral_message_hpp
+#ifndef integral_UnexpectedStackException_hpp
+#define integral_UnexpectedStackException_hpp
+
+#include <lua.hpp>
+#include "exception/Exception.hpp"
 
 namespace integral {
-    namespace detail {
-        namespace message {
-            extern const char * const gkUnknownExceptionMessage;
-            extern const char * const gkInvalidStackExceptionMessage;
-        }
-    }
+    class UnexpectedStackException : public exception::LogicException {
+    public:
+        UnexpectedStackException(lua_State *luaState, const std::string &fileName, int lineNumber, const std::string &functionName, const std::string &errorMessage);
+
+        UnexpectedStackException(lua_State *luaState, const std::string &fileName, int lineNumber, const std::string &functionName);
+
+        ~UnexpectedStackException();
+    };
 }
 
-#endif /* integral_message_hpp */
+#endif /* integral_UnexpectedStackException_hpp */

@@ -29,5 +29,6 @@
 #include "DefaultArgument.hpp"
 #include "State.hpp"
 #include "StateView.hpp"
+#include "UnexpectedStackException.hpp"
 
 #endif

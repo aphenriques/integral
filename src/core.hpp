@@ -40,8 +40,8 @@
 #include "LuaFunctionArgument.hpp"
 #include "LuaFunctionWrapper.hpp"
 #include "LuaIgnoredArgument.hpp"
-#include "message.hpp"
 #include "type_manager.hpp"
+#include "UnexpectedStackException.hpp"
 
 namespace integral {
     // Exception thrown by Caller
@@ -268,7 +268,7 @@ namespace integral {
             lua_insert(luaState, -2);
             lua_rawset(luaState, -3);
         } else {
-            throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
+            throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "missing table to set constructor");
         }
     }
 
@@ -285,7 +285,7 @@ namespace integral {
             lua_insert(luaState, -2);
             lua_rawset(luaState, -3);
         } else {
-            throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
+            throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "missing table to set lua function");
         }
     }
 
@@ -303,7 +303,7 @@ namespace integral {
             lua_insert(luaState, -2);
             lua_rawset(luaState, -3);
         } else {
-            throw exception::LogicException(__FILE__, __LINE__, __func__, detail::message::gkInvalidStackExceptionMessage);
+            throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "missing table to set function");
         }
     }
 

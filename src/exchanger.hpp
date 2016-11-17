@@ -42,8 +42,8 @@
 #include "basic.hpp"
 #include "generic.hpp"
 #include "lua_compatibility.hpp"
-#include "message.hpp"
 #include "type_manager.hpp"
+#include "UnexpectedStackException.hpp"
 #include "UserDataWrapper.hpp"
 #include "UserDataWrapperBase.hpp"
 
@@ -184,7 +184,8 @@ namespace integral {
             inline decltype(auto) get(lua_State *luaState, int index);
 
             // throws exception if more than 1 element is pushed onto the stack
-            // when "typename T" = LuaFunctionWrapper: nUpValues elements are removed from stack. That is why the stack is not checked for no element added or for elements removed
+            // when "typename T" = LuaFunctionWrapper: nUpValues elements are removed from stack.
+            // if more than one element is pushed on the stack, an exception is thrown
             template<typename T, typename ...A>
             void push(lua_State *luaState, A &&...arguments);
 
@@ -581,7 +582,7 @@ namespace integral {
                     lua_pop(luaState, 2);
                     return returnElement;
                 } else {
-                    throw exception::LogicException(__FILE__, __LINE__, __func__, std::string("expected table at index ") + std::to_string(index));
+                    throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, std::string("missing table at index ") + std::to_string(index));
                 }
             }
 
@@ -594,7 +595,7 @@ namespace integral {
                     // stack: table
                     generic::expandDummyTemplatePack((setElementInTable<S + 1, T>(luaState, std::get<S>(tuple), -1), 0)...);
                 } else {
-                    throw exception::RuntimeException(__FILE__, __LINE__, __func__, "LuaTuple is too big");
+                    throw exception::LogicException(__FILE__, __LINE__, __func__, "LuaTuple is too big");
                 }
             }
 
@@ -607,7 +608,7 @@ namespace integral {
                     // stack: table
                     generic::expandDummyTemplatePack((setElementInTable<S + 1, T>(luaState, std::forward<T>(t), -1), 0)...);
                 } else {
-                    throw exception::RuntimeException(__FILE__, __LINE__, __func__, "LuaTuple is too big");
+                    throw exception::LogicException(__FILE__, __LINE__, __func__, "LuaTuple is too big");
                 }
             }
 
@@ -652,9 +653,9 @@ namespace integral {
                 ExchangerType<T>::push(luaState, std::forward<A>(arguments)...);
                 // stack: ?...
                 const int stackIndexDelta = lua_gettop(luaState) - stackTopIndex;
+                // when "typename T" = LuaFunctionWrapper: nUpValues elements are removed from stack. That is why the stack is not checked for no element added or for elements removed
                 if (stackIndexDelta > 1) {
-                    lua_pop(luaState, stackIndexDelta);
-                    throw exception::LogicException(__FILE__, __LINE__, __func__, std::to_string(stackIndexDelta) + " elements (> 1) pushed onto the stack with exchanger::push (type: '" + typeid(T).name() + "')");
+                    throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, std::to_string(stackIndexDelta) + " more than one (1) element pushed onto the stack with exchanger::push (type: '" + typeid(T).name() + "')");
                 }
             }
 

@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <functional>
 #include <initializer_list>
+#include <string>
 #include <tuple>
 #include <utility>
 #include <lua.hpp>
@@ -34,6 +35,8 @@
 
 namespace integral {
     namespace utility {
+        std::string getStackString(lua_State *luaState);
+        
         int printStack(lua_State *luaState);
 
         // stack argument: table
