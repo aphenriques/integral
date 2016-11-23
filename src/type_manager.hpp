@@ -31,24 +31,24 @@
 #include <type_traits>
 #include <utility>
 #include <lua.hpp>
-#include "exception/Exception.hpp"
 #include "basic.hpp"
 #include "ConversionFunctionTraits.hpp"
 #include "FunctionTraits.hpp"
 #include "generic.hpp"
 #include "lua_compatibility.hpp"
+#include "UnexpectedStackException.hpp"
 #include "UserDataWrapper.hpp"
 
 // typeid(T).name() cannot be used as an automatic indentifier for metatables. It is not safe: different classes might have the same typeid(T).name() (c++ standard)
 // std::type_index is used as an automatic indentifier for metatables. Supposedly, it is safe.
 
 // TypeManager organization (hashmap):
-// REGISTRY[gkTypeMangerRegistryKey] = {[typeHash] = {[type_index_udata] = rootMetatable}}
-// REGISTRY[gkTypeMangerRegistryKey] = {[typeHash] = typeFunctionHashTable}
-// REGISTRY[gkTypeMangerRegistryKey] = typeManager
+// REGISTRY[gkTypeManagerRegistryKey] = {[typeHash] = {[type_index_udata] = rootMetatable}}
+// REGISTRY[gkTypeManagerRegistryKey] = {[typeHash] = typeHashBucket}
+// REGISTRY[gkTypeManagerRegistryKey] = typeManager
 
 // TypeManager (integral) version control:
-// REGISTRY[gkTypeMangerRegistryKey][gkTypeManagerVersionKey] = TYPE_MANAGER_VERSION
+// REGISTRY[gkTypeManagerRegistryKey][gkTypeManagerVersionKey] = TYPE_MANAGER_VERSION
 
 // there might be clashes with typeHash. It is NOT a problem. TypeManager is implemented as a hashmap.
 
@@ -59,26 +59,16 @@
 namespace integral {
     namespace detail {
         namespace type_manager {
-            extern const char * const gkTypeMangerRegistryKey;
-
+            extern const char * const gkTypeManagerRegistryKey;
             extern const char * const gkTypeIndexKey;
-
             extern const char * const gkTypeManagerVersionKey;
-
             extern const char * const gkTypeManagerVersion;
-
             extern const char * const gkTypeIndexMetatableName;
-
             extern const char * const gkTypeFunctionsKey;
-
             extern const char * const gkUserDataWrapperBaseTableKey;
-
             extern const char * const gkUnderlyingTypeFunctionKey;
-
             extern const char * const gkInheritanceSearchTagKey;
-
             extern const char * const gkInheritanceKey;
-
             extern const char * const gkInheritanceIndexMetamethodKey;
 
             enum class InheritanceTable : int {
@@ -108,8 +98,11 @@ namespace integral {
             UserDataWrapper<T> * getUserDataWrapper(lua_State *luaState, int index);
 
             template<typename T>
-            void pushRootMetatableFromTypeHashTable(lua_State *luaState, const std::type_index &typeIndex);
+            void pushRootMetatableFromTypeHashBucketTable(lua_State *luaState, const std::type_index &typeIndex);
 
+            // stack argument: typeManager
+            // returns rootMetatable
+            // pops typemanager from stack
             template<typename T>
             void pushRootMetatableFromTypeManager(lua_State *luaState, const std::type_index &typeIndex, std::size_t typeHash);
 
@@ -140,23 +133,23 @@ namespace integral {
             template<typename F>
             void defineTypeFunction(lua_State *luaState, F &&typeFunction);
 
-            // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic'inheritance)
+            // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic' inheritance)
             // index: metatable to be tagged
             bool checkInheritanceSearchTag(lua_State *luaState, int index);
 
-            // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic'inheritance)
+            // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic' inheritance)
             // index: metatable to be tagged
             void tagInheritanceSearch(lua_State *luaState, int index);
 
-            // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic'inheritance)
+            // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic' inheritance)
             // index: metatable to be tagged
             void untagInheritanceSearch(lua_State *luaState, int index);
 
-            // index: userdata (isUnderlyingLightUserData = false) or lightuserdata (isUnderlyingLightUserData = true) of the underlying type of a userdata stack index
+            // index: userdata or lightuserdata of the underlying type of a userdata
             // stack argument: metatable
             // returns true if the convertible type is pushed onto the stack, and false otherwise
             // metatable will be popped from stack in either case
-            bool pushDirectConvertibleType(lua_State *luaState, int index, const std::type_index &convertibleTypeIndex, bool isUnderlyingLightUserData);
+            bool pushDirectConvertibleType(lua_State *luaState, int index, const std::type_index &convertibleTypeIndex);
 
             // index: userdata (recursion = false) or lightuserdata (recursion = true) of the underlying type of a userdata stack index
             // stack argument: metatable
@@ -227,31 +220,35 @@ namespace integral {
             }
 
             template<typename T>
-            void pushRootMetatableFromTypeHashTable(lua_State *luaState, const std::type_index &typeIndex) {
-                // stack: typeFunctionHashTable
+            void pushRootMetatableFromTypeHashBucketTable(lua_State *luaState, const std::type_index &typeIndex) {
+                // stack: typeHashBucket
                 pushTypeIndexUserData(luaState, typeIndex);
-                // stack: typeFunctionHashTable | type_index_udata*
+                // stack: typeHashBucket | type_index_udata*
                 lua_newtable(luaState);
-                // stack: typeFunctionHashTable | type_index_udata* | rootMetatable*
+                // stack: typeHashBucket | type_index_udata* | rootMetatable*
                 lua_pushstring(luaState, "__index");
+                // stack: typeHashBucket | type_index_udata* | rootMetatable* | "__index"
                 lua_pushvalue(luaState, -2); // duplicates the metatable
+                // stack: typeHashBucket | type_index_udata* | rootMetatable* | "__index" | rootMetatable*
                 lua_rawset(luaState, -3); // metatable.__index = metatable
+                // stack: typeHashBucket | type_index_udata* | rootMetatable*
                 basic::setLuaFunction(luaState, "__gc", [](lua_State *lambdaLuaState) -> int {
                     static_cast<UserDataWrapper<T> *>(lua_touserdata(lambdaLuaState, 1))->~UserDataWrapper<T>();
                     return 0;
                 }, 0);
-                // stack: typeFunctionHashTable | type_index_udata* | rootMetatable*
+                // stack: typeHashBucket | type_index_udata* | rootMetatable*
                 lua_pushstring(luaState, gkTypeIndexKey);
-                // stack: typeFunctionHashTable | type_index_udata* | rootMetatable* | gkTypeIndexKey
+                // stack: typeHashBucket | type_index_udata* | rootMetatable* | gkTypeIndexKey
                 lua_pushvalue(luaState, -3);
-                // stack: typeFunctionHashTable | type_index_udata* | rootMetatable* | gkTypeIndexKey | type_index_udata*
+                // stack: typeHashBucket | type_index_udata* | rootMetatable* | gkTypeIndexKey | type_index_udata*
                 lua_rawset(luaState, -3); // used for getUserDataWrapper
-                // stack: typeFunctionHashTable | type_index_udata* | rootMetatable*
+                // stack: typeHashBucket | type_index_udata* | rootMetatable*
                 lua_pushvalue(luaState, -1);
-                // stack: typeFunctionHashTable | type_index_udata* | rootMetatable* | rootMetatable*
+                // stack: typeHashBucket | type_index_udata* | rootMetatable* | rootMetatable*
                 lua_insert(luaState, -4);
-                // stack: rootMetatable* | typeFunctionHashTable | type_index_udata* | rootMetatable*
+                // stack: rootMetatable* | typeHashBucket | type_index_udata* | rootMetatable*
                 lua_rawset(luaState, -3);
+                // stack: rootMetatable | typeHashBucket
                 lua_pop(luaState, 1);
                 // stack: rootMetatable
                 setUserDataWrapperBaseTable<T>(luaState);
@@ -269,16 +266,18 @@ namespace integral {
                 // stack: typeManager
                 static_assert(sizeof(typeHash) <= sizeof(lua_Integer), "lua_Integer cannot accommodate typeHash");
                 lua_pushinteger(luaState, static_cast<lua_Integer>(typeHash));
+                // stack: typeManager | typeHash
                 lua_newtable(luaState);
+                // stack: typeManager | typeHash | typeHashBucket*
                 lua_pushvalue(luaState, -1);
-                // stack: typeManager | typeHash | typeFunctionHashTable* | typeFunctionHashTable*
+                // stack: typeManager | typeHash | typeHashBucket* | typeHashBucket*
                 lua_insert(luaState, -4);
-                // stack: typeFunctionHashTable* | typeManager | typeHash | typeFunctionHashTable*
+                // stack: typeHashBucket* | typeManager | typeHash | typeHashBucket*
                 lua_rawset(luaState, -3);
-                // stack: typeFunctionHashTable | typeManager
+                // stack: typeHashBucket | typeManager
                 lua_pop(luaState, 1);
-                // stack: typeFunctionHashTable
-                pushRootMetatableFromTypeHashTable<T>(luaState, typeIndex);
+                // stack: typeHashBucket
+                pushRootMetatableFromTypeHashBucketTable<T>(luaState, typeIndex);
                 // stack: rootMetatable
             }
 
@@ -290,51 +289,67 @@ namespace integral {
                 static_assert(std::is_same<generic::BasicType<T>, std::string>::value == false, "cannot push std::string metatable. integral treats it as a primitive lua type");
                 const std::type_index typeIndex = typeid(UserDataWrapper<T>);
                 const std::size_t typeHash = typeIndex.hash_code();
-                lua_pushstring(luaState, gkTypeMangerRegistryKey);
+                lua_pushstring(luaState, gkTypeManagerRegistryKey);
+                // stack: gkTypeManagerRegistryKey
                 lua_rawget(luaState, LUA_REGISTRYINDEX);
+                // stack: typeManager (?)
                 if (lua_istable(luaState, -1) != 0) {
                     // stack: typeManager
                     static_assert(sizeof(typeHash) <= sizeof(lua_Integer), "lua_Integer cannot accommodate typeHash");
                     lua_pushinteger(luaState, static_cast<lua_Integer>(typeHash));
+                    // stack: typeManager | typeHash
                     lua_rawget(luaState, -2);
+                    // stack: typeManager | typeHashBucket (?)
                     if (lua_istable(luaState, -1) != 0) {
-                        // stack: typeManager | typeFunctionHashTable
+                        // stack: typeManager | typeHashBucket
                         lua_remove(luaState, -2);
-                        // stack: typeFunctionHashTable
+                        // stack: typeHashBucket
                         lua_pushnil(luaState);
+                        // stack: typeHashBucket | nil
                         for (int hasNext = lua_next(luaState, -2); hasNext != 0; lua_pop(luaState, 1), hasNext = lua_next(luaState, -2)) {
                             std::type_index *storedTypeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -2, gkTypeIndexMetatableName));
-                            // stack: typeFunctionHashTable | type_index_udata | rootMetatable
+                            // stack: typeHashBucket | type_index_udata (?) | rootMetatable (?)
                             if (storedTypeIndex != nullptr) {
+                                // stack: typeHashBucket | type_index_udata | rootMetatable (?)
                                 if (*storedTypeIndex == typeIndex) {
                                     lua_remove(luaState, -2);
-                                    lua_remove(luaState, -2);
-                                    // stack: rootMetatable
-                                    return false;
+                                    // stack: typeHashBucket | rootMetatable (?)
+                                    if (lua_istable(luaState, -1) != 0) {
+                                        // stack: typeHashBucket | rootMetatable
+                                        lua_remove(luaState, -2);
+                                        // stack: rootMetatable
+                                        return false;
+                                    } else {
+                                        // stack: typeHashBucket | ?
+                                        throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "corrupted TypeManager: expected rootMetatable at index -1");
+                                    }
                                 }
                             } else {
-                                lua_pop(luaState, 3);
-                                throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted TypeManager");
+                                // stack: typeHashBucket | ? | rootMetatable (?)
+                                throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "corrupted TypeManager: expected type_index_udata at index -2");
                             }
-                            // stack: typeFunctionHashTable | type_index_udata | rootMetatable
+                            // stack: typeHashBucket | type_index_udata | rootMetatable (?)
                         }
-                        // stack: typeFunctionHashTable
-                        pushRootMetatableFromTypeHashTable<T>(luaState, typeIndex);
+                        // stack: typeHashBucket
+                        pushRootMetatableFromTypeHashBucketTable<T>(luaState, typeIndex);
                         // stack: rootMetatable
                     } else {
-                        // stack: typeManager | nil
+                        // stack: typeManager | nil (?)
                         lua_pop(luaState, 1);
+                        // stack: typeManager
                         pushRootMetatableFromTypeManager<T>(luaState, typeIndex, typeHash);
                         // stack: rootMetatable
                     }
                 } else {
-                    // stack: nil
+                    // stack: nil (?)
                     lua_pop(luaState, 1);
+                    // stack:
                     lua_newtable(luaState);
-                    lua_pushstring(luaState, gkTypeMangerRegistryKey);
-                    // stack: typeManager* | gkTypeMangerRegistryKey
+                    // stack: typeManager*
+                    lua_pushstring(luaState, gkTypeManagerRegistryKey);
+                    // stack: typeManager* | gkTypeManagerRegistryKey
                     lua_pushvalue(luaState, -2);
-                    // stack: typeManager* | gkTypeMangerRegistryKey | typeManager*
+                    // stack: typeManager* | gkTypeManagerRegistryKey | typeManager*
                     lua_rawset(luaState, LUA_REGISTRYINDEX);
                     // stack: typeManager
                     lua_pushstring(luaState, gkTypeManagerVersionKey);
@@ -355,7 +370,7 @@ namespace integral {
             }
 
             // metatable[gkTypeFunctionsKey] = {[typeHash] = {[type_index_udata] = typeFunction}}
-            // metatable[gkTypeFunctionsKey] = {[typeHash] = typeFunctionHashTable}
+            // metatable[gkTypeFunctionsKey] = {[typeHash] = typeHashBucket}
             // metatable[gkTypeFunctionsKey] = typeFunctionTable
             template<typename D, typename B>
             void setTypeFunction(lua_State *luaState) {
@@ -363,18 +378,18 @@ namespace integral {
                 std::type_index typeIndex = typeid(B);
                 // stack: metatable
                 pushTypeFunctionHashTable(luaState, typeIndex);
-                // stack: metatable | typeFunctionHashTable
+                // stack: metatable | typeHashBucket
                 pushTypeIndexUserData(luaState, typeIndex);
-                // stack: metatable | typeFunctionHashTable| type_index_udata*
+                // stack: metatable | typeHashBucket | type_index_udata*
                 lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
                     if (lua_islightuserdata(lambdaLuaState, 1) != 0) {
                         lua_pushlightuserdata(lambdaLuaState, static_cast<void *>(static_cast<B *>(static_cast<D *>(lua_touserdata(lambdaLuaState, 1)))));
                         return 1;
                     } else {
-                        throw exception::LogicException(__FILE__, __LINE__, __func__, "conversion function expected underlying lightuserdata");
+                        throw UnexpectedStackException(lambdaLuaState, __FILE__, __LINE__, __func__, "conversion function expected underlying lightuserdata");
                     }
                 }, 0);
-                // stack: metatable | typeFunctionHashTable | type_index_udata* | function*
+                // stack: metatable | typeHashBucket | type_index_udata* | function*
                 lua_rawset(luaState, -3);
                 lua_pop(luaState, 1);
                 // stack: metatable
@@ -389,24 +404,27 @@ namespace integral {
                 std::type_index typeIndex = typeid(ConversionType);
                 // stack: metatable
                 pushTypeFunctionHashTable(luaState, typeIndex);
-                // stack: metatable | typeFunctionHashTable
+                // stack: metatable | typeHashBucket
                 pushTypeIndexUserData(luaState, typeIndex);
-                // stack: metatable | typeFunctionHashTable| type_index_udata*
+                // stack: metatable | typeHashBucket | type_index_udata*
                 basic::pushUserData<std::function<ConversionType *(OriginalType *)>>(luaState, std::forward<F>(typeFunction));
+                // stack: metatable | typeHashBucket | type_index_udata* | typeFunction_udata_no_metatable
                 basic::pushClassMetatable<std::function<ConversionType *(OriginalType *)>>(luaState);
+                // stack: metatable | typeHashBucket | type_index_udata* | typeFunction_udata_no_metatable | typeFunction_udata_metatable
                 lua_setmetatable(luaState, -2);
-                // stack: metatable | typeFunctionHashTable| type_index_udata* | typeFunction_udata
+                // stack: metatable | typeHashBucket | type_index_udata* | typeFunction_udata
                 lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
                     // no need for exception checking. Possible exceptions thrown by conversion function will be caught in [Lua]FunctionWrapperCaller. Type functions are only called by exchanger.
                     if (lua_islightuserdata(lambdaLuaState, 1) != 0) {
                         lua_pushlightuserdata(lambdaLuaState, static_cast<void *>((*static_cast<std::function<ConversionType *(OriginalType *)> *>(lua_touserdata(lambdaLuaState, lua_upvalueindex(1))))(static_cast<OriginalType *>(lua_touserdata(lambdaLuaState, 1)))));
                         return 1;
                     } else {
-                        throw exception::LogicException(__FILE__, __LINE__, __func__, "custom conversion function expected underlying lightuserdata");
+                        throw UnexpectedStackException(lambdaLuaState, __FILE__, __LINE__, __func__, "custom conversion function expected underlying lightuserdata");
                     }
                 }, 1);
-                // stack: metatable | typeFunctionHashTable | type_index_udata* | function*
+                // stack: metatable | typeHashBucket | type_index_udata* | function*
                 lua_rawset(luaState, -3);
+                // stack: metatable | typeHashBucket
                 lua_pop(luaState, 1);
                 // stack: metatable
             }
@@ -442,6 +460,7 @@ namespace integral {
             void setUserDataWrapperBaseTable(lua_State *luaState) {
                 // stack: metatable
                 lua_pushstring(luaState, gkUserDataWrapperBaseTableKey);
+                // stack: metatable | gkUserDataWrapperBaseTableKey
                 lua_createtable(luaState, 2, 0);
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable*
                 pushTypeIndexUserData<UserDataWrapperBase>(luaState);
@@ -469,14 +488,17 @@ namespace integral {
                         // stack: userdata | typeTLightUserData
                         T * lightUserData = static_cast<T *>(lua_touserdata(luaState, -1));
                         lua_pop(luaState, 2);
+                        // stack:
                         return lightUserData;
                     } else {
                         // stack: userdata
                         lua_pop(luaState, 1);
+                        // stack:
                     }
                 } else {
                     // stack: userdata
                     lua_pop(luaState, 1);
+                    // stack:
                 }
                 return nullptr;
             }
@@ -537,10 +559,13 @@ namespace integral {
             void setInheritanceTable(lua_State *luaState) {
                 // stack: metatable
                 lua_pushstring(luaState, gkInheritanceKey);
+                // stack: metatable | gkInheritanceKey
                 lua_rawget(luaState, -2);
+                // stack: metatable | inheritanceTable (?)
                 if (lua_istable(luaState, -1) == 0) {
                     // stack: metatable | nil
                     lua_pop(luaState, 1);
+                    // stack: metatable
                     lua_newtable(luaState);
                     // stack: metatable | inheritanceTable*
                     lua_pushstring(luaState, gkInheritanceKey);
@@ -553,9 +578,9 @@ namespace integral {
                 lua_createtable(luaState, 2, 0);
                 // stack: metatable | inheritanceTable | baseTable*
                 lua_compatibility::pushunsigned(luaState, lua_compatibility::rawlen(luaState, -2) + 1);
-                // stack: metatable | inheritanceTable | baseTable* | inheritanceTableLength
+                // stack: metatable | inheritanceTable | baseTable* | baseTableIndex
                 lua_pushvalue(luaState, -2);
-                // stack: metatable | inheritanceTable | baseTable* | inheritanceTableLength | baseTable*
+                // stack: metatable | inheritanceTable | baseTable* | baseTableIndex | baseTable*
                 lua_rawset(luaState, -4);
                 // stack: metatable | inheritanceTable | baseTable
                 pushTypeIndexUserData<B>(luaState);
