@@ -1,7 +1,8 @@
 ## TODO
-* makeFunctionWrapper
-* makeLuaFunctionWrapper
 * test suite
+* change makefiles to most recent model on github
+* makeFunctionWrapper (not necessary in c++17)
+* makeLuaFunctionWrapper (not necessary in c++17)
 * intel compiler
 * coverity
 * assembly classes (abstraction over integral core - luabind style)
@@ -9,6 +10,7 @@
   * c++17: type_traits is*_v and *_v
   * c++17: enable -Wunused-parameter and use [[maybe_unused]]
   * c++17: fold expressions (search and replace expansion/recursion functions)
+  * c++17: template type deduction by constructor
 * compare performance with other binding libraries
 * sandbox (in lua script?)
   * must be easily disabled
@@ -23,6 +25,7 @@
   * check copyright notices
   * check compatibility with lua 5.1, 5.2 and 5.3 and luaJIT
   * update compatibility information on README.md and lua wiki
+* test suite
 
 ## Rationales
 * removing occurrences of exchanger::Exchanger outside of exchanger.h is not possible because LuaFunctionArgument.h includes Caller.h which includes exchanger.h (cyclic dependency due to LuaFunctionArgument::call)
