@@ -14,6 +14,9 @@ shared:
 samples: static
 	cd samples && $(MAKE) all
 
+test: static
+	cd test && $(MAKE) all
+
 install: all
 	mkdir -p $(INSTALL_INC) $(INSTALL_INC)/exception $(INSTALL_LIB)
 	install -p -m 0644 src/*.hpp $(INSTALL_INC)
@@ -27,3 +30,4 @@ uninstall:
 clean:
 	cd src && $(MAKE) $@
 	cd samples && $(MAKE) $@
+	cd test && $(MAKE) $@
