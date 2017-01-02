@@ -26,7 +26,7 @@
 #include <string>
 #include <utility>
 #include <lua.hpp>
-#include "integral.hpp"
+#include <integral.hpp>
 #include "Match.hpp"
 
 extern "C" {

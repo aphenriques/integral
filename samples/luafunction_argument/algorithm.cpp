@@ -26,7 +26,7 @@
 #include <iostream>
 #include <string>
 #include <lua.hpp>
-#include "integral.hpp"
+#include <integral.hpp>
 
 namespace {
     integral::LuaVector<int> transform(integral::LuaVector<int> luaVectorCopy, const integral::LuaFunctionArgument &luaFunctionArgument) {

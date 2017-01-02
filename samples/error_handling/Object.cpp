@@ -24,7 +24,7 @@
 #include <stdexcept>
 #include <string>
 #include <lua.hpp>
-#include "integral.hpp"
+#include <integral.hpp>
 
 class Object {
 public:

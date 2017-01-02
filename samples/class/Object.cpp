@@ -25,7 +25,7 @@
 #include <sstream>
 #include <string>
 #include <lua.hpp>
-#include "integral.hpp"
+#include <integral.hpp>
 
 class Persistence {
 public:

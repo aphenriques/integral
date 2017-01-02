@@ -23,7 +23,7 @@
 
 #include <iostream>
 #include <lua.hpp>
-#include "integral.hpp"
+#include <integral.hpp>
 
 void printHello() {
     std::cout << "Hello!" << std::endl;

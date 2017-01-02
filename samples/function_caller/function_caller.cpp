@@ -23,7 +23,7 @@
 
 #include <iostream>
 #include <lua.hpp>
-#include "integral.hpp"
+#include <integral.hpp>
 
 int main(int argc, char * argv[]) {
     lua_State *luaState = nullptr;

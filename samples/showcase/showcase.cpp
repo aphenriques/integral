@@ -25,7 +25,7 @@
 #include <string>
 #include <functional>
 #include <lua.hpp>
-#include "integral.hpp"
+#include <integral.hpp>
 
 class Base {
 public:

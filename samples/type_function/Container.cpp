@@ -24,7 +24,7 @@
 #include <exception>
 #include <functional>
 #include <lua.hpp>
-#include "integral.hpp"
+#include <integral.hpp>
 
 class Id {
 public:

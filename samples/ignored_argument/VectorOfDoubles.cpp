@@ -24,7 +24,7 @@
 #include <functional>
 #include <string>
 #include <lua.hpp>
-#include "integral.hpp"
+#include <integral.hpp>
 
 extern "C" {
     LUALIB_API int luaopen_libVectorOfDoubles(lua_State *luaState) {
