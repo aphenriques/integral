@@ -10,7 +10,7 @@ DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 
 PROJECT_STATIC_LIB:=../src/$(PROJECT_STATIC_LIB_NAME)
 
-LDLIBS+=$(LIB_LUA_FLAG)
+LDLIBS+=$(LIB_LUA_FLAG) -ldl
 
 CXXFLAGS+=-I../src -I../Catch/single_include/
 
