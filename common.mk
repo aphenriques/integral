@@ -5,7 +5,7 @@ INSTALL_INC:=$(INSTALL_TOP)/include/$(PROJECT_NAME)
 INSTALL_LIB:=$(INSTALL_TOP)/lib
 
 # TODO with c++17: remove -Wno-unused-parameter and -Wno-unused-but-set-parameter and use [[maybe_unused]] attribute
-CXXFLAGS:=-std=c++14 -O3 -I/usr/local/include -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wno-missing-braces -Wno-unused-parameter -pedantic
+CXXFLAGS:=-std=c++14 -O0 -I/usr/local/include -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wno-missing-braces -Wno-unused-parameter -pedantic
 LDFLAGS:=-L/usr/local/lib
 
 LIB_LUA_FLAG:=-llua
