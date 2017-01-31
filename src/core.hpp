@@ -2,7 +2,7 @@
 //  core.hpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2015, 2016  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -30,6 +30,7 @@
 #include <utility>
 #include <lua.hpp>
 #include "Caller.hpp"
+#include "ClassMetatable.hpp"
 #include "ConstructorWrapper.hpp"
 #include "ConversionFunctionTraits.hpp"
 #include "DefaultArgument.hpp"
@@ -46,7 +47,11 @@
 namespace integral {
     // Exception thrown by Caller
     using CallerException = detail::CallerException;
-
+    
+    // Proxy to lua class metatable of type T
+    template<typename T>
+    using ClassMetatable = detail::ClassMetatable<T>;
+    
     // Proxy to any value in lua state.
     // It is meant to be used as an argument to a C++ function.
     using LuaIgnoredArgument = detail::LuaIgnoredArgument;
@@ -227,7 +232,7 @@ namespace integral {
 
     template<typename T>
     inline void pushClassMetatable(lua_State *luaState) {
-        detail::type_manager::pushClassMetatable<T>(luaState);
+        push<ClassMetatable<T>>(luaState);
     }
 
     template<typename D, typename B>
