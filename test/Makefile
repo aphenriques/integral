@@ -2,7 +2,7 @@ include ../common.mk
 
 SRC_DIRS:=.
 
-SAMPLE_EXECUTALBE:=test
+TARGET:=integral_test
 
 SRCS:=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
 OBJS:=$(addsuffix .o, $(basename $(SRCS)))
@@ -14,15 +14,18 @@ LDLIBS+=$(LIB_LUA_FLAG) -ldl
 
 CXXFLAGS+=-I../src -I../Catch/single_include/
 
-.PHONY: all clean
+.PHONY: all test clean
 
-all: $(SAMPLE_EXECUTALBE)
+all: $(TARGET)
 
-$(SAMPLE_EXECUTALBE): $(OBJS) $(PROJECT_STATIC_LIB)
+test: all
+	./$(TARGET)
+
+$(TARGET): $(OBJS) $(PROJECT_STATIC_LIB)
 	$(CXX) $(OBJS) $(PROJECT_STATIC_LIB) $(LDFLAGS) $(LDLIBS) -o $@
 
 clean:
-	$(RM) $(DEPS) $(OBJS) $(SAMPLE_EXECUTALBE)
+	$(RM) $(DEPS) $(OBJS) $(TARGET)
 
 %.d: %.cpp
 	$(CXX) $(CXXFLAGS) -MP -MM -MF $@ -MT '$@ $(addsuffix .o, $(basename $<))' $<
