@@ -1,8 +1,8 @@
 //
-//  test.cpp
+//  integral_test.cpp
 //  integral
 //
-//  Copyright (C) 2016  André Pereira Henriques
+//  Copyright (C) 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -235,6 +235,8 @@ TEST_CASE("integral test") {
         REQUIRE_THROWS_AS(stateView.doString("object.getId()"), integral::StateException);
         REQUIRE_THROWS_AS(stateView.doString("Object.throwException()"), integral::StateException);
     }
+    SECTION("integral::Reference ClassMetatable, methods, functions and luaFunctions") {
+    }
     SECTION("integral::push and integral::get with Adaptors") {
         const std::vector<int> vector{1, 2, 3};
         integral::push<integral::LuaVector<int>>(luaState.get(), vector);
@@ -267,8 +269,16 @@ TEST_CASE("integral test") {
         REQUIRE_THROWS_AS(stateView["x"][2].get<int>(), integral::ReferenceException);
         REQUIRE_THROWS_AS(stateView["x"]["y"].get<std::string>(), integral::ReferenceException);
         REQUIRE_THROWS_AS(stateView["x"]["y"][1].get<int>(), integral::ReferenceException);
+        const std::unordered_map<std::string, integral::LuaArray<Object, 2>> unorderedMapOfLuaArrays{{"a", std::array<Object, 2>{Object("objectA1"), Object("objectA2")}}, {"b", std::array<Object, 2>{Object("objectB1"), Object("objectB2")}}};
+        stateView["y"].set<integral::LuaUnorderedMap<std::string, integral::LuaArray<Object, 2>>>(unorderedMapOfLuaArrays);
+        REQUIRE(stateView["y"]["a"][1].get<Object>() == Object("objectA1"));
+        REQUIRE(stateView["y"]["a"][2].get<Object>() == Object("objectA2"));
+        REQUIRE(stateView["y"]["b"][1].get<Object>() == Object("objectB1"));
+        REQUIRE(stateView["y"]["b"][2].get<Object>() == Object("objectB2"));
     }
     SECTION("lua table to Adaptors") {
+        lua_newtable(luaState.get());
+        lua_setglobal(luaState.get(), "lib");
         REQUIRE(luaL_dostring(luaState.get(), "v = {}") == LUA_OK);
         // TODO with Object interaction
     }
