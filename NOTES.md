@@ -8,7 +8,6 @@
 * makeConstructorWrapper (not necessary in c++17: template type deduction in constructor)
 * intel compiler
 * coverity
-* assembly classes (abstraction over integral core - luabind style)
 * c++17:
   * c++17: type_traits is*_v and *_v
   * c++17: enable -Wunused-parameter and use [[maybe_unused]]
