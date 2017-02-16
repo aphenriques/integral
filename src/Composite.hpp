@@ -81,9 +81,13 @@ namespace integral {
         template<typename T, typename K, typename V>
         void Composite<T, K, V>::push(lua_State *luaState) const {
             exchanger::push<T>(luaState, chainedComposite_);
+            // stack: table 
             exchanger::push<K>(luaState, key_);
+            // stack: table | key
             exchanger::push<V>(luaState, value_);
+            // stack: table | key | value
             lua_rawset(luaState, -3);
+            // stack: table 
         }
 
         namespace exchanger {
