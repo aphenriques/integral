@@ -2,7 +2,7 @@
 //  LuaIgnoredArgument.hpp
 //  integral
 //
-//  Copyright (C) 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2014, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -25,7 +25,6 @@
 #define integral_LuaIgnoredArgument_hpp
 
 #include <lua.hpp>
-#include "Adaptor.hpp"
 #include "exchanger.hpp"
 
 namespace integral {
@@ -37,8 +36,6 @@ namespace integral {
             LuaIgnoredArgument & operator=(const LuaIgnoredArgument &) = delete;
 
             LuaIgnoredArgument(LuaIgnoredArgument &&) = default;
-
-        protected:
             LuaIgnoredArgument() = default;
         };
 
@@ -55,8 +52,7 @@ namespace integral {
 
         namespace exchanger {
             inline LuaIgnoredArgument Exchanger<LuaIgnoredArgument>::get(lua_State *luaState, int index) {
-                // Adaptor<LuaIgnoredArgument> is utilized to acces protected constructor of LuaIgnoredArgument
-                return Adaptor<LuaIgnoredArgument>();
+                return LuaIgnoredArgument();
             }
         }
     }

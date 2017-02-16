@@ -2,7 +2,7 @@
 //  Reference.hpp
 //  integral
 //
-//  Copyright (C) 2016  André Pereira Henriques
+//  Copyright (C) 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -24,11 +24,11 @@
 #ifndef integral_Reference_hpp
 #define integral_Reference_hpp
 
+#include <type_traits>
 #include <utility>
 #include <lua.hpp>
 #include "exception/Exception.hpp"
 #include "exception/TemplateClassException.hpp"
-#include "Adaptor.hpp"
 #include "ArgumentException.hpp"
 #include "exchanger.hpp"
 #include "generic.hpp"
@@ -39,28 +39,30 @@ namespace integral {
     namespace detail {
         template<typename K, typename R>
         class Reference {
+            static_assert(std::is_reference<K>::value == false, "K cannot be a reference type");
+            static_assert(std::is_reference<R>::value == false, "R cannot be a reference type");
         public:
             // non-copyable
             Reference(const Reference &) = delete;
-            Reference<K, R> & operator=(const Reference &) = delete;
+            Reference & operator=(const Reference &) = delete;
 
             Reference(Reference &&) = default;
+
+            inline Reference(K &&key, R &&chainedReference);
 
             inline lua_State * getLuaState() const;
             void push() const;
             std::string getReferenceString() const;
 
+            // generic::BasicType<L> is used because L might be a reference
             template<typename L>
-            inline Reference<L, Reference<K, R>> operator[](L &&key) &&;
+            inline Reference<generic::BasicType<L>, Reference<K, R>> operator[](L &&key) &&;
 
             template<typename V>
             Reference<K, R> & set(V &&value);
 
             template<typename V>
             V get() const;
-
-        protected:
-            inline Reference(K &&key, R &&chainedReference);
 
         private:
             K key_;
@@ -70,6 +72,9 @@ namespace integral {
         using ReferenceException = exception::TemplateClassException<Reference, exception::RuntimeException>;
 
         //--
+
+        template<typename K, typename R>
+        inline Reference<K, R>::Reference(K &&key, R &&chainedReference) : key_(std::forward<K>(key)), chainedReference_(std::forward<R>(chainedReference)) {}
 
         template<typename K, typename R>
         inline lua_State * Reference<K, R>::getLuaState() const {
@@ -82,8 +87,7 @@ namespace integral {
             // stack: ?
             if (lua_istable(getLuaState(), -1) != 0) {
                 // stack: chainedReferenceTable
-                // BasicType<K> must be used especially due to string literal type
-                exchanger::push<generic::BasicType<K>>(getLuaState(), key_);
+                exchanger::push<K>(getLuaState(), key_);
                 // stack: chainedReferenceTable | key
                 lua_rawget(getLuaState(), -2);
                 // stack: chainedReferenceTable | reference
@@ -104,9 +108,8 @@ namespace integral {
 
         template<typename K, typename R>
         template<typename L>
-        inline Reference<L, Reference<K, R>> Reference<K, R>::operator[](L &&key) && {
-            // Adaptor<detail::Reference<...>> is utilized to access protected constructor of detail::Reference<...>
-            return Adaptor<detail::Reference<L, Reference<K, R>>>(std::forward<L>(key), std::move(*this));
+        inline Reference<generic::BasicType<L>, Reference<K, R>> Reference<K, R>::operator[](L &&key) && {
+            return Reference<generic::BasicType<L>, Reference<K, R>>(std::forward<L>(key), std::move(*this));
         }
 
         template<typename K, typename R>
@@ -116,9 +119,9 @@ namespace integral {
             // stack: ?
             if (lua_istable(getLuaState(), -1) != 0) {
                 // stack: chainedReferenceTable
-                // BasicType<K> must be used especially due to string literal type
-                exchanger::push<generic::BasicType<K>>(getLuaState(), key_);
+                exchanger::push<K>(getLuaState(), key_);
                 // stack: chainedReferenceTable | key
+                // BasicType<V> is used because V might be a reference
                 exchanger::push<generic::BasicType<V>>(getLuaState(), std::forward<V>(value));
                 // stack: chainedReferenceTable | key | value
                 lua_rawset(getLuaState(), -3);
@@ -151,9 +154,6 @@ namespace integral {
                 throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] invalid type getting reference  " ) + getReferenceString() + ": " + argumentException.what());
             }
         }
-
-        template<typename K, typename R>
-        inline Reference<K, R>::Reference(K &&key, R &&chainedReference) : key_(std::forward<K>(key)),  chainedReference_(std::forward<R>(chainedReference)) {}
     }
 }
 

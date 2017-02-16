@@ -2,7 +2,7 @@
 //  exchanger.hpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2015, 2016  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -648,7 +648,7 @@ namespace integral {
 
             template<typename T, typename ...A>
             void push(lua_State *luaState, A &&...arguments) {
-                static_assert(std::is_reference<T>::value == false, "cannot push reference");
+                static_assert(std::is_reference<generic::StringLiteralFilterType<T>>::value == false, "cannot push reference");
                 const int stackTopIndex = lua_gettop(luaState);
                 ExchangerType<T>::push(luaState, std::forward<A>(arguments)...);
                 // stack: ?...

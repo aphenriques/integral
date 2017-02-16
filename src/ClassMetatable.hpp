@@ -24,8 +24,11 @@
 #ifndef integral_ClassMetatable_hpp
 #define integral_ClassMetatable_hpp
 
+#include <utility>
 #include <lua.hpp>
+#include "Composite.hpp"
 #include "exchanger.hpp"
+#include "generic.hpp"
 #include "type_manager.hpp"
 
 namespace integral {
@@ -38,9 +41,10 @@ namespace integral {
             ClassMetatable & operator=(const ClassMetatable &) = delete;
 
             ClassMetatable(ClassMetatable &&) = default;
-
-        protected:
             ClassMetatable() = default;
+
+            template<typename K, typename V>
+            inline Composite<ClassMetatable<T>, generic::BasicType<K>, generic::BasicType<V>> set(K&& key, V &&value) &&;
         };
 
         namespace exchanger {
@@ -48,15 +52,27 @@ namespace integral {
             class Exchanger<ClassMetatable<T>> {
             public:
                 inline static void push(lua_State *luaState);
+                inline static void push(lua_State *luaState, const ClassMetatable<T> &);
             };
         }
 
         //--
 
+        template<typename T>
+        template<typename K, typename V>
+        inline Composite<ClassMetatable<T>, generic::BasicType<K>, generic::BasicType<V>> ClassMetatable<T>::set(K&& key, V &&value) && {
+            return Composite<ClassMetatable<T>, generic::BasicType<K>, generic::BasicType<V>>(std::move(*this), std::forward<K>(key), std::forward<V>(value));
+        }
+
         namespace exchanger {
             template<typename T>
             inline void Exchanger<ClassMetatable<T>>::push(lua_State *luaState) {
                 type_manager::pushClassMetatable<T>(luaState);
+            }
+
+            template<typename T>
+            inline void Exchanger<ClassMetatable<T>>::push(lua_State *luaState, const ClassMetatable<T> &) {
+                push(luaState);
             }
         }
     }

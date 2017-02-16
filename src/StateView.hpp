@@ -2,7 +2,7 @@
 //  StateView.hpp
 //  integral
 //
-//  Copyright (C) 2016  André Pereira Henriques
+//  Copyright (C) 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -29,7 +29,7 @@
 #include <lua.hpp>
 #include "exception/ClassException.hpp"
 #include "exception/Exception.hpp"
-#include "Adaptor.hpp"
+#include "generic.hpp"
 #include "GlobalReference.hpp"
 #include "Reference.hpp"
 
@@ -54,8 +54,9 @@ namespace integral {
         // throws StateException on error
         void doFile(const std::string &fileName) const;
 
+        // generic::BasicType<K> is used because K might be a reference
         template<typename K>
-        inline detail::Reference<K, detail::GlobalReference> operator[](K &&key) const;
+        inline detail::Reference<detail::generic::BasicType<K>, detail::GlobalReference> operator[](K &&key) const;
 
     private:
         static const char * const kErrorStackArgument;
@@ -82,9 +83,8 @@ namespace integral {
     }
 
     template<typename K>
-    inline detail::Reference<K, detail::GlobalReference> StateView::operator[](K &&key) const {
-        // Adaptor<detail::Reference<...>> is utilized to access protected constructors of detail::Reference<...> and detail::GlobalReference
-        return detail::Adaptor<detail::Reference<K, detail::GlobalReference>>(std::forward<K>(key), detail::Adaptor<detail::GlobalReference>(luaState_));
+    inline detail::Reference<detail::generic::BasicType<K>, detail::GlobalReference> StateView::operator[](K &&key) const {
+        return detail::Reference<detail::generic::BasicType<K>, detail::GlobalReference>(std::forward<K>(key), detail::GlobalReference(luaState_));
     }
 }
 

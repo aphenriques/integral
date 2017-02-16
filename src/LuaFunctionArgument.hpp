@@ -2,7 +2,7 @@
 //  LuaFunctionArgument.hpp
 //  integral
 //
-//  Copyright (C) 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2014, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -38,11 +38,10 @@ namespace integral {
 
             LuaFunctionArgument(LuaFunctionArgument &&) = default;
 
+            LuaFunctionArgument(lua_State *luaState, int index);
+
             template<typename R, typename ...A>
             inline decltype(auto) call(const A &...arguments) const;
-
-        protected:
-            LuaFunctionArgument(lua_State *luaState, int index);
 
         private:
             lua_State * const luaState_;

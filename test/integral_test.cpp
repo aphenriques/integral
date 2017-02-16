@@ -203,7 +203,7 @@ TEST_CASE("integral test") {
         REQUIRE_NOTHROW(stateView.doString("assert(lib.getMultiplicationFunction3(21)(2) == 42)"));
         REQUIRE_NOTHROW(stateView.doString("assert(lib.getMultiplicationFunction4(21)(2) == 42)"));
     }
-    SECTION("methods, constructor and integral::IgnoredArgument") {
+    SECTION("integral::pushClassMetatable, methods, constructor and integral::IgnoredArgument") {
         integral::pushClassMetatable<Object>(luaState.get());
         integral::setConstructor<Object(const std::string &)>(luaState.get(), "new1");
         integral::setConstructor<Object(unsigned)>(luaState.get(), "new2");
@@ -235,7 +235,12 @@ TEST_CASE("integral test") {
         REQUIRE_THROWS_AS(stateView.doString("object.getId()"), integral::StateException);
         REQUIRE_THROWS_AS(stateView.doString("Object.throwException()"), integral::StateException);
     }
-    SECTION("integral::Reference ClassMetatable, methods, functions and luaFunctions") {
+    SECTION("integral::detail::Reference integral::detail::Composite ClassMetatable, methods, functions and luaFunctions") {
+        stateView["Object"].set(integral::ClassMetatable<Object>()
+                                .set("new1", integral::ConstructorWrapper<Object(const std::string &)>())
+                                .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId)));
+        REQUIRE_NOTHROW(stateView.doString("assert(Object.new1('id'):getId() == 'id')"));
+        //TODO mix with Reference::operator[]
     }
     SECTION("integral::push and integral::get with Adaptors") {
         const std::vector<int> vector{1, 2, 3};
@@ -277,9 +282,7 @@ TEST_CASE("integral test") {
         REQUIRE(stateView["y"]["b"][2].get<Object>() == Object("objectB2"));
     }
     SECTION("lua table to Adaptors") {
-        lua_newtable(luaState.get());
-        lua_setglobal(luaState.get(), "lib");
-        REQUIRE(luaL_dostring(luaState.get(), "v = {}") == LUA_OK);
+        REQUIRE_NOTHROW(stateView.doString("x = {11, 22, 33}"));
         // TODO with Object interaction
     }
     REQUIRE(lua_gettop(luaState.get()) == 0);

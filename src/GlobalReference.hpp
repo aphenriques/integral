@@ -2,7 +2,7 @@
 //  GlobalReference.hpp
 //  integral
 //
-//  Copyright (C) 2016  André Pereira Henriques
+//  Copyright (C) 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -37,18 +37,19 @@ namespace integral {
             
             GlobalReference(GlobalReference &&) = default;
 
+            inline GlobalReference(lua_State *luaState);
+
             inline lua_State * getLuaState() const;
             inline void push() const;
             inline std::string getReferenceString() const;
-
-        protected:
-            inline GlobalReference(lua_State *luaState);
 
         private:
             lua_State *luaState_;
         };
 
         //--
+        
+        inline GlobalReference::GlobalReference(lua_State *luaState) : luaState_(luaState) {}
 
         inline lua_State * GlobalReference::getLuaState() const {
             return luaState_;
@@ -61,9 +62,6 @@ namespace integral {
         inline std::string GlobalReference::getReferenceString() const {
             return std::string("_G");
         }
-        
-        inline GlobalReference::GlobalReference(lua_State *luaState) : luaState_(luaState) {}
-
     }
 }
 
