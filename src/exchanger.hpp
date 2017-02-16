@@ -655,7 +655,7 @@ namespace integral {
                 const int stackIndexDelta = lua_gettop(luaState) - stackTopIndex;
                 // when "typename T" = LuaFunctionWrapper: nUpValues elements are removed from stack. That is why the stack is not checked for no element added or for elements removed
                 if (stackIndexDelta > 1) {
-                    throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, std::to_string(stackIndexDelta) + " more than one (1) element pushed onto the stack with exchanger::push (type: '" + typeid(T).name() + "')");
+                    throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, std::to_string(stackIndexDelta) + " elements pushed onto the stack (expected 1 element) with exchanger::push (type: '" + typeid(T).name() + "')");
                 }
             }
 
