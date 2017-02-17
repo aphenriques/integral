@@ -263,7 +263,7 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TNUMBER));
                     }
                 } else {
-                    T *userData = type_manager::getConvertibleType<T>(luaState, index);
+                    const T *userData = type_manager::getConvertibleType<T>(luaState, index);
                     if (userData != nullptr) {
                         return *userData;
                     } else {
@@ -289,7 +289,7 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TNUMBER));
                     }
                 } else {
-                    T *userData = type_manager::getConvertibleType<T>(luaState, index);
+                    const T *userData = type_manager::getConvertibleType<T>(luaState, index);
                     if (userData != nullptr) {
                         return *userData;
                     } else {
@@ -318,7 +318,7 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TNUMBER));
                     }
                 } else {
-                    T *userData = type_manager::getConvertibleType<T>(luaState, index);
+                    const T *userData = type_manager::getConvertibleType<T>(luaState, index);
                     if (userData != nullptr) {
                         return *userData;
                     } else {
@@ -558,7 +558,7 @@ namespace integral {
                         throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TTABLE));
                     }
                 } else {
-                    LuaTuple<T...> *userData = type_manager::getConvertibleType<LuaTuple<T...>>(luaState, index);
+                    const LuaTuple<T...> *userData = type_manager::getConvertibleType<LuaTuple<T...>>(luaState, index);
                     if (userData != nullptr) {
                         return *userData;
                     } else {
