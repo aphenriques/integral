@@ -1,11 +1,7 @@
 ## TODO
-* ClassMetatable inherits Table
-* test suite
-  * integral::ClassMetatable<T>::set(K &&, V &&)
 * change makefiles to most recent model on github (most recent project style)
 * makeFunctionWrapper (not necessary in c++17: template type deduction in constructor)
-* makeLuaFunctionWrapper (not necessary in c++17: template type deduction in constructor)
-* makeConstructorWrapper (not necessary in c++17: template type deduction in constructor)
+* update README.md
 * intel compiler
 * coverity
 * c++17:

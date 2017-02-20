@@ -32,21 +32,21 @@
 #include "type_manager.hpp"
 
 namespace integral {
+    template<typename T>
+    class ClassMetatable {
+    public:
+        // non-copyable
+        ClassMetatable(const ClassMetatable &) = delete;
+        ClassMetatable & operator=(const ClassMetatable &) = delete;
+
+        ClassMetatable(ClassMetatable &&) = default;
+        ClassMetatable() = default;
+
+        template<typename K, typename V>
+        inline detail::Composite<ClassMetatable<T>, detail::generic::BasicType<K>, detail::generic::BasicType<V>> set(K&& key, V &&value) &&;
+    };
+
     namespace detail {
-        template<typename T>
-        class ClassMetatable {
-        public:
-            // non-copyable
-            ClassMetatable(const ClassMetatable &) = delete;
-            ClassMetatable & operator=(const ClassMetatable &) = delete;
-
-            ClassMetatable(ClassMetatable &&) = default;
-            ClassMetatable() = default;
-
-            template<typename K, typename V>
-            inline Composite<ClassMetatable<T>, generic::BasicType<K>, generic::BasicType<V>> set(K&& key, V &&value) &&;
-        };
-
         namespace exchanger {
             template<typename T>
             class Exchanger<ClassMetatable<T>> {
@@ -55,15 +55,17 @@ namespace integral {
                 inline static void push(lua_State *luaState, const ClassMetatable<T> &);
             };
         }
+    }
 
-        //--
+    //--
 
-        template<typename T>
-        template<typename K, typename V>
-        inline Composite<ClassMetatable<T>, generic::BasicType<K>, generic::BasicType<V>> ClassMetatable<T>::set(K&& key, V &&value) && {
-            return Composite<ClassMetatable<T>, generic::BasicType<K>, generic::BasicType<V>>(std::move(*this), std::forward<K>(key), std::forward<V>(value));
-        }
+    template<typename T>
+    template<typename K, typename V>
+    inline detail::Composite<ClassMetatable<T>, detail::generic::BasicType<K>, detail::generic::BasicType<V>> ClassMetatable<T>::set(K&& key, V &&value) && {
+        return detail::Composite<ClassMetatable<T>, detail::generic::BasicType<K>, detail::generic::BasicType<V>>(std::move(*this), std::forward<K>(key), std::forward<V>(value));
+    }
 
+    namespace detail {
         namespace exchanger {
             template<typename T>
             inline void Exchanger<ClassMetatable<T>>::push(lua_State *luaState) {

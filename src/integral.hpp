@@ -25,10 +25,12 @@
 #define integral_integral_hpp
 
 #include "ArgumentException.hpp"
+#include "ClassMetatable.hpp"
 #include "core.hpp"
 #include "DefaultArgument.hpp"
 #include "State.hpp"
 #include "StateView.hpp"
+#include "Table.hpp"
 #include "UnexpectedStackException.hpp"
 
 #endif

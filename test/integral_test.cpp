@@ -239,8 +239,21 @@ TEST_CASE("integral test") {
         stateView["Object"].set(integral::ClassMetatable<Object>()
                                 .set("new1", integral::ConstructorWrapper<Object(const std::string &)>())
                                 .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId)));
-        REQUIRE_NOTHROW(stateView.doString("assert(Object.new1('id'):getId() == 'id')"));
-        //TODO mix with Reference::operator[]
+        REQUIRE_NOTHROW(stateView.doString("object = Object.new1('id')"));
+        REQUIRE_NOTHROW(stateView.doString("assert(object:getId() == 'id')"));
+        stateView["Object"]["setId"].set(integral::FunctionWrapper<void(Object &, const std::string &)>(&Object::setId));
+        REQUIRE_NOTHROW(stateView.doString("object:setId('42'); assert(object:getId() == '42')"));
+        stateView["Object"]["aux"].set(integral::Table()
+                                       .set("hasSameId", integral::FunctionWrapper<bool(const Object &, const Object &)>([](const Object &object1, const Object &object2) -> bool {
+                                            return object1.getId() == object2.getId();
+                                        }))
+                                        .set("new", integral::LuaFunctionWrapper([](lua_State *lambdaLuaState) -> int {
+                                            integral::push<Object>(lambdaLuaState, integral::get<unsigned>(lambdaLuaState, 1));
+                                            return 1;
+                                        })));
+        REQUIRE_THROWS_AS(stateView.doString("Object.aux.new('string')"), integral::StateException);
+        REQUIRE_NOTHROW(stateView.doString("object2 = Object.aux.new(42)"));
+        REQUIRE_NOTHROW(stateView.doString("assert(Object.aux.hasSameId(object, object2) == true)"));
     }
     SECTION("integral::push and integral::get with Adaptors") {
         const std::vector<int> vector{1, 2, 3};

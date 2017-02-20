@@ -47,11 +47,7 @@
 namespace integral {
     // Exception thrown by Caller
     using CallerException = detail::CallerException;
-    
-    // Proxy to lua class metatable of type T
-    template<typename T>
-    using ClassMetatable = detail::ClassMetatable<T>;
-    
+
     // Proxy to any value in lua state.
     // It is meant to be used as an argument to a C++ function.
     using LuaIgnoredArgument = detail::LuaIgnoredArgument;
