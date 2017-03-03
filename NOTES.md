@@ -1,4 +1,5 @@
 ## TODO
+* setInheritance and setTypeFunction methods for ClassMetatable and Compound
 * change makefiles to most recent model on github (most recent project style)
 * makeFunctionWrapper (not necessary in c++17: template type deduction in constructor)
 * update README.md
