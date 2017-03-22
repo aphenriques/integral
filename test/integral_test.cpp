@@ -273,7 +273,7 @@ TEST_CASE("integral test") {
         integral::push<integral::LuaUnorderedMap<std::string, integral::LuaArray<Object, 2>>>(luaState.get(), unorderedMapOfLuaArrays);
         REQUIRE((integral::get<integral::LuaUnorderedMap<std::string, integral::LuaArray<Object, 2>>>(luaState.get(), -1) == unorderedMapOfLuaArrays));
         lua_pop(luaState.get(), 1);
-        std::tuple<std::tuple<int, std::string>, Object> tuple(std::tuple<int, std::string>(42, "string"), "object");
+        std::tuple<std::tuple<int, std::string>, Object> tuple(std::tuple<int, std::string>(42, "string"), Object("object"));
         integral::push<integral::LuaTuple<integral::LuaTuple<int, std::string>, Object>>(luaState.get(), tuple);
         REQUIRE((integral::get<integral::LuaTuple<integral::LuaTuple<int, std::string>, Object>>(luaState.get(), -1) == tuple));
         lua_pop(luaState.get(), 1);
