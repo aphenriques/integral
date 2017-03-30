@@ -31,7 +31,6 @@
 #include "exception/TemplateClassException.hpp"
 #include "ArgumentException.hpp"
 #include "exchanger.hpp"
-#include "generic.hpp"
 #include "GlobalReference.hpp"
 #include "serializer.hpp"
 
@@ -54,9 +53,8 @@ namespace integral {
             void push() const;
             std::string getReferenceString() const;
 
-            // generic::BasicType<L> is used because L might be a reference
             template<typename L>
-            inline Reference<generic::BasicType<L>, Reference<K, R>> operator[](L &&key) &&;
+            inline Reference<typename std::decay<L>::type, Reference<K, R>> operator[](L &&key) &&;
 
             template<typename V>
             Reference<K, R> & set(V &&value);
@@ -108,8 +106,8 @@ namespace integral {
 
         template<typename K, typename R>
         template<typename L>
-        inline Reference<generic::BasicType<L>, Reference<K, R>> Reference<K, R>::operator[](L &&key) && {
-            return Reference<generic::BasicType<L>, Reference<K, R>>(std::forward<L>(key), std::move(*this));
+        inline Reference<typename std::decay<L>::type, Reference<K, R>> Reference<K, R>::operator[](L &&key) && {
+            return Reference<typename std::decay<L>::type, Reference<K, R>>(std::forward<L>(key), std::move(*this));
         }
 
         template<typename K, typename R>
@@ -121,8 +119,7 @@ namespace integral {
                 // stack: chainedReferenceTable
                 exchanger::push<K>(getLuaState(), key_);
                 // stack: chainedReferenceTable | key
-                // BasicType<V> is used because V might be a reference
-                exchanger::push<generic::BasicType<V>>(getLuaState(), std::forward<V>(value));
+                exchanger::push<typename std::decay<V>::type>(getLuaState(), std::forward<V>(value));
                 // stack: chainedReferenceTable | key | value
                 lua_rawset(getLuaState(), -3);
                 // stack: chainedReferenceTable

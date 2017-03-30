@@ -2,7 +2,7 @@
 //  Caller.hpp
 //  integral
 //
-//  Copyright (C) 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2014, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -32,6 +32,7 @@
 #include "ArgumentException.hpp"
 #include "exchanger.hpp"
 #include "generic.hpp"
+#include "IsStringLiteral.hpp"
 
 namespace integral {
     namespace detail {
@@ -53,7 +54,7 @@ namespace integral {
 
         template<typename R, typename ...A>
         decltype(auto) Caller<R, A...>::call(lua_State *luaState, const A &...arguments) {
-            static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
+            static_assert(generic::getLogicalOr((IsStringLiteral<A>::value == false && std::is_reference<A>::value == true)...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
             exchanger::pushCopy(luaState, arguments...);
             if (lua_pcall(luaState, sizeof...(A), 1, 0) == lua_compatibility::keLuaOk) {
                 try {
@@ -74,7 +75,7 @@ namespace integral {
 
         template<typename ...A>
         void Caller<void, A...>::call(lua_State *luaState, const A &...arguments) {
-            static_assert(generic::getLogicalOr(std::is_reference<generic::StringLiteralFilterType<A>>::value...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
+            static_assert(generic::getLogicalOr((IsStringLiteral<A>::value == false && std::is_reference<A>::value == true)...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
             exchanger::pushCopy(luaState, arguments...);
             if (lua_pcall(luaState, sizeof...(A), 0, 0) != lua_compatibility::keLuaOk) {
                 std::string errorMessage(lua_tostring(luaState, -1));

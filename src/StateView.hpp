@@ -25,11 +25,11 @@
 #define integral_StateView_hpp
 
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <lua.hpp>
 #include "exception/ClassException.hpp"
 #include "exception/Exception.hpp"
-#include "generic.hpp"
 #include "GlobalReference.hpp"
 #include "Reference.hpp"
 
@@ -54,9 +54,8 @@ namespace integral {
         // throws StateException on error
         void doFile(const std::string &fileName) const;
 
-        // generic::BasicType<K> is used because K might be a reference
         template<typename K>
-        inline detail::Reference<detail::generic::BasicType<K>, detail::GlobalReference> operator[](K &&key) const;
+        inline detail::Reference<typename std::decay<K>::type, detail::GlobalReference> operator[](K &&key) const;
 
     private:
         static const char * const kErrorStackArgument;
@@ -83,8 +82,8 @@ namespace integral {
     }
 
     template<typename K>
-    inline detail::Reference<detail::generic::BasicType<K>, detail::GlobalReference> StateView::operator[](K &&key) const {
-        return detail::Reference<detail::generic::BasicType<K>, detail::GlobalReference>(std::forward<K>(key), detail::GlobalReference(luaState_));
+    inline detail::Reference<typename std::decay<K>::type, detail::GlobalReference> StateView::operator[](K &&key) const {
+        return detail::Reference<typename std::decay<K>::type, detail::GlobalReference>(std::forward<K>(key), detail::GlobalReference(luaState_));
     }
 }
 

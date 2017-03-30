@@ -2,7 +2,7 @@
 //  type_manager.hpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -34,7 +34,6 @@
 #include "basic.hpp"
 #include "ConversionFunctionTraits.hpp"
 #include "FunctionTraits.hpp"
-#include "generic.hpp"
 #include "lua_compatibility.hpp"
 #include "UnexpectedStackException.hpp"
 #include "UserDataWrapper.hpp"
@@ -286,7 +285,7 @@ namespace integral {
                 // Attention! The stored type_index is UserDataWrapper<T>
                 // This is useful when multiple integral versions are used.
                 // Maybe UserDataWrapper<T> is incompatible from different integral versions used together; this way, it will fail gracefully.
-                static_assert(std::is_same<generic::BasicType<T>, std::string>::value == false, "cannot push std::string metatable. integral treats it as a primitive lua type");
+                static_assert(std::is_same<typename std::decay<T>::type, std::string>::value == false, "cannot push std::string metatable. integral treats it as a primitive lua type");
                 const std::type_index typeIndex = typeid(UserDataWrapper<T>);
                 const std::size_t typeHash = typeIndex.hash_code();
                 lua_pushstring(luaState, gkTypeManagerRegistryKey);

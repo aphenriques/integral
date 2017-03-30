@@ -28,7 +28,6 @@
 #include <utility>
 #include <lua.hpp>
 #include "exchanger.hpp"
-#include "generic.hpp"
 #include "type_manager.hpp"
 
 namespace integral {
@@ -47,9 +46,8 @@ namespace integral {
 
             inline Composite(T &&chainedComposite, K &&key, V &&value);
 
-            // generic::BasicType<...> is used because ... might be a reference
             template<typename L, typename W>
-            inline Composite<Composite<T, K, V>, generic::BasicType<L>, generic::BasicType<W>> set(L &&key, W &&value) &&;
+            inline Composite<Composite<T, K, V>, typename std::decay<L>::type, typename std::decay<W>::type> set(L &&key, W &&value) &&;
 
             void push(lua_State *luaState) const;
  
@@ -74,8 +72,8 @@ namespace integral {
 
         template<typename T, typename K, typename V>
         template<typename L, typename W>
-        inline Composite<Composite<T, K, V>, generic::BasicType<L>, generic::BasicType<W>> Composite<T, K, V>::set(L &&key, W &&value) && {
-            return Composite<Composite<T, K, V>, generic::BasicType<L>, generic::BasicType<W>>(std::move(*this), std::forward<L>(key), std::forward<W>(value));
+        inline Composite<Composite<T, K, V>, typename std::decay<L>::type, typename std::decay<W>::type> Composite<T, K, V>::set(L &&key, W &&value) && {
+            return Composite<Composite<T, K, V>, typename std::decay<L>::type, typename std::decay<W>::type>(std::move(*this), std::forward<L>(key), std::forward<W>(value));
         }
 
         template<typename T, typename K, typename V>

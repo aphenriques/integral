@@ -2,7 +2,7 @@
 //  generic.hpp
 //  integral
 //
-//  Copyright (C) 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2014, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -25,19 +25,10 @@
 #define integral_generic_hpp
 
 #include <type_traits>
-#include "IsStringLiteral.hpp"
 
 namespace integral {
     namespace detail {
         namespace generic {
-            // String literals (const char (&) [N]) are converted to const char *
-            // If it is no a string literal, the type is the same.
-            template<typename T>
-            using StringLiteralFilterType = typename std::conditional<IsStringLiteral<T>::value, const char *, T>::type;
-
-            template<typename T>
-            using BasicType = typename std::remove_cv<typename std::remove_reference<StringLiteralFilterType<T>>::type>::type;
-
             template<typename ...T>
             inline void expandDummyTemplatePack(T...);
 

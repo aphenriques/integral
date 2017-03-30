@@ -2,7 +2,7 @@
 //  argument.hpp
 //  integral
 //
-//  Copyright (C) 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2014, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -51,7 +51,7 @@ namespace integral {
 
             template<typename ...T, std::size_t ...S>
             constexpr auto createArgumentTagPack(std::integer_sequence<std::size_t, S...>) {
-                return MultipleInheritancePack<ArgumentTag<generic::BasicType<T>, S + 1>...>();
+                return MultipleInheritancePack<ArgumentTag<typename std::decay<T>::type, S + 1>...>();
             }
 
             template<typename ...T, std::size_t ...I>

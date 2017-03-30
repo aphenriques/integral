@@ -90,7 +90,14 @@ namespace integral {
             public:
                 // If the value on the stack is a number, then lua_tostring also changes the actual value in the stack to a string. (This change confuses lua_next when lua_tolstring is applied to keys during a table traversal.)
                 static const char * get(lua_State *luaState, int index);
-                inline static void push(lua_State *luaState, const char *string);
+
+                // for template argument, check http://stackoverflow.com/questions/16708307/is-it-possible-to-legally-overload-a-string-literal-and-const-char
+                template<typename T>
+                inline static void push(lua_State *luaState, const T * const &string);
+
+                // string literal overload
+                template<typename T, std::size_t N>
+                inline static void push(lua_State *luaState, const T (&string)[N]);
             };
 
             template<>
@@ -178,7 +185,7 @@ namespace integral {
             };
 
             template<typename T>
-            using ExchangerType = Exchanger<generic::BasicType<T>>;
+            using ExchangerType = Exchanger<typename std::decay<T>::type>;
 
             template<typename T>
             inline decltype(auto) get(lua_State *luaState, int index);
@@ -244,8 +251,14 @@ namespace integral {
                 pushObject<T>(luaState, std::forward<A>(arguments)...);
             }
 
-            inline void Exchanger<const char *>::push(lua_State *luaState, const char *string) {
+            template<typename T>
+            inline void Exchanger<const char *>::push(lua_State *luaState, const T * const &string) {
                 lua_pushstring(luaState, string);
+            }
+
+            template<typename T, std::size_t N>
+            inline void Exchanger<const char *>::push(lua_State *luaState, const T (&string)[N]) {
+                lua_pushlstring(luaState, string, N - 1);
             }
 
             inline void Exchanger<std::string>::push(lua_State *luaState, const std::string &string) {
@@ -648,7 +661,7 @@ namespace integral {
 
             template<typename T, typename ...A>
             void push(lua_State *luaState, A &&...arguments) {
-                static_assert(std::is_reference<generic::StringLiteralFilterType<T>>::value == false, "cannot push reference");
+                static_assert(std::is_reference<T>::value == false, "cannot push reference");
                 const int stackTopIndex = lua_gettop(luaState);
                 ExchangerType<T>::push(luaState, std::forward<A>(arguments)...);
                 // stack: ?...
@@ -663,7 +676,7 @@ namespace integral {
 
             template<typename A, typename ...B>
             void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments) {
-                push<generic::BasicType<A>>(luaState, std::forward<A>(firstArgument));
+                push<typename std::decay<A>::type>(luaState, std::forward<A>(firstArgument));
                 pushCopy(luaState, std::forward<B>(remainingArguments)...);
             }
         }

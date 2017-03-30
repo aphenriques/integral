@@ -2,7 +2,7 @@
 //  serializer.hpp
 //  integral
 //
-//  Copyright (C) 2016  André Pereira Henriques
+//  Copyright (C) 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -28,7 +28,6 @@
 #include <string>
 #include <type_traits>
 #include <typeinfo>
-#include "generic.hpp"
 
 namespace integral {
     namespace detail {
@@ -79,7 +78,7 @@ namespace integral {
             
             template<typename T>
             inline std::string getString(T &&t) {
-                return Serializer<generic::BasicType<T>>::getString(std::forward<T>(t));
+                return Serializer<typename std::decay<T>::type>::getString(std::forward<T>(t));
             }
         }
     }
