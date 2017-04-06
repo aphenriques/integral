@@ -1,7 +1,7 @@
 ## TODO
-* setInheritance and setTypeFunction methods for ClassMetatable and Compound
-* change makefiles to most recent model on github (most recent project style)
+* setInheritance and setTypeFunction methods in StateView
 * makeFunctionWrapper (not necessary in c++17: template type deduction in constructor)
+* change makefiles to most recent model on github (most recent project style)
 * update README.md
 * intel compiler
 * coverity
@@ -10,6 +10,7 @@
   * c++17: enable -Wunused-parameter and use [[maybe_unused]]
   * c++17: fold expressions (search and replace expansion/recursion functions)
   * c++17: template type deduction by constructor
+  * c++17: makeFunctionWrapper (not necessary in c++17: template type deduction in constructor)
 * compare performance with other binding libraries
 * sandbox (in lua script?)
   * must be easily disabled

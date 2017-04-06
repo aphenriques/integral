@@ -33,7 +33,14 @@
 #include <integral.hpp>
 #include <exception/Exception.hpp>
 
-class Object {
+class BaseObject {
+public:
+    int getBaseConstant() const {
+        return 42;
+    }
+};
+
+class Object : public BaseObject {
 public:
     bool flag_ = false;
 
@@ -297,6 +304,22 @@ TEST_CASE("integral test") {
     SECTION("lua table to Adaptors") {
         REQUIRE_NOTHROW(stateView.doString("x = {11, 22, 33}"));
         // TODO with Object interaction
+    }
+    SECTION("inheritance and type convertion") {
+        // TODO core functions 
+    }
+    SECTION("ClassMetatable inheritance") {
+        stateView["BaseObject"].set(integral::ClassMetatable<BaseObject>()
+                                    .set("new", integral::ConstructorWrapper<BaseObject()>())
+                                    .set("getBaseConstant", integral::FunctionWrapper<int(BaseObject &)>(&BaseObject::getBaseConstant)));
+        REQUIRE_NOTHROW(stateView.doString("base = BaseObject.new()"));
+        REQUIRE_NOTHROW(stateView.doString("assert(base:getBaseConstant() == 42)"));
+        stateView["Object"].set(integral::ClassMetatable<Object, BaseObject>()
+                                .set("new", integral::ConstructorWrapper<Object(unsigned)>())
+                                .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId)));
+        REQUIRE_NOTHROW(stateView.doString("object = Object.new(21)"));
+        REQUIRE_NOTHROW(stateView.doString("assert(object:getId() == '21')"));
+        REQUIRE_NOTHROW(stateView.doString("assert(object:getBaseConstant() == 42)"));
     }
     REQUIRE(lua_gettop(luaState.get()) == 0);
 }
