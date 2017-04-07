@@ -1,7 +1,7 @@
 ## TODO
-* setInheritance and setTypeFunction methods in StateView
-* makeFunctionWrapper (not necessary in c++17: template type deduction in constructor)
 * change makefiles to most recent model on github (most recent project style)
+* more tests
+* separate core samples from samples with higher level of abstraction
 * update README.md
 * intel compiler
 * coverity

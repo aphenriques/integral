@@ -30,6 +30,7 @@
 #include <lua.hpp>
 #include "exception/ClassException.hpp"
 #include "exception/Exception.hpp"
+#include "core.hpp"
 #include "GlobalReference.hpp"
 #include "Reference.hpp"
 
@@ -56,6 +57,15 @@ namespace integral {
 
         template<typename K>
         inline detail::Reference<typename std::decay<K>::type, detail::GlobalReference> operator[](K &&key) const;
+
+        template<typename F>
+        inline void defineTypeFunction(F &&typeFunction);
+
+        template<typename D, typename B>
+        inline void defineInheritance();
+
+        template<typename F>
+        inline void defineInheritance(F &&typeFunction);
 
     private:
         static const char * const kErrorStackArgument;
@@ -84,6 +94,21 @@ namespace integral {
     template<typename K>
     inline detail::Reference<typename std::decay<K>::type, detail::GlobalReference> StateView::operator[](K &&key) const {
         return detail::Reference<typename std::decay<K>::type, detail::GlobalReference>(std::forward<K>(key), detail::GlobalReference(luaState_));
+    }
+
+    template<typename F>
+    inline void StateView::defineTypeFunction(F &&typeFunction) {
+        integral::defineTypeFunction(getLuaState(), std::forward<F>(typeFunction));
+    }
+
+    template<typename D, typename B>
+    inline void StateView::defineInheritance() {
+        integral::defineInheritance<D, B>(getLuaState());
+    }
+
+    template<typename F>
+    inline void StateView::defineInheritance(F &&typeFunction) {
+        integral::defineInheritance(getLuaState(), std::forward<F>(typeFunction));
     }
 }
 
