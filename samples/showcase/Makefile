@@ -34,6 +34,7 @@ $(SHARED_LIB): $(OBJS) $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_L
 	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS)
 
 clean:
+	cd otherlib && $(MAKE) clean
 	rm -f $(addsuffix /*.d, $(SRC_DIRS)) $(addsuffix /*.o, $(SRC_DIRS)) $(SHARED_LIB)
 #	rm -f $(DEPS) $(OBJS) $(SHARED_LIB)
 
