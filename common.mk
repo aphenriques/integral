@@ -1,25 +1,28 @@
-PROJECT_NAME:=integral
+PROJECT:=integral
 
-INSTALL_TOP:=/usr/local
-INSTALL_INC:=$(INSTALL_TOP)/include/$(PROJECT_NAME)
-INSTALL_LIB:=$(INSTALL_TOP)/lib
+PROJECT_LIB_DIR:=src
+PROJECT_BIN_DIR:=samples
+PROJECT_TEST_DIR:=test
+PROJECT_STATIC_LIB:=lib$(PROJECT).a
 
+# some variables require PROJECT_ROOT_DIR definition. That's why = is used instead of := for their definition
+PROJECT_INCLUDE_DIRS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)
+PROJECT_LDLIBS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
+PROJECT_SYSTEM_INCLUDE_DIRS:=/usr/local/include
+PROJECT_LIB_DIRS:=/usr/local/lib
 # TODO with c++17: remove -Wno-unused-parameter and -Wno-unused-but-set-parameter and use [[maybe_unused]] attribute
-CXXFLAGS:=-std=c++14 -O0 -I/usr/local/include -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wno-missing-braces -Wno-unused-parameter -pedantic
-LDFLAGS:=-L/usr/local/lib
+PROJECT_CXXFLAGS:=-std=c++14 -O0 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wno-missing-braces -Wno-unused-parameter -pedantic
 
-LIB_LUA_FLAG:=-llua
-
-SHARED_LIB_FLAGS:=-shared
 ifeq ($(shell uname -s),Darwin)
 # -Wweak-vtables is a clang feature
-CXXFLAGS+=-Wweak-vtables
+PROJECT_CXXFLAGS+=-Wweak-vtables
 SHARED_LIB_EXTENSION:=dylib
-SHARED_LIB_FLAGS+=-undefined dynamic_lookup
+PROJECT_LDFLAGS:=-undefined dynamic_lookup
 else
-CXXFLAGS+=-Wno-unused-but-set-parameter
+PROJECT_CXXFLAGS+=-Wno-unused-but-set-parameter
 SHARED_LIB_EXTENSION:=so
+PROJECT_LDFLAGS:=
 endif
 
-PROJECT_STATIC_LIB_NAME:=lib$(PROJECT_NAME).a
-PROJECT_SHARED_LIB_NAME:=lib$(PROJECT_NAME).$(SHARED_LIB_EXTENSION)
+PROJECT_SHARED_LIB:=lib$(PROJECT).$(SHARED_LIB_EXTENSION)
+LIB_LUA_FLAG:=-llua

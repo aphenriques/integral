@@ -1,28 +1,40 @@
-include ../../common.mk
+PROJECT_ROOT_DIR:=../..
 
-SRC_DIRS:=.
+include $(PROJECT_ROOT_DIR)/common.mk
 
-SAMPLE_SHARED_LIB:=libadaptors.$(SHARED_LIB_EXTENSION)
+TARGET:=adaptors
+SRC_DIRS:=. $(wildcard */.)
+FILTER_OUT:=
+INCLUDE_DIRS:=$(PROJECT_INCLUDE_DIRS)
+SYSTEM_INCLUDE_DIRS:=$(PROJECT_SYSTEM_INCLUDE_DIRS)
+LIB_DIRS:=
+LDLIBS:=$(PROJECT_LDLIBS)
 
-SRCS:=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
+# '-isystem <dir>' supress warnings from included headers in <dir>. These headers are also excluded from dependency generation
+CXXFLAGS:=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS)) -fPIC
+LDFLAGS:=$(addprefix -L, $(LIB_DIRS)) $(PROJECT_LDFLAGS) -shared
+
+################################################################################
+
+SHARED_LIB:=lib$(TARGET).$(SHARED_LIB_EXTENSION)
+
+SRC_DIRS:=$(subst /.,,$(SRC_DIRS))
+SRCS:=$(filter-out $(FILTER_OUT), $(wildcard $(addsuffix /*.cpp, $(SRC_DIRS))))
 OBJS:=$(addsuffix .o, $(basename $(SRCS)))
 DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 
-PROJECT_STATIC_LIB:=../../src/$(PROJECT_STATIC_LIB_NAME)
-
-CXXFLAGS+=-fPIC -I../../src
-
 .PHONY: all clean
 
-all: $(SAMPLE_SHARED_LIB)
+all:
+	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) all
+	$(MAKE) $(SHARED_LIB)
 
-otherlib/libotherlib.$(SHARED_LIB_EXTENSION):
-
-$(SAMPLE_SHARED_LIB): $(OBJS) $(PROJECT_STATIC_LIB)
-	$(CXX) $(OBJS) $(PROJECT_STATIC_LIB) $(SHARED_LIB_FLAGS) -o $@
+$(SHARED_LIB): $(OBJS) $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
+	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS)
 
 clean:
-	$(RM) $(DEPS) $(OBJS) $(SAMPLE_SHARED_LIB)
+	rm -f $(addsuffix /*.d, $(SRC_DIRS)) $(addsuffix /*.o, $(SRC_DIRS)) $(SHARED_LIB)
+#	rm -f $(DEPS) $(OBJS) $(SHARED_LIB)
 
 %.d: %.cpp
 	$(CXX) $(CXXFLAGS) -MP -MM -MF $@ -MT '$@ $(addsuffix .o, $(basename $<))' $<

@@ -1,11 +1,26 @@
-include ../common.mk
+PROJECT_ROOT_DIR:=..
 
-SRC_DIRS:=.
+include $(PROJECT_ROOT_DIR)/common.mk
 
+SRC_DIRS:=. $(wildcard */.)
+FILTER_OUT:=
+INCLUDE_DIRS:=
+SYSTEM_INCLUDE_DIRS:=$(PROJECT_SYSTEM_INCLUDE_DIRS)
+LIB_DIRS:=
+LDLIBS:=
+
+# '-isystem <dir>' supress warnings from included headers in <dir>. These headers are also excluded from dependency generation
+CXXFLAGS:=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS)) -fPIC
 ARFLAGS:=rcs
-CXXFLAGS+=-fPIC
+LDFLAGS:=$(addprefix -L, $(LIB_DIRS)) $(PROJECT_LDFLAGS) -shared
 
-SRCS:=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
+################################################################################
+
+STATIC_LIB:=$(PROJECT_STATIC_LIB)
+SHARED_LIB:=$(PROJECT_SHARED_LIB)
+
+SRC_DIRS:=$(subst /.,,$(SRC_DIRS))
+SRCS:=$(filter-out $(FILTER_OUT), $(wildcard $(addsuffix /*.cpp, $(SRC_DIRS))))
 OBJS:=$(addsuffix .o, $(basename $(SRCS)))
 DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 
@@ -13,21 +28,22 @@ DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 
 all: static shared
 
-static: $(PROJECT_STATIC_LIB_NAME)
+static: $(STATIC_LIB)
 
-shared: $(PROJECT_SHARED_LIB_NAME)
+shared: $(SHARED_LIB)
 
-$(PROJECT_STATIC_LIB_NAME): $(OBJS)
-	$(AR) $(ARFLAGS) $@ $^
+$(STATIC_LIB): $(OBJS)
+	$(AR) $(ARFLAGS) $@ $(OBJS)
 
-$(PROJECT_SHARED_LIB_NAME): $(OBJS)
-	$(CXX) $(SHARED_LIB_FLAGS) $^ -o $@
+$(SHARED_LIB): $(OBJS)
+	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS)
+
+clean:
+	rm -f $(addsuffix /*.d, $(SRC_DIRS)) $(addsuffix /*.o, $(SRC_DIRS)) $(STATIC_LIB) $(SHARED_LIB)
+#	rm -f $(DEPS) $(OBJS) $(STATIC_LIB) $(SHARED_LIB)
 
 %.d: %.cpp
 	$(CXX) $(CXXFLAGS) -MP -MM -MF $@ -MT '$@ $(addsuffix .o, $(basename $<))' $<
-
-clean:
-	$(RM) $(DEPS) $(OBJS) $(PROJECT_STATIC_LIB_NAME) $(PROJECT_SHARED_LIB_NAME)
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)

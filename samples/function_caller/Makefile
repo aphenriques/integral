@@ -1,28 +1,41 @@
-include ../../common.mk
+PROJECT_ROOT_DIR:=../..
 
-SRC_DIRS:=.
+include $(PROJECT_ROOT_DIR)/common.mk
 
-SAMPLE_EXECUTALBE:=function_caller
+TARGET:=function_caller
+SRC_DIRS:=. $(wildcard */.)
+FILTER_OUT:=
+INCLUDE_DIRS:=$(PROJECT_INCLUDE_DIRS)
+SYSTEM_INCLUDE_DIRS:=$(PROJECT_SYSTEM_INCLUDE_DIRS)
+LIB_DIRS:=$(PROJECT_LIB_DIRS)
+LDLIBS:=$(PROJECT_LDLIBS) $(LIB_LUA_FLAG) -ldl
 
-SRCS:=$(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
+# '-isystem <dir>' supress warnings from included headers in <dir>. These headers are also excluded from dependency generation
+CXXFLAGS:=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS))
+LDFLAGS:=$(addprefix -L, $(LIB_DIRS))
+
+################################################################################
+
+SRC_DIRS:=$(subst /.,,$(SRC_DIRS))
+SRCS:=$(filter-out $(FILTER_OUT), $(wildcard $(addsuffix /*.cpp, $(SRC_DIRS))))
 OBJS:=$(addsuffix .o, $(basename $(SRCS)))
 DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 
-PROJECT_STATIC_LIB:=../../src/$(PROJECT_STATIC_LIB_NAME)
+.PHONY: all run clean
 
-LDLIBS+=$(LIB_LUA_FLAG)
+all:
+	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) all
+	$(MAKE) $(TARGET)
 
-CXXFLAGS+=-I../../src
+run: all
+	./$(TARGET)
 
-.PHONY: all clean
-
-all: $(SAMPLE_EXECUTALBE)
-
-$(SAMPLE_EXECUTALBE): $(OBJS) $(PROJECT_STATIC_LIB)
-	$(CXX) $(OBJS) $(PROJECT_STATIC_LIB) $(LDFLAGS) $(LDLIBS) -o $@
+$(TARGET): $(OBJS) $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
+	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS)
 
 clean:
-	$(RM) $(DEPS) $(OBJS) $(SAMPLE_EXECUTALBE)
+	rm -f $(addsuffix /*.d, $(SRC_DIRS)) $(addsuffix /*.o, $(SRC_DIRS)) $(TARGET)
+#	rm -f $(DEPS) $(OBJS) $(TARGET)
 
 %.d: %.cpp
 	$(CXX) $(CXXFLAGS) -MP -MM -MF $@ -MT '$@ $(addsuffix .o, $(basename $<))' $<

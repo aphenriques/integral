@@ -25,7 +25,7 @@
   * check copyright notices
   * check compatibility with lua 5.1, 5.2 and 5.3 and luaJIT
   * update compatibility information on README.md and lua wiki
-* test suite
+  * test suite
 
 ## Rationales
 * removing occurrences of exchanger::Exchanger outside of exchanger.h is not possible because LuaFunctionArgument.h includes Caller.h which includes exchanger.h (cyclic dependency due to LuaFunctionArgument::call)

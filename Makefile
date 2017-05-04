@@ -1,33 +1,37 @@
 include common.mk
 
+INSTALL_TOP:=/usr/local
+INSTALL_INC:=$(INSTALL_TOP)/include/$(PROJECT)
+INSTALL_LIB:=$(INSTALL_TOP)/lib
+
 .PHONY: all static shared samples install uninstall clean
 
 all:
-	cd src && $(MAKE) $@
+	cd $(PROJECT_LIB_DIR) && $(MAKE) $@
 
 static:
-	cd src && $(MAKE) $@
+	cd $(PROJECT_LIB_DIR) && $(MAKE) $@
 
 shared:
-	cd src && $(MAKE) $@
+	cd $(PROJECT_LIB_DIR) && $(MAKE) $@
 
 samples: static
-	cd samples && $(MAKE) all
+	cd $(PROJECT_BIN_DIR) && $(MAKE) all
 
 test: static
-	cd test && $(MAKE) all
+	cd $(PROJECT_TEST_DIR) && $(MAKE) all
 
 install: all
 	mkdir -p $(INSTALL_INC) $(INSTALL_INC)/exception $(INSTALL_LIB)
-	install -p -m 0644 src/*.hpp $(INSTALL_INC)
-	install -p -m 0644 src/exception/*.hpp $(INSTALL_INC)/exception
-	install -p -m 0644 src/$(PROJECT_STATIC_LIB_NAME) src/$(PROJECT_SHARED_LIB_NAME) $(INSTALL_LIB)
+	install -p -m 0644 $(PROJECT_LIB_DIR)/*.hpp $(INSTALL_INC)
+	install -p -m 0644 $(PROJECT_LIB_DIR)/exception/*.hpp $(INSTALL_INC)/exception
+	install -p -m 0644 $(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB) $(PROJECT_LIB_DIR)/$(PROJECT_SHARED_LIB) $(INSTALL_LIB)
 
 uninstall:
 	$(RM) -R $(INSTALL_INC)
-	$(RM) $(INSTALL_LIB)/$(PROJECT_STATIC_LIB_NAME) $(INSTALL_LIB)/$(PROJECT_SHARED_LIB_NAME)
+	$(RM) $(INSTALL_LIB)/$(PROJECT_STATIC_LIB) $(INSTALL_LIB)/$(PROJECT_SHARED_LIB)
 
 clean:
-	cd src && $(MAKE) $@
-	cd samples && $(MAKE) $@
-	cd test && $(MAKE) $@
+	cd $(PROJECT_LIB_DIR) && $(MAKE) $@
+	cd $(PROJECT_BIN_DIR) && $(MAKE) $@
+	cd $(PROJECT_TEST_DIR) && $(MAKE) $@
