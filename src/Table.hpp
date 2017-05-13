@@ -27,7 +27,7 @@
 #include <type_traits>
 #include <utility>
 #include <lua.hpp>
-#include "Composite.hpp"
+#include "TableComposite.hpp"
 #include "exchanger.hpp"
 
 namespace integral {
@@ -41,7 +41,7 @@ namespace integral {
         Table() = default;
 
         template<typename K, typename V>
-        inline detail::Composite<Table, typename std::decay<K>::type, typename std::decay<V>::type> set(K&& key, V &&value) &&;
+        inline detail::TableComposite<Table, typename std::decay<K>::type, typename std::decay<V>::type> set(K&& key, V &&value) &&;
     };
 
     namespace detail {
@@ -58,8 +58,8 @@ namespace integral {
     //--
 
     template<typename K, typename V>
-    inline detail::Composite<Table, typename std::decay<K>::type, typename std::decay<V>::type> Table::set(K&& key, V &&value) && {
-        return detail::Composite<Table, typename std::decay<K>::type, typename std::decay<V>::type>(std::move(*this), std::forward<K>(key), std::forward<V>(value));
+    inline detail::TableComposite<Table, typename std::decay<K>::type, typename std::decay<V>::type> Table::set(K&& key, V &&value) && {
+        return detail::TableComposite<Table, typename std::decay<K>::type, typename std::decay<V>::type>(std::move(*this), std::forward<K>(key), std::forward<V>(value));
     }
 
     namespace detail {

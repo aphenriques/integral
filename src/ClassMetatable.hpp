@@ -27,16 +27,15 @@
 #include <type_traits>
 #include <utility>
 #include <lua.hpp>
-#include "Composite.hpp"
+#include "class_composite.hpp"
 #include "exchanger.hpp"
 #include "generic.hpp"
 #include "type_manager.hpp"
 
 namespace integral {
     // T: class type
-    // B...: base classes types
-    template<typename T, typename ...B>
-    class ClassMetatable {
+    template<typename T>
+    class ClassMetatable : public detail::class_composite::ClassCompositeInterface<T, ClassMetatable<T>> {
     public:
         // non-copyable
         ClassMetatable(const ClassMetatable &) = delete;
@@ -44,40 +43,30 @@ namespace integral {
 
         ClassMetatable(ClassMetatable &&) = default;
         ClassMetatable() = default;
-
-        template<typename K, typename V>
-        inline detail::Composite<ClassMetatable<T, B...>, typename std::decay<K>::type, typename std::decay<V>::type> set(K&& key, V &&value) &&;
     };
 
     namespace detail {
         namespace exchanger {
-            template<typename T, typename ...B>
-            class Exchanger<ClassMetatable<T, B...>> {
+            template<typename T>
+            class Exchanger<ClassMetatable<T>> {
             public:
                 inline static void push(lua_State *luaState);
-                inline static void push(lua_State *luaState, const ClassMetatable<T, B...> &);
+                inline static void push(lua_State *luaState, const ClassMetatable<T> &);
             };
         }
     }
 
     //--
 
-    template<typename T, typename ...B>
-    template<typename K, typename V>
-    inline detail::Composite<ClassMetatable<T, B...>, typename std::decay<K>::type, typename std::decay<V>::type> ClassMetatable<T, B...>::set(K&& key, V &&value) && {
-        return detail::Composite<ClassMetatable<T, B...>, typename std::decay<K>::type, typename std::decay<V>::type>(std::move(*this), std::forward<K>(key), std::forward<V>(value));
-    }
-
     namespace detail {
         namespace exchanger {
-            template<typename T, typename ...B>
-            inline void Exchanger<ClassMetatable<T, B...>>::push(lua_State *luaState) {
+            template<typename T>
+            inline void Exchanger<ClassMetatable<T>>::push(lua_State *luaState) {
                 type_manager::pushClassMetatable<T>(luaState);
-                generic::expandDummyTemplatePack((type_manager::defineInheritance<T, B>(luaState), 0)...);
             }
 
-            template<typename T, typename ...B>
-            inline void Exchanger<ClassMetatable<T, B...>>::push(lua_State *luaState, const ClassMetatable<T, B...> &) {
+            template<typename T>
+            inline void Exchanger<ClassMetatable<T>>::push(lua_State *luaState, const ClassMetatable<T> &) {
                 push(luaState);
             }
         }

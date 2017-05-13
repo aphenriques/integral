@@ -1,4 +1,6 @@
 ## TODO
+* interface similar to ClassCompositeInterface for TableComposite
+* ClassCompositeInterface::setBaseClass(const std::function<B *(T *)> &typeFunction)
 * more tests
 * separate core samples from samples with higher level of abstraction
 * update README.md

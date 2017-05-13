@@ -250,7 +250,7 @@ TEST_CASE("integral test") {
         REQUIRE_THROWS_AS(stateView.doString("object.getId()"), integral::StateException);
         REQUIRE_THROWS_AS(stateView.doString("Object.throwException()"), integral::StateException);
     }
-    SECTION("integral::detail::Reference integral::detail::Composite ClassMetatable, methods, functions and luaFunctions") {
+    SECTION("TableComposite, ClassMetatableComposite ClassMetatable, methods, functions and luaFunctions") {
         stateView["Object"].set(integral::ClassMetatable<Object>()
                                 .set("new1", integral::ConstructorWrapper<Object(const std::string &)>())
                                 .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId)));
@@ -323,6 +323,8 @@ TEST_CASE("integral test") {
                                 .set("new", integral::ConstructorWrapper<Object(unsigned)>())
                                 .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId)));
         stateView.defineInheritance<Object, BaseObject>();
+        // FIXME should not the following cause a compilation error?
+        //stateView.defineInheritance<BaseObject, Object>();
         REQUIRE_NOTHROW(stateView.doString("object = Object.new(21)"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getId() == '21')"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getBaseConstant() == 42)"));
@@ -346,7 +348,8 @@ TEST_CASE("integral test") {
                                     .set("getBaseConstant", integral::makeFunctionWrapper(&BaseObject::getBaseConstant)));
         REQUIRE_NOTHROW(stateView.doString("base = BaseObject.new()"));
         REQUIRE_NOTHROW(stateView.doString("assert(base:getBaseConstant() == 42)"));
-        stateView["Object"].set(integral::ClassMetatable<Object, BaseObject>()
+        stateView["Object"].set(integral::ClassMetatable<Object>()
+                                .setBaseClass<BaseObject>()
                                 .set("new", integral::ConstructorWrapper<Object(unsigned)>())
                                 .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId)));
         REQUIRE_NOTHROW(stateView.doString("object = Object.new(21)"));
