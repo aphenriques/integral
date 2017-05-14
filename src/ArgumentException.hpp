@@ -47,8 +47,8 @@ namespace integral {
         inline ArgumentException(lua_State *luaState, std::size_t maximumNumberOfArguments, std::size_t actualNumberOfArguments);
 
     private:
-        static bool findField (lua_State *luaState, int index, int level);
-        static bool pushGlobalFunctionName (lua_State *L, lua_Debug *debugInfo);
+        static bool findField(lua_State *luaState, int index, int level);
+        static bool pushGlobalFunctionName(lua_State *L, lua_Debug *debugInfo);
         static std::string getExceptionMessage(lua_State *luaState, int index, const std::string &extraMessage);
         static std::string getExceptionMessage(lua_State *luaState, std::size_t maximumNumberOfArguments, std::size_t actualNumberOfArguments);
     };
