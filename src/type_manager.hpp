@@ -374,6 +374,7 @@ namespace integral {
             template<typename D, typename B>
             void setTypeFunction(lua_State *luaState) {
                 static_assert(std::is_same<D, B>::value == false, "conversion to itself");
+                static_assert(std::is_base_of<B, D>::value == true, "D must be derived from B");
                 std::type_index typeIndex = typeid(B);
                 // stack: metatable
                 pushTypeFunctionHashTable(luaState, typeIndex);
@@ -505,6 +506,7 @@ namespace integral {
             template<typename D, typename B>
             void setInheritance(lua_State *luaState) {
                 static_assert(std::is_same<D, B>::value == false, "inheritance to itself");
+                static_assert(std::is_base_of<B, D>::value == true, "D must be derived from B");
                 // stack: metatable
                 setInheritanceTable<B>(luaState);
                 setTypeFunction<D, B>(luaState);
