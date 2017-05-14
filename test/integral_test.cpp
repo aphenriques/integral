@@ -280,11 +280,11 @@ TEST_CASE("integral test") {
         integral::push<integral::LuaVector<integral::LuaVector<Object>>>(luaState.get(), LuaVectorOfLuaVectors);
         REQUIRE((integral::get<integral::LuaVector<integral::LuaVector<Object>>>(luaState.get(), -1) == LuaVectorOfLuaVectors));
         lua_pop(luaState.get(), 1);
-        const std::array<double, 3> array{1.3, 2.2, 3.1};
+        const std::array<double, 3> array{{1.3, 2.2, 3.1}};
         integral::push<integral::LuaArray<double, 3>>(luaState.get(), array);
         REQUIRE((integral::get<integral::LuaArray<double, 3>>(luaState.get(), -1) == array));
         lua_pop(luaState.get(), 1);
-        const std::unordered_map<std::string, integral::LuaArray<Object, 2>> unorderedMapOfLuaArrays{{"a", std::array<Object, 2>{Object("objectA1"), Object("objectA2")}}, {"b", std::array<Object, 2>{Object("objectB1"), Object("objectB2")}}};
+        const std::unordered_map<std::string, integral::LuaArray<Object, 2>> unorderedMapOfLuaArrays{{"a", std::array<Object, 2>{{Object("objectA1"), Object("objectA2")}}}, {"b", std::array<Object, 2>{{Object("objectB1"), Object("objectB2")}}}};
         integral::push<integral::LuaUnorderedMap<std::string, integral::LuaArray<Object, 2>>>(luaState.get(), unorderedMapOfLuaArrays);
         REQUIRE((integral::get<integral::LuaUnorderedMap<std::string, integral::LuaArray<Object, 2>>>(luaState.get(), -1) == unorderedMapOfLuaArrays));
         lua_pop(luaState.get(), 1);
@@ -302,7 +302,7 @@ TEST_CASE("integral test") {
         REQUIRE_THROWS_AS(stateView["x"][2].get<int>(), integral::ReferenceException);
         REQUIRE_THROWS_AS(stateView["x"]["y"].get<std::string>(), integral::ReferenceException);
         REQUIRE_THROWS_AS(stateView["x"]["y"][1].get<int>(), integral::ReferenceException);
-        const std::unordered_map<std::string, integral::LuaArray<Object, 2>> unorderedMapOfLuaArrays{{"a", std::array<Object, 2>{Object("objectA1"), Object("objectA2")}}, {"b", std::array<Object, 2>{Object("objectB1"), Object("objectB2")}}};
+        const std::unordered_map<std::string, integral::LuaArray<Object, 2>> unorderedMapOfLuaArrays{{"a", std::array<Object, 2>{{Object("objectA1"), Object("objectA2")}}}, {"b", std::array<Object, 2>{{Object("objectB1"), Object("objectB2")}}}};
         stateView["y"].set<integral::LuaUnorderedMap<std::string, integral::LuaArray<Object, 2>>>(unorderedMapOfLuaArrays);
         REQUIRE(stateView["y"]["a"][1].get<Object>() == Object("objectA1"));
         REQUIRE(stateView["y"]["a"][2].get<Object>() == Object("objectA2"));
