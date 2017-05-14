@@ -24,12 +24,13 @@
 #ifndef integral_FunctorTraits_hpp
 #define integral_FunctorTraits_hpp
 
+#include <type_traits>
 #include "FunctionSignature.hpp"
 
 namespace integral {
     namespace detail {
         template<typename T>
-        class FunctorTraits : public FunctorTraits<decltype(&T::operator())> {};
+        class FunctorTraits : public FunctorTraits<decltype(&std::decay<T>::type::operator())> {};
 
         template<typename T, typename R, typename ...A>
         class FunctorTraits<R(T::*)(A...)> : public FunctionSignature<R(A...)> {};
