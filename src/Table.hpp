@@ -27,11 +27,11 @@
 #include <type_traits>
 #include <utility>
 #include <lua.hpp>
-#include "TableComposite.hpp"
+#include "table_composite.hpp"
 #include "exchanger.hpp"
 
 namespace integral {
-    class Table {
+    class Table : public detail::table_composite::TableCompositeInterface<Table> {
     public:
         // non-copyable
         Table(const Table &) = delete;
@@ -39,9 +39,6 @@ namespace integral {
 
         Table(Table &&) = default;
         Table() = default;
-
-        template<typename K, typename V>
-        inline detail::TableComposite<Table, typename std::decay<K>::type, typename std::decay<V>::type> set(K&& key, V &&value) &&;
     };
 
     namespace detail {
@@ -56,11 +53,6 @@ namespace integral {
     }
 
     //--
-
-    template<typename K, typename V>
-    inline detail::TableComposite<Table, typename std::decay<K>::type, typename std::decay<V>::type> Table::set(K&& key, V &&value) && {
-        return detail::TableComposite<Table, typename std::decay<K>::type, typename std::decay<V>::type>(std::move(*this), std::forward<K>(key), std::forward<V>(value));
-    }
 
     namespace detail {
         namespace exchanger {

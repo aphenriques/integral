@@ -323,8 +323,6 @@ TEST_CASE("integral test") {
                                 .set("new", integral::ConstructorWrapper<Object(unsigned)>())
                                 .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId)));
         stateView.defineInheritance<Object, BaseObject>();
-        // FIXME should not the following cause a compilation error?
-        //stateView.defineInheritance<BaseObject, Object>();
         REQUIRE_NOTHROW(stateView.doString("object = Object.new(21)"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getId() == '21')"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getBaseConstant() == 42)"));
@@ -350,11 +348,25 @@ TEST_CASE("integral test") {
         REQUIRE_NOTHROW(stateView.doString("assert(base:getBaseConstant() == 42)"));
         stateView["Object"].set(integral::ClassMetatable<Object>()
                                 .setBaseClass<BaseObject>()
+                                .setBaseClass([](Object *object) -> InnerObject * {
+                                    return &object->innerObject_;
+                                })
                                 .set("new", integral::ConstructorWrapper<Object(unsigned)>())
                                 .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId)));
         REQUIRE_NOTHROW(stateView.doString("object = Object.new(21)"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getId() == '21')"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getBaseConstant() == 42)"));
+        Object cppObject("cppObject");
+        stateView["cppObject"].set(std::ref(cppObject));
+        REQUIRE_THROWS_AS(stateView.doString("assert(cppObject:getId() == 'cppObject')"), integral::StateException);
+        stateView["ObjectReference"].set(integral::ClassMetatable<std::reference_wrapper<Object>>()
+                                         .setBaseClass([](std::reference_wrapper<Object> *objectReferenceWrapper) -> Object * {
+                                             return &objectReferenceWrapper->get();
+                                         }));
+        REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getId() == 'cppObject')"));
+        stateView["InnerObject"].set(integral::ClassMetatable<InnerObject>().set("getGreeting", integral::makeFunctionWrapper(&InnerObject::getGreeting)));
+        REQUIRE_NOTHROW(stateView.doString("assert(InnerObject.getGreeting(cppObject) == 'hello')"));
+
     }
     REQUIRE(lua_gettop(luaState.get()) == 0);
 }

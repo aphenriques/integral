@@ -24,21 +24,27 @@
 #ifndef integral_class_composite_hpp
 #define integral_class_composite_hpp
 
+#include <functional>
 #include <type_traits>
 #include <utility>
 #include <lua.hpp>
+#include "ConversionFunctionTraits.hpp"
 #include "exchanger.hpp"
+#include "FunctionTraits.hpp"
 #include "type_manager.hpp"
 
 namespace integral {
     namespace detail {
         namespace class_composite {
-            // Forward declaration
+            // forward declarations
             template<typename T, typename B, typename C>
             class InheritanceComposite;
 
             template<typename T, typename C, typename K, typename V>
             class ClassMetatableComposite;
+
+            template<typename T, typename C, typename F>
+            class SyntheticInheritanceComposite;
 
             // T: class type
             // U: underlying type
@@ -49,10 +55,13 @@ namespace integral {
                 template<typename L, typename W>
                 inline ClassMetatableComposite<T, U, typename std::decay<L>::type, typename std::decay<W>::type> set(L &&key, W &&value) &&;
 
-                // B: derived class type
+                // B: base class type
                 template<typename B>
                 inline InheritanceComposite<T, B, U> setBaseClass() &&;
 
+                // F: type function
+                template<typename F>
+                inline SyntheticInheritanceComposite<T, U, F> setBaseClass(F &&typeFunction) &&;
             };
 
             // T: Class type
@@ -97,6 +106,27 @@ namespace integral {
             private:
                 C chainedClassMetatableComposite_;
             };
+
+            // T: class type
+            // F: type function
+            template<typename T, typename C, typename F>
+            class SyntheticInheritanceComposite : public ClassCompositeInterface<T, SyntheticInheritanceComposite<T, C, F>> {
+                static_assert(std::is_reference<C>::value == false, "C cannot be a reference type");
+            public:
+                // non-copyable
+                SyntheticInheritanceComposite(const SyntheticInheritanceComposite &) = delete;
+                SyntheticInheritanceComposite & operator=(const SyntheticInheritanceComposite &) = delete;
+
+                SyntheticInheritanceComposite(SyntheticInheritanceComposite &&) = default;
+
+                inline SyntheticInheritanceComposite(C &&chainedClassMetatableComposite, F &&typeFunction);
+
+                void push(lua_State *luaState) const;
+
+            private:
+                C chainedClassMetatableComposite_;
+                F typeFunction_;
+            };
         }
 
         namespace exchanger {
@@ -105,17 +135,21 @@ namespace integral {
             public:
                 inline static void push(lua_State *luaState, const class_composite::ClassMetatableComposite<T, C, K, V> &composite);
             };
-        }
 
-        namespace exchanger {
             template<typename T, typename B, typename C>
             class Exchanger<class_composite::InheritanceComposite<T, B, C>> {
             public:
                 inline static void push(lua_State *luaState, const class_composite::InheritanceComposite<T, B, C> &composite);
             };
+
+            template<typename T, typename C, typename F>
+            class Exchanger<class_composite::SyntheticInheritanceComposite<T, C, F>> {
+            public:
+                inline static void push(lua_State *luaState, const class_composite::SyntheticInheritanceComposite<T, C, F> &composite);
+            };
         }
 
-            //--
+        //--
 
         namespace class_composite {
             // ClassCompositeInterface
@@ -129,6 +163,16 @@ namespace integral {
             template<typename B>
             inline InheritanceComposite<T, B, U> ClassCompositeInterface<T, U>::setBaseClass() && {
                 return InheritanceComposite<T, B, U>(std::move(*static_cast<U *>(this)));
+            }
+
+            template<typename T, typename U>
+            template<typename F>
+            inline SyntheticInheritanceComposite<T, U, F> ClassCompositeInterface<T, U>::setBaseClass(F &&typeFunction) && {
+                using ConversionFunctionTraits = ConversionFunctionTraits<typename FunctionTraits<F>::Signature>;
+                using OriginalType = typename ConversionFunctionTraits::OriginalType;
+                // failing the following static_assert would NOT cause a bug. It exists to prevent an abstraction inconsistecy (it is a design choice)
+                static_assert(std::is_same<OriginalType, T>::value == true, "type function original type mismatch with metatable class type");
+                return SyntheticInheritanceComposite<T, U, F>(std::move(*static_cast<U *>(this)), std::forward<F>(typeFunction));
             }
 
             // ClassMetatableComposite
@@ -158,6 +202,18 @@ namespace integral {
                 type_manager::defineInheritance<T, B>(luaState);
                 // stack: table 
             }
+
+            // SyntheticInheritanceComposite
+            template<typename T, typename C, typename F>
+            inline SyntheticInheritanceComposite<T, C, F>::SyntheticInheritanceComposite(C &&chainedClassMetatableComposite, F &&typeFunction) : chainedClassMetatableComposite_(std::forward<C>(chainedClassMetatableComposite)), typeFunction_(std::forward<F>(typeFunction)) {}
+
+            template<typename T, typename C, typename F>
+            void SyntheticInheritanceComposite<T, C, F>::push(lua_State *luaState) const {
+                exchanger::push<C>(luaState, chainedClassMetatableComposite_);
+                // stack: table
+                type_manager::defineInheritance(luaState, typeFunction_);
+                // stack: table
+            }
         }
 
         namespace exchanger {
@@ -165,11 +221,14 @@ namespace integral {
             inline void Exchanger<class_composite::ClassMetatableComposite<T, C, K, V>>::push(lua_State *luaState, const class_composite::ClassMetatableComposite<T, C, K, V> &composite) {
                 composite.push(luaState);
             }
-        }
 
-        namespace exchanger {
             template<typename T, typename B, typename C>
             inline void Exchanger<class_composite::InheritanceComposite<T, B, C>>::push(lua_State *luaState, const class_composite::InheritanceComposite<T, B, C> &composite) {
+                composite.push(luaState);
+            }
+
+            template<typename T, typename C, typename F>
+            inline void Exchanger<class_composite::SyntheticInheritanceComposite<T, C, F>>::push(lua_State *luaState, const class_composite::SyntheticInheritanceComposite<T, C, F> &composite) {
                 composite.push(luaState);
             }
         }
