@@ -40,3 +40,9 @@
     * configuration
     * adjustments
     * prototyping
+
+## Problems
+* Xcode migh emmit a linker warning in the form:
+  * "Direct access in function ..."
+  * To fix it, on target (not project) settings set:
+    * Inline Methods Hidden > No
