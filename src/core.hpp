@@ -99,12 +99,19 @@ namespace integral {
     template<typename F, typename M = detail::DefaultArgumentManager<>>
     using ConstructorWrapper = detail::ConstructorWrapper<F, M>;
 
-    // Constructs a FunctionWrapper object
+    // Makes a FunctionWrapper object
     // "function": function to be wrapped
     // "defaultArguments...": pack of default arguments. Each with its own specific type E at index I (every type is deduced from the function arguments). DefaultArgument Index I starts with 1 (like lua). Static checking is performed, so the invalid type or/and index causes compilation error.
     // defaultArguments... argument is a rvalue in order to utilize move constructors whenever possible. Moreover, forcing the declaration of DefaultArgument in-place adds clarity.
     template<typename F, typename ...E, std::size_t ...I>
-    FunctionWrapper<typename detail::FunctionTraits<F>::Signature, detail::DefaultArgumentManager<DefaultArgument<E, I>...>> makeFunctionWrapper(F &&function, DefaultArgument<E, I> &&...defaultArguments);
+    inline FunctionWrapper<typename detail::FunctionTraits<F>::Signature, detail::DefaultArgumentManager<DefaultArgument<E, I>...>> makeFunctionWrapper(F &&function, DefaultArgument<E, I> &&...defaultArguments);
+
+    // Makes a ConstructorWrapper object
+    // "typename F": function type e.g T(A...) (it is an abstraction. The constructor is not a function)
+    // "defaultArguments...": pack of default arguments. Each with its own specific type E at index I (every type is deduced from the function arguments). DefaultArgument Index I starts with 1 (like lua). Static checking is performed, so the invalid type or/and index causes compilation error.
+    // defaultArguments... argument is a rvalue in order to utilize move constructors whenever possible. Moreover, forcing the declaration of DefaultArgument in-place adds clarity.
+    template<typename F, typename ...E, std::size_t ...I>
+    inline ConstructorWrapper<F, detail::DefaultArgumentManager<DefaultArgument<E, I>...>> makeConstructorWrapper(DefaultArgument<E, I> &&...defaultArguments);
 
     // Pushes class metatable of type "T".
     // The class metatable can be converted to base types EVEN when they are NOT especified with defineTypeFunction or defineInheritance.
@@ -233,10 +240,15 @@ namespace integral {
     //--
 
     template<typename F, typename ...E, std::size_t ...I>
-    FunctionWrapper<typename detail::FunctionTraits<F>::Signature, detail::DefaultArgumentManager<DefaultArgument<E, I>...>> makeFunctionWrapper(F &&function, DefaultArgument<E, I> &&...defaultArguments) {
+    inline FunctionWrapper<typename detail::FunctionTraits<F>::Signature, detail::DefaultArgumentManager<DefaultArgument<E, I>...>> makeFunctionWrapper(F &&function, DefaultArgument<E, I> &&...defaultArguments) {
         return FunctionWrapper<typename detail::FunctionTraits<F>::Signature, detail::DefaultArgumentManager<DefaultArgument<E, I>...>>(std::forward<F>(function), std::move(defaultArguments)...);
     }
-    
+
+    template<typename F, typename ...E, std::size_t ...I>
+    inline ConstructorWrapper<F, detail::DefaultArgumentManager<DefaultArgument<E, I>...>> makeConstructorWrapper(DefaultArgument<E, I> &&...defaultArguments) {
+        return ConstructorWrapper<F, detail::DefaultArgumentManager<DefaultArgument<E, I>...>>(std::move(defaultArguments)...);
+    }
+
     template<typename T>
     inline void pushClassMetatable(lua_State *luaState) {
         push<ClassMetatable<T>>(luaState);
@@ -286,7 +298,7 @@ namespace integral {
 
     template<typename F, typename ...E, std::size_t ...I>
     inline void pushConstructor(lua_State *luaState, DefaultArgument<E, I> &&...defaultArguments) {
-        push<ConstructorWrapper<F, detail::DefaultArgumentManager<DefaultArgument<E, I>...>>>(luaState, std::move(defaultArguments)...);
+        push<ConstructorWrapper<F, detail::DefaultArgumentManager<DefaultArgument<E, I>...>>>(luaState, ConstructorWrapper<F, detail::DefaultArgumentManager<DefaultArgument<E, I>...>>(std::move(defaultArguments)...));
     }
 
     template<typename F>
@@ -321,7 +333,7 @@ namespace integral {
 
     template<typename F, typename ...E, std::size_t ...I>
     inline void pushFunction(lua_State *luaState, F &&function, DefaultArgument<E, I> &&...defaultArguments) {
-        push<FunctionWrapper<typename detail::FunctionTraits<F>::Signature, detail::DefaultArgumentManager<DefaultArgument<E, I>...>>>(luaState, std::forward<F>(function), std::move(defaultArguments)...);
+        push<FunctionWrapper<typename detail::FunctionTraits<F>::Signature, detail::DefaultArgumentManager<DefaultArgument<E, I>...>>>(luaState, FunctionWrapper<typename detail::FunctionTraits<F>::Signature, detail::DefaultArgumentManager<DefaultArgument<E, I>...>>(std::forward<F>(function), std::move(defaultArguments)...));
     }
 
     template<typename R, typename T>

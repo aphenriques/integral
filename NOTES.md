@@ -1,6 +1,5 @@
 ## TODO
-* Reference::call<R, ...A>(const A &...arguments)
-* more tests
+* check for more tests
 * separate core samples from samples with higher level of abstraction
 * update README.md
 * intel compiler
@@ -10,7 +9,7 @@
   * c++17: enable -Wunused-parameter and use [[maybe_unused]]
   * c++17: fold expressions (search and replace expansion/recursion functions)
   * c++17: template type deduction by constructor
-  * c++17: makeFunctionWrapper (not necessary in c++17: template type deduction in constructor)
+  * c++17: makeFunctionWrapper and makeConstructorWrapper (not necessary in c++17: template type deduction in constructor)
 * compare performance with other binding libraries
 * sandbox (in lua script?)
   * must be easily disabled
@@ -43,5 +42,5 @@
 ## Problems
 * Xcode migh emmit a linker warning in the form:
   * "Direct access in function ..."
-  * To fix it, on target (not project) settings set:
+  * To fix this, on target (not project) settings set:
     * Inline Methods Hidden > No

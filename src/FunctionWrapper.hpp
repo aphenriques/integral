@@ -2,7 +2,7 @@
 //  FunctionWrapper.hpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2015, 2016  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -28,9 +28,9 @@
 #include <functional>
 #include <utility>
 #include <lua.hpp>
-#include "argument.hpp"
 #include "ArgumentException.hpp"
 #include "DefaultArgument.hpp"
+#include "DefaultArgumentManager.hpp"
 #include "DefaultArgumentManagerContainer.hpp"
 #include "exchanger.hpp"
 #include "FunctionCaller.hpp"
@@ -43,7 +43,7 @@ namespace integral {
 
         // "typename M" must be a DefaultArgumentManager<DefaultArgument<E, I>...>
         template<typename R, typename ...A, typename M>
-        class FunctionWrapper<R(A...), M> : public DefaultArgumentManagerContainer<M> {
+        class FunctionWrapper<R(A...), M> : public DefaultArgumentManagerContainer<M, A...> {
         public:
             template<typename F, typename ...E, std::size_t ...I>
             inline FunctionWrapper(F &&function, DefaultArgument<E, I> &&...defaultArguments);
@@ -64,7 +64,14 @@ namespace integral {
             class Exchanger<FunctionWrapper<R(A...), M>> {
             public:
                 template<typename F, typename ...E, std::size_t ...I>
-                static void push(lua_State *luaState, F &&function, DefaultArgument<E, I> &&...defaultArguments);
+                inline static void push(lua_State *luaState, F &&function, DefaultArgument<E, I> &&...defaultArguments);
+
+                inline static void push(lua_State *luaState, FunctionWrapper<R(A...), M> &&functionWrapper);
+                inline static void push(lua_State *luaState, const FunctionWrapper<R(A...), M> &functionWrapper);
+
+            private:
+                template<typename W>
+                static void genericPush(lua_State *luaState, W &&functionWrapper);
             };
         }
 
@@ -72,7 +79,7 @@ namespace integral {
 
         template<typename R, typename ...A, typename M>
         template<typename F, typename ...E, std::size_t ...I>
-        inline FunctionWrapper<R(A...), M>::FunctionWrapper(F &&function, DefaultArgument<E, I> &&...defaultArguments) : DefaultArgumentManagerContainer<M>(std::move(defaultArguments)...), function_(std::forward<F>(function)) {}
+        inline FunctionWrapper<R(A...), M>::FunctionWrapper(F &&function, DefaultArgument<E, I> &&...defaultArguments) : DefaultArgumentManagerContainer<M, A...>(std::move(defaultArguments)...), function_(std::forward<F>(function)) {}
 
         template<typename R, typename ...A, typename M>
         inline const std::function<R(A...)> & FunctionWrapper<R(A...), M>::getFunction() const {
@@ -82,15 +89,30 @@ namespace integral {
         namespace exchanger {
             template<typename R, typename ...A, typename M>
             template<typename F, typename ...E, std::size_t ...I>
-            void Exchanger<FunctionWrapper<R(A...), M>>::push(lua_State *luaState, F &&function, DefaultArgument<E, I> &&...defaultArguments) {
-                argument::validateDefaultArguments<A...>(defaultArguments...);
-                exchanger::push<LuaFunctionWrapper>(luaState, [functionWrapper = FunctionWrapper<R(A...), M>(std::forward<F>(function), std::move(defaultArguments)...)](lua_State *lambdaLuaState) -> int {
+            inline void Exchanger<FunctionWrapper<R(A...), M>>::push(lua_State *luaState, F &&function, DefaultArgument<E, I> &&...defaultArguments) {
+                genericPush(luaState, FunctionWrapper<R(A...), M>(std::forward<F>(function), std::move(defaultArguments)...));
+            }
+
+            template<typename R, typename ...A, typename M>
+            inline void Exchanger<FunctionWrapper<R(A...), M>>::push(lua_State *luaState, FunctionWrapper<R(A...), M> &&functionWrapper) {
+                genericPush(luaState, std::move(functionWrapper));
+            }
+
+            template<typename R, typename ...A, typename M>
+            inline void Exchanger<FunctionWrapper<R(A...), M>>::push(lua_State *luaState, const FunctionWrapper<R(A...), M> &functionWrapper) {
+                genericPush(luaState, functionWrapper);
+            }
+
+            template<typename R, typename ...A, typename M>
+            template<typename W>
+            void Exchanger<FunctionWrapper<R(A...), M>>::genericPush(lua_State *luaState, W &&functionWrapper) {
+                exchanger::push<LuaFunctionWrapper>(luaState, [lambdaFunctionWrapper = std::forward<W>(functionWrapper)](lua_State *lambdaLuaState) -> int {
                     // replicate code of maximum number of parameters checking in Exchanger<ConstructorWrapper<T(A...), M>>::push
                     const std::size_t numberOfArgumentsOnStack = static_cast<std::size_t>(lua_gettop(lambdaLuaState));
                     constexpr std::size_t keCppNumberOfArguments = sizeof...(A);
                     if (numberOfArgumentsOnStack <= keCppNumberOfArguments) {
-                         functionWrapper.getDefaultArgumentManager().processDefaultArguments(lambdaLuaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
-                        return FunctionCaller<R, A...>::call(lambdaLuaState, functionWrapper.getFunction(), std::make_integer_sequence<std::size_t, keCppNumberOfArguments>());
+                         lambdaFunctionWrapper.getDefaultArgumentManager().processDefaultArguments(lambdaLuaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
+                        return FunctionCaller<R, A...>::call(lambdaLuaState, lambdaFunctionWrapper.getFunction(), std::make_integer_sequence<std::size_t, keCppNumberOfArguments>());
                     } else {
                         throw ArgumentException(lambdaLuaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
                     }

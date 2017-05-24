@@ -2,7 +2,7 @@
 //  DefaultArgumentManagerContainer.hpp
 //  integral
 //
-//  Copyright (C) 2016  André Pereira Henriques
+//  Copyright (C) 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -27,12 +27,13 @@
 
 #include <cstddef>
 #include <utility>
+#include "argument.hpp"
 #include "DefaultArgumentManager.hpp"
 #include "IsTemplateClass.hpp"
 
 namespace integral {
     namespace detail {
-        template<typename T>
+        template<typename T, typename ...A>
         class DefaultArgumentManagerContainer {
             static_assert(IsTemplateClass<DefaultArgumentManager, T>::value == true, "typename T in DefaultArgumentManagerContainer must be a DefaultArgumentManager");
         public:
@@ -47,12 +48,14 @@ namespace integral {
 
         //--
 
-        template<typename T>
+        template<typename T, typename ...A>
         template<typename ...E, std::size_t ...I>
-        inline DefaultArgumentManagerContainer<T>::DefaultArgumentManagerContainer(DefaultArgument<E, I> &&...defaultArguments) : defaultArgumentManager_(std::move(defaultArguments)...) {}
+        inline DefaultArgumentManagerContainer<T, A...>::DefaultArgumentManagerContainer(DefaultArgument<E, I> &&...defaultArguments) : defaultArgumentManager_(std::move(defaultArguments)...) {
+            argument::validateDefaultArguments<A...>(defaultArguments...);
+        }
 
-        template<typename T>
-        inline const T & DefaultArgumentManagerContainer<T>::getDefaultArgumentManager() const {
+        template<typename T, typename ...A>
+        inline const T & DefaultArgumentManagerContainer<T, A...>::getDefaultArgumentManager() const {
             return defaultArgumentManager_;
         }
     }
