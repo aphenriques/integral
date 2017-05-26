@@ -32,6 +32,7 @@
 #include "ArgumentException.hpp"
 #include "Caller.hpp"
 #include "exchanger.hpp"
+#include "factory.hpp"
 #include "GlobalReference.hpp"
 #include "serializer.hpp"
 
@@ -59,6 +60,12 @@ namespace integral {
 
             template<typename V>
             Reference<K, C> & set(V &&value);
+
+            template<typename F, typename ...E, std::size_t ...I>
+            inline Reference<K, C> & setFunction(F &&function, DefaultArgument<E, I> &&...defaultArguments);
+
+            template<typename F>
+            inline Reference<K, C> & setLuaFunction(F &&function);
 
             template<typename V>
             V get() const;
@@ -135,6 +142,18 @@ namespace integral {
                 lua_pop(getLuaState(), 1);
                 throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] reference ") + getReferenceString() + " is not a table");
             }
+        }
+
+        template<typename K, typename C>
+        template<typename F, typename ...E, std::size_t ...I>
+        inline Reference<K, C> & Reference<K, C>::setFunction(F &&function, DefaultArgument<E, I> &&...defaultArguments) {
+            return set(makeFunctionWrapper(std::forward<F>(function), std::move(defaultArguments)...));
+        }
+
+        template<typename K, typename C>
+        template<typename F>
+        inline Reference<K, C> & Reference<K, C>::setLuaFunction(F &&function) {
+            return set(LuaFunctionWrapper(std::forward<F>(function)));
         }
 
         template<typename K, typename C>

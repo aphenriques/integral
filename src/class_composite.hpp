@@ -29,8 +29,11 @@
 #include <utility>
 #include <lua.hpp>
 #include "ConversionFunctionTraits.hpp"
+#include "CopyGetter.hpp"
 #include "exchanger.hpp"
+#include "factory.hpp"
 #include "FunctionTraits.hpp"
+#include "Setter.hpp"
 #include "type_manager.hpp"
 
 namespace integral {
@@ -52,8 +55,23 @@ namespace integral {
             template<typename T, typename U>
             class ClassCompositeInterface {
             public:
-                template<typename L, typename W>
-                inline ClassMetatableComposite<T, U, typename std::decay<L>::type, typename std::decay<W>::type> set(L &&key, W &&value) &&;
+                template<typename K, typename V>
+                inline ClassMetatableComposite<T, U, typename std::decay<K>::type, typename std::decay<V>::type> set(K &&key, V &&value) &&;
+
+                template<typename K, typename F, typename ...E, std::size_t ...I>
+                inline decltype(auto) setFunction(K &&key, F &&function, DefaultArgument<E, I> &&...defaultArguments) &&;
+
+                template<typename K, typename F>
+                inline decltype(auto) setLuaFunction(K &&key, F &&luaFunction) &&;
+                
+                template<typename F, typename K, typename ...E, std::size_t ...I>
+                inline decltype(auto) setConstructor(K &&key, DefaultArgument<E, I> &&...defaultArguments) &&;
+
+                template<typename K, typename R, typename S>
+                inline decltype(auto) setCopyGetter(K &&key, R S::* attribute) &&;
+
+                template<typename K, typename R, typename S>
+                inline decltype(auto) setSetter(K &&key, R S::* attribute) &&;
 
                 // B: base class type
                 template<typename B>
@@ -154,9 +172,39 @@ namespace integral {
         namespace class_composite {
             // ClassCompositeInterface
             template<typename T, typename U>
-            template<typename L, typename W>
-            inline ClassMetatableComposite<T, U, typename std::decay<L>::type, typename std::decay<W>::type> ClassCompositeInterface<T, U>::set(L &&key, W &&value) && {
-                return ClassMetatableComposite<T, U, typename std::decay<L>::type, typename std::decay<W>::type>(std::move(*static_cast<U *>(this)), std::forward<L>(key), std::forward<W>(value));
+            template<typename K, typename V>
+            inline ClassMetatableComposite<T, U, typename std::decay<K>::type, typename std::decay<V>::type> ClassCompositeInterface<T, U>::set(K &&key, V &&value) && {
+                return ClassMetatableComposite<T, U, typename std::decay<K>::type, typename std::decay<V>::type>(std::move(*static_cast<U *>(this)), std::forward<K>(key), std::forward<V>(value));
+            }
+
+            template<typename T, typename U>
+            template<typename K, typename F, typename ...E, std::size_t ...I>
+            inline decltype(auto) ClassCompositeInterface<T, U>::setFunction(K &&key, F &&function, DefaultArgument<E, I> &&...defaultArguments) && {
+                return std::move(*this).set(std::forward<K>(key), factory::makeFunctionWrapper(std::forward<F>(function), std::move(defaultArguments)...));
+            }
+
+            template<typename T, typename U>
+            template<typename K, typename F>
+            inline decltype(auto) ClassCompositeInterface<T, U>::setLuaFunction(K &&key, F &&luaFunction) && {
+                return std::move(*this).set(std::forward<K>(key), LuaFunctionWrapper(std::forward<F>(luaFunction)));
+            }
+
+            template<typename T, typename U>
+            template<typename F, typename K, typename ...E, std::size_t ...I>
+            inline decltype(auto) ClassCompositeInterface<T, U>::setConstructor(K &&key, DefaultArgument<E, I> &&...defaultArguments) && {
+                return std::move(*this).set(std::forward<K>(key), detail::factory::makeConstructorWrapper<F>(std::move(defaultArguments)...));
+            }
+
+            template<typename T, typename U>
+            template<typename K, typename R, typename S>
+            inline decltype(auto) ClassCompositeInterface<T, U>::setCopyGetter(K &&key, R S::* attribute) && {
+                return std::move(*this).setFunction(std::forward<K>(key), CopyGetter<S, R>(attribute));
+            }
+
+            template<typename T, typename U>
+            template<typename K, typename R, typename S>
+            inline decltype(auto) ClassCompositeInterface<T, U>::setSetter(K &&key, R S::* attribute) && {
+                return std::move(*this).setFunction(std::forward<K>(key), Setter<S, R>(attribute));
             }
 
             template<typename T, typename U>

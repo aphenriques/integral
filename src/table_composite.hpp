@@ -28,6 +28,7 @@
 #include <utility>
 #include <lua.hpp>
 #include "exchanger.hpp"
+#include "factory.hpp"
 #include "type_manager.hpp"
 
 namespace integral {
@@ -41,8 +42,14 @@ namespace integral {
             template<typename U>
             class TableCompositeInterface {
             public:
-                template<typename L, typename W>
-                inline TableComposite<U, typename std::decay<L>::type, typename std::decay<W>::type> set(L &&key, W &&value) &&;
+                template<typename K, typename V>
+                inline TableComposite<U, typename std::decay<K>::type, typename std::decay<V>::type> set(K &&key, V &&value) &&;
+
+                template<typename K, typename F, typename ...E, std::size_t ...I>
+                inline decltype(auto) setFunction(K &&key, F &&function, DefaultArgument<E, I> &&...defaultArguments) &&;
+
+                template<typename K, typename F>
+                inline decltype(auto) setLuaFunction(K &&key, F &&luaFunction) &&;
             };
 
             template<typename C, typename K, typename V>
@@ -81,9 +88,21 @@ namespace integral {
         namespace table_composite {
             // TableCompositeInterface
             template<typename U>
-            template<typename L, typename W>
-            inline TableComposite<U, typename std::decay<L>::type, typename std::decay<W>::type> TableCompositeInterface<U>::set(L &&key, W &&value) && {
-                return TableComposite<U, typename std::decay<L>::type, typename std::decay<W>::type>(std::move(*static_cast<U *>(this)), std::forward<L>(key), std::forward<W>(value));
+            template<typename K, typename V>
+            inline TableComposite<U, typename std::decay<K>::type, typename std::decay<V>::type> TableCompositeInterface<U>::set(K &&key, V &&value) && {
+                return TableComposite<U, typename std::decay<K>::type, typename std::decay<V>::type>(std::move(*static_cast<U *>(this)), std::forward<K>(key), std::forward<V>(value));
+            }
+
+            template<typename U>
+            template<typename K, typename F>
+            inline decltype(auto) TableCompositeInterface<U>::setLuaFunction(K &&key, F &&luaFunction) && {
+                return std::move(*this).set(std::forward<K>(key), LuaFunctionWrapper(std::forward<F>(luaFunction)));
+            }
+
+            template<typename U>
+            template<typename K, typename F, typename ...E, std::size_t ...I>
+            inline decltype(auto) TableCompositeInterface<U>::setFunction(K &&key, F &&function, DefaultArgument<E, I> &&...defaultArguments) && {
+                return std::move(*this).set(std::forward<K>(key), makeFunctionWrapper(std::forward<F>(function), std::move(defaultArguments)...));
             }
 
             // TableComposite

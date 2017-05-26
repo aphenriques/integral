@@ -25,7 +25,6 @@
 #define integral_core_hpp
 
 #include <cstddef>
-#include <functional>
 #include <string>
 #include <utility>
 #include <lua.hpp>
@@ -33,6 +32,8 @@
 #include "ClassMetatable.hpp"
 #include "ConstructorWrapper.hpp"
 #include "ConversionFunctionTraits.hpp"
+#include "CopyGetter.hpp"
+#include "Setter.hpp"
 #include "DefaultArgument.hpp"
 #include "DefaultArgumentManager.hpp"
 #include "exchanger.hpp"
@@ -42,6 +43,7 @@
 #include "LuaFunctionArgument.hpp"
 #include "LuaFunctionWrapper.hpp"
 #include "LuaIgnoredArgument.hpp"
+#include "Setter.hpp"
 #include "type_manager.hpp"
 #include "UnexpectedStackException.hpp"
 
@@ -339,30 +341,22 @@ namespace integral {
 
     template<typename R, typename T>
     inline void setCopyGetter(lua_State *luaState, const std::string &name, R T::* attribute) {
-        setFunction(luaState, name, std::function<R(const T &)>([attribute](const T &object) -> R {
-            return object.*attribute;
-        }));
+        setFunction(luaState, name, detail::CopyGetter<T, R>(attribute));
     }
 
     template<typename R, typename T>
     inline void pushCopyGetter(lua_State *luaState, R T::* attribute) {
-        pushFunction(luaState, std::function<R(const T &)>([attribute](const T &object) -> R {
-            return object.*attribute;
-        }));
+        pushFunction(luaState, detail::CopyGetter<T, R>(attribute));
     }
 
     template<typename R, typename T>
     inline void setSetter(lua_State *luaState, const std::string &name, R T::* attribute) {
-        setFunction(luaState, name, std::function<void(T &, const R&)>([attribute](T &object, const R &value) -> void {
-            object.*attribute = value;
-        }));
+        setFunction(luaState, name, detail::Setter<T, R>(attribute));
     }
 
     template<typename R, typename T>
     inline void pushSetter(lua_State *luaState, R T::* attribute) {
-        pushFunction(luaState, std::function<void(T &, const R&)>([attribute](T &object, const R &value) -> void {
-            object.*attribute = value;
-        }));
+        pushFunction(luaState, detail::Setter<T, R>(attribute));
     }
 
     template<typename R, typename ...A>

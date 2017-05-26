@@ -261,23 +261,48 @@ TEST_CASE("integral test") {
     SECTION("TableComposite, ClassMetatableComposite ClassMetatable, methods, functions and luaFunctions") {
         stateView["Object"].set(integral::ClassMetatable<Object>()
                                 .set("new1", integral::ConstructorWrapper<Object(const std::string &)>())
-                                .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId)));
+                                .setConstructor<Object(unsigned)>("new2")
+                                .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId))
+                                .setCopyGetter("getFlag", &Object::flag_)
+                                .setSetter("setFlag", &Object::flag_)
+                                .setLuaFunction("getIdAndFlag", [](lua_State *lambdaLuaState) -> int {
+                                    const Object &object = integral::get<Object>(lambdaLuaState, 1);
+                                    integral::push<const char *>(lambdaLuaState, object.getId().c_str());
+                                    integral::push<bool>(lambdaLuaState, object.flag_);
+                                    return 2;
+                                })
+                                );
         REQUIRE_NOTHROW(stateView.doString("object = Object.new1('id')"));
+        REQUIRE_NOTHROW(stateView.doString("assert(Object.new2(42):getId() == '42')"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getId() == 'id')"));
-        stateView["Object"]["setId"].set(integral::makeFunctionWrapper(&Object::setId));
+        REQUIRE_NOTHROW(stateView.doString("assert(object:getFlag() == false)"));
+        REQUIRE_NOTHROW(stateView.doString("object:setFlag(true)"));
+        REQUIRE_NOTHROW(stateView.doString("assert(object:getFlag() == true)"));
+        REQUIRE_NOTHROW(stateView.doString("id, flag = object:getIdAndFlag(); assert(id == 'id' and flag == true)"));
+        stateView["Object"]["setId"].setFunction(&Object::setId);
         REQUIRE_NOTHROW(stateView.doString("object:setId('42'); assert(object:getId() == '42')"));
         stateView["Object"]["aux"].set(integral::Table()
-                                       .set("hasSameId", integral::makeFunctionWrapper([](const Object &object1, const Object &object2) -> bool {
-                                            return object1.getId() == object2.getId();
-                                        }))
-                                        .set("new", integral::LuaFunctionWrapper([](lua_State *lambdaLuaState) -> int {
-                                            integral::push<Object>(lambdaLuaState, integral::get<unsigned>(lambdaLuaState, 1));
-                                            return 1;
-                                        }))
-                                        );
+                                       .setFunction("hasSameId", [](const Object &object1, const Object &object2) -> bool {
+                                           return object1.getId() == object2.getId();
+                                       })
+                                       .set("new", integral::LuaFunctionWrapper([](lua_State *lambdaLuaState) -> int {
+                                           integral::push<Object>(lambdaLuaState, integral::get<unsigned>(lambdaLuaState, 1));
+                                           return 1;
+                                       }))
+                                       .setLuaFunction("new2", [](lua_State *lambdaLuaState) -> int {
+                                           integral::push<Object>(lambdaLuaState, 10);
+                                           return 1;
+                                       })
+                                       );
         REQUIRE_THROWS_AS(stateView.doString("Object.aux.new('string')"), integral::StateException);
+        REQUIRE_NOTHROW(stateView.doString("assert(Object.aux.new2():getId() == '10')"));
         REQUIRE_NOTHROW(stateView.doString("object2 = Object.aux.new(42)"));
         REQUIRE_NOTHROW(stateView.doString("assert(Object.aux.hasSameId(object, object2) == true)"));
+        stateView["Object"]["aux"]["get42"].setLuaFunction([](lua_State *lambdaLuaState) -> int {
+            integral::push<int>(lambdaLuaState, 42);
+            return 1;
+        });
+        REQUIRE_NOTHROW(stateView.doString("assert(Object.aux.get42() == 42)"));
     }
     SECTION("integral::push and integral::get with Adaptors") {
         const std::vector<int> vector{1, 2, 3};
@@ -366,7 +391,8 @@ TEST_CASE("integral test") {
     }
     SECTION("function call") {
         stateView["Object"].set(integral::ClassMetatable<Object>()
-                                .set("new", integral::ConstructorWrapper<Object(const std::string &)>()));
+                                .setConstructor<Object(const std::string &)>("new")
+                                );
         REQUIRE_NOTHROW(stateView.doString("function makeObject(id) return Object.new(id) end"));
         REQUIRE_NOTHROW(stateView.doString("function dummy() end"));
         lua_getglobal(luaState.get(), "makeObject");
@@ -388,17 +414,17 @@ TEST_CASE("integral test") {
     }
     SECTION("LuaIgnoredArgument and LuaFunctionArgument") {
         stateView["Vector"].set(integral::ClassMetatable<std::vector<double>>()
-                                .set("new", integral::makeFunctionWrapper([](const integral::LuaVector<double> &vector) -> std::vector<double> {
+                                .setFunction("new", [](const integral::LuaVector<double> &vector) -> std::vector<double> {
                                     return vector;
-                                }))
-                                .set("__len", integral::makeFunctionWrapper([](const std::vector<double> &vector, integral::LuaIgnoredArgument) -> std::size_t {
+                                })
+                                .setFunction("__len", [](const std::vector<double> &vector, integral::LuaIgnoredArgument) -> std::size_t {
                                     return vector.size();
-                                }))
-                                .set("transform", integral::makeFunctionWrapper([](std::vector<double> &vector, const integral::LuaFunctionArgument &luaFunctionArgument) -> void {
+                                })
+                                .setFunction("transform", [](std::vector<double> &vector, const integral::LuaFunctionArgument &luaFunctionArgument) -> void {
                                     std::for_each(vector.begin(), vector.end(), [&luaFunctionArgument](double &element) -> void {
                                         element = luaFunctionArgument.call<double>(element);
                                     });
-                                }))
+                                })
                                 );
         REQUIRE_NOTHROW(stateView.doString("vector = Vector.new({1.1, 1.2, 1.3})"));
         REQUIRE_NOTHROW(stateView.doString("assert(#vector == 3)"));
@@ -418,10 +444,10 @@ TEST_CASE("integral test") {
     }
     SECTION("polymorphism") {
         stateView["Object"].set(integral::ClassMetatable<Object>()
-                                .set("new", integral::ConstructorWrapper<Object(const char *)>())
+                                .setConstructor<Object(const char *)>("new")
                                 );
-        stateView["getBaseConstant"].set(integral::makeFunctionWrapper(&BaseObject::getBaseConstant));
-        stateView["getBaseOfBaseString"].set(integral::makeFunctionWrapper(&BaseOfBaseObject::getBaseOfBaseString));
+        stateView["getBaseConstant"].setFunction(&BaseObject::getBaseConstant);
+        stateView["getBaseOfBaseString"].setFunction(&BaseOfBaseObject::getBaseOfBaseString);
         REQUIRE_NOTHROW(stateView.doString("object = Object.new(21)"));
         REQUIRE_NOTHROW(stateView.doString("assert(getBaseConstant(object) == 42)"));
         REQUIRE_NOTHROW(stateView.doString("assert(getBaseOfBaseString(object) == 'BaseOfBase')"));
@@ -445,13 +471,13 @@ TEST_CASE("integral test") {
     }
     SECTION("Reference default argument") {
         stateView["Object"].set(integral::ClassMetatable<Object>()
-                                .set("new", integral::makeConstructorWrapper<Object(const std::string &)>(integral::DefaultArgument<std::string, 1>("default")))
-                                .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId))
-                                .set("getBaseConstant", integral::makeFunctionWrapper(&BaseObject::getBaseConstant, integral::DefaultArgument<BaseObject, 1>()))
-                                .set("getSum", integral::makeFunctionWrapper(&getSum, integral::DefaultArgument<double, 2>(1)))
-                                .set("testDefault", integral::makeFunctionWrapper([](int number, const std::string &string) -> std::string {
+                                .setConstructor<Object(const std::string &)>("new", integral::DefaultArgument<std::string, 1>("default"))
+                                .setFunction("getId", std::function<std::string(const Object &)>(&Object::getId))
+                                .setFunction("getBaseConstant", &BaseObject::getBaseConstant, integral::DefaultArgument<BaseObject, 1>())
+                                .setFunction("getSum", &getSum, integral::DefaultArgument<double, 2>(1))
+                                .setFunction("testDefault", [](int number, const std::string &string) -> std::string {
                                     return std::to_string(number) + string;
-                                }, integral::DefaultArgument<int, 1>(42), integral::DefaultArgument<std::string, 2>("_")))
+                                }, integral::DefaultArgument<int, 1>(42), integral::DefaultArgument<std::string, 2>("_"))
                                 );
         REQUIRE_NOTHROW(stateView.doString("assert(Object.new():getId() == 'default')"));
         REQUIRE_NOTHROW(stateView.doString("assert(Object.getBaseConstant() == 42)"));
@@ -462,22 +488,22 @@ TEST_CASE("integral test") {
     }
     SECTION("inheritance and type convertion") {
         stateView["BaseOfBaseObject"].set(integral::ClassMetatable<BaseOfBaseObject>()
-                                          .set("new", integral::ConstructorWrapper<BaseOfBaseObject()>())
-                                          .set("getBaseOfBaseString", integral::makeFunctionWrapper(&BaseOfBaseObject::getBaseOfBaseString))
+                                          .setConstructor<BaseOfBaseObject()>("new")
+                                          .setFunction("getBaseOfBaseString", &BaseOfBaseObject::getBaseOfBaseString)
                                           );
         REQUIRE_NOTHROW(stateView.doString("baseOfBase = BaseOfBaseObject.new()"));
         REQUIRE_NOTHROW(stateView.doString("assert(baseOfBase:getBaseOfBaseString() == 'BaseOfBase')"));
         stateView["BaseObject"].set(integral::ClassMetatable<BaseObject>()
-                                    .set("new", integral::ConstructorWrapper<BaseObject()>())
-                                    .set("getBaseConstant", integral::makeFunctionWrapper(&BaseObject::getBaseConstant))
+                                    .setConstructor<BaseObject()>("new")
+                                    .setFunction("getBaseConstant", &BaseObject::getBaseConstant)
                                     );
         stateView.defineInheritance<BaseObject, BaseOfBaseObject>();
         REQUIRE_NOTHROW(stateView.doString("base = BaseObject.new()"));
         REQUIRE_NOTHROW(stateView.doString("assert(base:getBaseConstant() == 42)"));
         REQUIRE_NOTHROW(stateView.doString("assert(base:getBaseOfBaseString() == 'BaseOfBase')"));
         stateView["Object"].set(integral::ClassMetatable<Object>()
-                                .set("new", integral::ConstructorWrapper<Object(unsigned)>())
-                                .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId))
+                                .setConstructor<Object(unsigned)>("new")
+                                .setFunction("getId", std::function<std::string(const Object &)>(&Object::getId))
                                 );
         stateView.defineInheritance<Object, BaseObject>();
         REQUIRE_NOTHROW(stateView.doString("object = Object.new(21)"));
@@ -491,7 +517,7 @@ TEST_CASE("integral test") {
             return &objectReferenceWrapper->get();
         });
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getId() == 'cppObject')"));
-        stateView["InnerObject"].set(integral::ClassMetatable<InnerObject>().set("getGreeting", integral::makeFunctionWrapper(&InnerObject::getGreeting)));
+        stateView["InnerObject"].set(integral::ClassMetatable<InnerObject>().setFunction("getGreeting", &InnerObject::getGreeting));
         REQUIRE_THROWS_AS(stateView.doString("assert(InnerObject.getGreeting(cppObject) == 'hello')"), integral::StateException);
         stateView.defineTypeFunction([](Object *object) -> InnerObject * {
             return &object->innerObject_;
@@ -500,14 +526,14 @@ TEST_CASE("integral test") {
     }
     SECTION("ClassMetatable inheritance") {
         stateView["BaseOfBaseObject"].set(integral::ClassMetatable<BaseOfBaseObject>()
-                                    .set("new", integral::ConstructorWrapper<BaseOfBaseObject()>())
-                                    .set("getBaseOfBaseString", integral::makeFunctionWrapper(&BaseOfBaseObject::getBaseOfBaseString))
-                                    );
+                                          .setConstructor<BaseOfBaseObject()>("new")
+                                          .setFunction("getBaseOfBaseString", &BaseOfBaseObject::getBaseOfBaseString)
+                                          );
         REQUIRE_NOTHROW(stateView.doString("baseOfBase = BaseOfBaseObject.new()"));
         REQUIRE_NOTHROW(stateView.doString("assert(baseOfBase:getBaseOfBaseString() == 'BaseOfBase')"));
         stateView["BaseObject"].set(integral::ClassMetatable<BaseObject>()
-                                    .set("new", integral::ConstructorWrapper<BaseObject()>())
-                                    .set("getBaseConstant", integral::makeFunctionWrapper(&BaseObject::getBaseConstant))
+                                    .setConstructor<BaseObject()>("new")
+                                    .setFunction("getBaseConstant", &BaseObject::getBaseConstant)
                                     .setBaseClass<BaseOfBaseObject>()
                                     );
         REQUIRE_NOTHROW(stateView.doString("base = BaseObject.new()"));
@@ -518,7 +544,7 @@ TEST_CASE("integral test") {
                                 .setBaseClass([](Object *object) -> InnerObject * {
                                     return &object->innerObject_;
                                 })
-                                .set("new", integral::ConstructorWrapper<Object(unsigned)>())
+                                .setConstructor<Object(unsigned)>("new")
                                 .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId))
                                 );
         REQUIRE_NOTHROW(stateView.doString("object = Object.new(21)"));
@@ -533,9 +559,8 @@ TEST_CASE("integral test") {
                                              return &objectReferenceWrapper->get();
                                          }));
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getId() == 'cppObject')"));
-        stateView["InnerObject"].set(integral::ClassMetatable<InnerObject>().set("getGreeting", integral::makeFunctionWrapper(&InnerObject::getGreeting)));
+        stateView["InnerObject"].set(integral::ClassMetatable<InnerObject>().setFunction("getGreeting", &InnerObject::getGreeting));
         REQUIRE_NOTHROW(stateView.doString("assert(InnerObject.getGreeting(cppObject) == 'hello')"));
-
     }
     REQUIRE(lua_gettop(luaState.get()) == 0);
 }
