@@ -290,7 +290,7 @@ TEST_CASE("integral test") {
                                            return 1;
                                        }))
                                        .setLuaFunction("new2", [](lua_State *lambdaLuaState) -> int {
-                                           integral::push<Object>(lambdaLuaState, 10);
+                                           integral::push<Object>(lambdaLuaState, 10u);
                                            return 1;
                                        })
                                        );
