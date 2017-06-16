@@ -35,7 +35,14 @@
 #include <integral.hpp>
 #include <exception/Exception.hpp>
 
-class InnerObject {
+class BaseOfInnerObject {
+public:
+    int getBaseOfInnerConstant() const  {
+        return 21;
+    }
+};
+
+class InnerObject : public BaseOfInnerObject {
 public:
     std::string getGreeting() const {
         return "hello";
@@ -395,6 +402,7 @@ TEST_CASE("integral test") {
                                 );
         REQUIRE_NOTHROW(stateView.doString("function makeObject(id) return Object.new(id) end"));
         REQUIRE_NOTHROW(stateView.doString("function dummy() end"));
+        REQUIRE_NOTHROW(stateView.doString("x = 'not function'"));
         lua_getglobal(luaState.get(), "makeObject");
         lua_pushvalue(luaState.get(), -1);
         lua_pushvalue(luaState.get(), -1);
@@ -409,8 +417,12 @@ TEST_CASE("integral test") {
         lua_pushvalue(luaState.get(), -1);
         REQUIRE_NOTHROW(integral::call<void>(luaState.get()));
         REQUIRE_THROWS_AS(integral::call<int>(luaState.get()), integral::ArgumentException);
+        lua_getglobal(luaState.get(), "x");
+        REQUIRE_THROWS_AS(integral::call<void>(luaState.get()), integral::CallerException);
         REQUIRE(stateView["makeObject"].call<Object>("id-42").getId() == "id-42");
+        REQUIRE_THROWS_AS(stateView["makeObject"].call<int>("id-42"), integral::ReferenceException);
         REQUIRE_NOTHROW(stateView["dummy"].call<void>());
+        REQUIRE_THROWS_AS(stateView["x"].call<void>(), integral::ReferenceException);
     }
     SECTION("LuaIgnoredArgument and LuaFunctionArgument") {
         stateView["Vector"].set(integral::ClassMetatable<std::vector<double>>()
@@ -517,14 +529,42 @@ TEST_CASE("integral test") {
             return &objectReferenceWrapper->get();
         });
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getId() == 'cppObject')"));
-        stateView["InnerObject"].set(integral::ClassMetatable<InnerObject>().setFunction("getGreeting", &InnerObject::getGreeting));
+        REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getBaseOfBaseString() == 'BaseOfBase')"));
+        REQUIRE_NOTHROW(&stateView["cppObject"].get<Object>() == &cppObject);
+        stateView["BaseOfInnerObject"].set(integral::ClassMetatable<BaseOfInnerObject>()
+                                           .setFunction("getBaseOfInnerConstant", &BaseOfInnerObject::getBaseOfInnerConstant)
+                                           );
+        stateView["InnerObject"].set(integral::ClassMetatable<InnerObject>()
+                                     .setFunction("getGreeting", &InnerObject::getGreeting)
+                                     );
+        stateView.defineInheritance<InnerObject, BaseOfInnerObject>();
         REQUIRE_THROWS_AS(stateView.doString("assert(InnerObject.getGreeting(cppObject) == 'hello')"), integral::StateException);
         stateView.defineTypeFunction([](Object *object) -> InnerObject * {
             return &object->innerObject_;
         });
         REQUIRE_NOTHROW(stateView.doString("assert(InnerObject.getGreeting(cppObject) == 'hello')"));
+        REQUIRE_THROWS_AS(stateView.doString("cppObject:getGreeting()"), integral::StateException);
+        REQUIRE_THROWS_AS(stateView.doString("cppObject:getBaseOfInnerConstant()"), integral::StateException);
+        stateView.defineInheritance([](Object *object) -> InnerObject * {
+            return &object->innerObject_;
+        });
+        REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getGreeting() == 'hello')"));
+        REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getBaseOfInnerConstant() == 21)"));
+        stateView["sharedObject"].set(std::make_shared<Object>("shared"));
+        REQUIRE_THROWS_AS(stateView.doString("assert(sharedObject:getId() == 'shared')"), integral::StateException);
+        stateView.defineInheritance([](std::shared_ptr<Object> *objectSharedPointer) -> Object * {
+            return objectSharedPointer->get();
+        });
+        REQUIRE_NOTHROW(stateView.doString("assert(sharedObject:getId() == 'shared')"));
     }
     SECTION("ClassMetatable inheritance") {
+        stateView["BaseOfInnerObject"].set(integral::ClassMetatable<BaseOfInnerObject>()
+                                           .setFunction("getBaseOfInnerConstant", &BaseOfInnerObject::getBaseOfInnerConstant)
+                                           );
+        stateView["InnerObject"].set(integral::ClassMetatable<InnerObject>()
+                                     .setFunction("getGreeting", &InnerObject::getGreeting)
+                                     .setBaseClass<BaseOfInnerObject>()
+                                     );
         stateView["BaseOfBaseObject"].set(integral::ClassMetatable<BaseOfBaseObject>()
                                           .setConstructor<BaseOfBaseObject()>("new")
                                           .setFunction("getBaseOfBaseString", &BaseOfBaseObject::getBaseOfBaseString)
@@ -551,6 +591,8 @@ TEST_CASE("integral test") {
         REQUIRE_NOTHROW(stateView.doString("assert(object:getId() == '21')"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getBaseConstant() == 42)"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getBaseOfBaseString() == 'BaseOfBase')"));
+        REQUIRE_NOTHROW(stateView.doString("assert(object:getGreeting() == 'hello')"));
+        REQUIRE_NOTHROW(stateView.doString("assert(object:getBaseOfInnerConstant() == 21)"));
         Object cppObject("cppObject");
         stateView["cppObject"].set(std::ref(cppObject));
         REQUIRE_THROWS_AS(stateView.doString("assert(cppObject:getId() == 'cppObject')"), integral::StateException);
@@ -559,8 +601,15 @@ TEST_CASE("integral test") {
                                              return &objectReferenceWrapper->get();
                                          }));
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getId() == 'cppObject')"));
-        stateView["InnerObject"].set(integral::ClassMetatable<InnerObject>().setFunction("getGreeting", &InnerObject::getGreeting));
-        REQUIRE_NOTHROW(stateView.doString("assert(InnerObject.getGreeting(cppObject) == 'hello')"));
+        REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getBaseOfBaseString() == 'BaseOfBase')"));
+        REQUIRE_NOTHROW(&stateView["cppObject"].get<Object>() == &cppObject);
+        REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getGreeting() == 'hello')"));
+        REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getBaseOfInnerConstant() == 21)"));
+        stateView["sharedObject"].set(std::make_shared<Object>("shared"));
+        REQUIRE_THROWS_AS(stateView.doString("assert(sharedObject:getId() == 'shared')"), integral::StateException);
+        stateView["ObjectSharedPointer"].set(integral::ClassMetatable<std::shared_ptr<Object>>()
+                                             .setBaseClass(std::function<Object *(std::shared_ptr<Object> *)>(&std::shared_ptr<Object>::get)));
+        REQUIRE_NOTHROW(stateView.doString("assert(sharedObject:getId() == 'shared')"));
     }
     REQUIRE(lua_gettop(luaState.get()) == 0);
 }
