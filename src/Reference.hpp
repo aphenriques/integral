@@ -68,7 +68,7 @@ namespace integral {
             inline Reference<K, C> & setLuaFunction(F &&function);
 
             template<typename V>
-            V get() const;
+            decltype(auto) get() const;
 
             template<typename R, typename ...A>
             decltype(auto) call(const A &...arguments);
@@ -158,7 +158,7 @@ namespace integral {
 
         template<typename K, typename C>
         template<typename V>
-        V Reference<K, C>::get() const {
+        decltype(auto) Reference<K, C>::get() const {
             push();
             // stack: ?
             try {
