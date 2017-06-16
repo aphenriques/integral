@@ -2,7 +2,7 @@
 //  Object.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2014, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -89,7 +89,7 @@ extern "C" {
             // alternative way to push LuaFunctions
             lua_pushstring(luaState, "printMessage");
             integral::push<integral::LuaFunctionWrapper>(luaState, [](lua_State *lambdaLuaState) -> int {
-                std::cout << "message from CLuaFunction" << std::endl;
+                std::cout << "message from LuaFunctionWrapper" << std::endl;
                 return 0;
             });
             lua_rawset(luaState, -3);
