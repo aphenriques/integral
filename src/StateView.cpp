@@ -34,7 +34,7 @@ namespace integral {
         if (luaState_ != nullptr) {
             lua_atpanic(getLuaState(), &StateView::atPanic);
         } else {
-            throw exception::RuntimeException(__FILE__, __LINE__, __func__, "[integral] nullptr passed to StateView::StateView(lua_State *luaState)");
+            throw StateException(__FILE__, __LINE__, __func__, "[integral] nullptr passed to StateView::StateView(lua_State *luaState)");
         }
     }
 

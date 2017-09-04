@@ -42,7 +42,7 @@ namespace integral {
         StateView(const StateView &) = delete;
         StateView & operator=(const StateView &) = delete;
         
-        // throws exception::RuntimeException if luaState is nullptr
+        // throws StateException if luaState is nullptr
         // defines StateView::atPanic as lua panic function
         StateView(lua_State *luaState);
         

@@ -1,24 +1,13 @@
-PROJECT_ROOT_DIR:=..
+.PHONY: abstraction core all clean
 
-include $(PROJECT_ROOT_DIR)/common.mk
+abstraction:
+	cd abstraction && $(MAKE) all
 
-# http://stackoverflow.com/a/11206700
+core:
+	cd core && $(MAKE) all
 
-SUBDIRS:=$(wildcard */.)
-TARGETS:=all clean  # must not contain '/'
+all: abstraction core
 
-SUBDIRS_TARGETS:=$(foreach t,$(TARGETS),$(addsuffix $t,$(SUBDIRS)))
-
-.PHONY: $(TARGETS) $(SUBDIRS_TARGETS) lib
-
-$(TARGETS): % : $(addsuffix %,$(SUBDIRS))
-	@echo 'Done "$*" target'
-
-$(SUBDIRS_TARGETS):
-	$(MAKE) -C $(@D) $(@F:.%=%)
-
-# lib as prerequisite so that make -j all won't invoke make lib in parallel in each subdir
-$(addsuffix all,$(SUBDIRS)): lib
-
-lib:
-	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) all
+clean:
+	cd abstraction && $(MAKE) $@
+	cd core && $(MAKE) $@

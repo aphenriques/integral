@@ -22,15 +22,14 @@
 //
 
 #include "State.hpp"
-#include <exception>
 #include <string>
 #include <lua.hpp>
 #include "exception/Exception.hpp"
 
 namespace integral {
     State::State() try : StateView(luaL_newstate()) {
-    } catch (const exception::RuntimeException &exception) {
-        throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string("[integral] failed to create new lua state: { ") + exception.what() + " }");
+    } catch (const StateException &stateException) {
+        throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string("[integral] failed to create new lua state: { ") + stateException.what() + " }");
     }
 
     State::~State() {
