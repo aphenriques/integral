@@ -6,6 +6,8 @@ INSTALL_LIB:=$(INSTALL_TOP)/lib
 
 .PHONY: all static shared samples install uninstall clean
 
+# Any of the following make rules can be executed with the `-j` option (`make -j`) for parallel compilation 
+
 all:
 	cd $(PROJECT_LIB_DIR) && $(MAKE) $@
 
