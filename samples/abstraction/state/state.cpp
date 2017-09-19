@@ -23,7 +23,6 @@
 
 #include <iostream>
 #include <memory>
-#include <string>
 #include <lua.hpp>
 #include <integral.hpp>
 
@@ -49,6 +48,18 @@ int main(int argc, char* argv[]) {
         
         try {
             integral::StateView(nullptr);
+        } catch (const integral::StateException &stateException) {
+            std::cout << "expected exception: {" << stateException.what() << "}\n";
+        }
+
+        try {
+            luaState.doString("invalid_statement");
+        } catch (const integral::StateException &stateException) {
+            std::cout << "expected exception: {" << stateException.what() << "}\n";
+        }
+
+        try {
+            luaState.doFile("nonexistentFile");
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
