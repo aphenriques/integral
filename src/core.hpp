@@ -166,6 +166,12 @@ namespace integral {
     template<typename T, typename ...A>
     inline void push(lua_State *luaState, A &&...arguments);
 
+    // Pushes a copy of type "T" value (string or number) or object onto the stack.
+    // References and pointers (except const char *) can not be pushed.
+    // The class metatable is automatically registered if needed.
+    template<typename T>
+    inline void pushCopy(lua_State *luaState, T &&value);
+
     // Returns a type "T" value (string or number) or object from the stack at "index" position.
     // Objects are returned by reference.
     // Lua types (number, table and strings) are returned by value.
@@ -280,6 +286,11 @@ namespace integral {
     template<typename T, typename ...A>
     inline void push(lua_State *luaState, A &&...arguments) {
         detail::exchanger::push<T>(luaState, std::forward<A>(arguments)...);
+    }
+
+    template<typename T>
+    inline void pushCopy(lua_State *luaState, T &&value) {
+        push<T>(luaState, std::forward<T>(value));
     }
 
     template<typename T>
