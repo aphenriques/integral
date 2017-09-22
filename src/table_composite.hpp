@@ -27,6 +27,7 @@
 #include <type_traits>
 #include <utility>
 #include <lua.hpp>
+#include "Emplacer.hpp"
 #include "exchanger.hpp"
 #include "factory.hpp"
 #include "type_manager.hpp"
@@ -44,6 +45,9 @@ namespace integral {
             public:
                 template<typename K, typename V>
                 inline TableComposite<U, typename std::decay<K>::type, typename std::decay<V>::type> set(K &&key, V &&value) &&;
+
+                template<typename W, typename K, typename ...A>
+                inline TableComposite<U, typename std::decay<K>::type, Emplacer<W, typename std::decay<A>::type...>> emplace(K &&key, A &&...arguments) &&;
 
                 template<typename K, typename F, typename ...E, std::size_t ...I>
                 inline decltype(auto) setFunction(K &&key, F &&function, DefaultArgument<E, I> &&...defaultArguments) &&;
@@ -91,6 +95,12 @@ namespace integral {
             template<typename K, typename V>
             inline TableComposite<U, typename std::decay<K>::type, typename std::decay<V>::type> TableCompositeInterface<U>::set(K &&key, V &&value) && {
                 return TableComposite<U, typename std::decay<K>::type, typename std::decay<V>::type>(std::move(*static_cast<U *>(this)), std::forward<K>(key), std::forward<V>(value));
+            }
+
+            template<typename U>
+            template<typename W, typename K, typename ...A>
+            inline TableComposite<U, typename std::decay<K>::type, Emplacer<W, typename std::decay<A>::type...>> TableCompositeInterface<U>::emplace(K &&key, A &&...arguments) && {
+                return TableComposite<U, typename std::decay<K>::type, Emplacer<W, typename std::decay<A>::type...>>(std::move(*static_cast<U *>(this)), std::forward<K>(key), Emplacer<W, typename std::decay<A>::type...>(std::forward<A>(arguments)...));
             }
 
             template<typename U>

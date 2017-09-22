@@ -30,6 +30,7 @@
 #include <lua.hpp>
 #include "ConversionFunctionTraits.hpp"
 #include "CopyGetter.hpp"
+#include "Emplacer.hpp"
 #include "exchanger.hpp"
 #include "factory.hpp"
 #include "FunctionTraits.hpp"
@@ -57,6 +58,9 @@ namespace integral {
             public:
                 template<typename K, typename V>
                 inline ClassMetatableComposite<T, U, typename std::decay<K>::type, typename std::decay<V>::type> set(K &&key, V &&value) &&;
+
+                template<typename W, typename K, typename ...A>
+                inline ClassMetatableComposite<T, U, typename std::decay<K>::type, Emplacer<W, typename std::decay<A>::type...>> emplace(K &&key, A &&...arguments) &&;
 
                 template<typename K, typename F, typename ...E, std::size_t ...I>
                 inline decltype(auto) setFunction(K &&key, F &&function, DefaultArgument<E, I> &&...defaultArguments) &&;
@@ -175,6 +179,12 @@ namespace integral {
             template<typename K, typename V>
             inline ClassMetatableComposite<T, U, typename std::decay<K>::type, typename std::decay<V>::type> ClassCompositeInterface<T, U>::set(K &&key, V &&value) && {
                 return ClassMetatableComposite<T, U, typename std::decay<K>::type, typename std::decay<V>::type>(std::move(*static_cast<U *>(this)), std::forward<K>(key), std::forward<V>(value));
+            }
+
+            template<typename T, typename U>
+            template<typename W, typename K, typename ...A>
+            inline ClassMetatableComposite<T, U, typename std::decay<K>::type, Emplacer<W, typename std::decay<A>::type...>> ClassCompositeInterface<T, U>::emplace(K &&key, A &&...arguments) && {
+                return ClassMetatableComposite<T, U, typename std::decay<K>::type, Emplacer<W, typename std::decay<A>::type...>>(std::move(*static_cast<U *>(this)), std::forward<K>(key), Emplacer<W, typename std::decay<A>::type...>(std::forward<A>(arguments)...));
             }
 
             template<typename T, typename U>

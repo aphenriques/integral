@@ -71,6 +71,7 @@ public:
     Object() = default;
     Object(const std::string &id) : id_(id) {}
     Object(unsigned id) : id_(std::to_string(id)) {}
+    Object(const std::string &prefix, unsigned id) : id_(prefix + std::to_string(id)) {}
 
     bool operator==(const Object &object) const {
         return getId()==object.getId() && flag_ == object.flag_;
@@ -150,6 +151,10 @@ TEST_CASE("integral test") {
         REQUIRE_NOTHROW(stateView.doFile("doFileTest.lua"));
         REQUIRE_THROWS_AS(stateView.doFile("nonexistentFile"), integral::StateException);
     }
+    SECTION("integral::detail::Reference::emplace and integral::detail::Reference::get") {
+        stateView["x"].emplace<Object>("object");
+        REQUIRE(stateView["x"].get<Object>() == Object("object"));
+    }
     SECTION("integral::detail::Reference::get and integral::detail::Reference::set") {
         stateView["x"].set(-42);
         REQUIRE(stateView["x"].get<int>() == -42);
@@ -178,6 +183,52 @@ TEST_CASE("integral test") {
         stateView["x"].set(Object("object"));
         REQUIRE_THROWS_AS(stateView["x"].get<int>(), integral::ReferenceException);
         REQUIRE_THROWS_AS(stateView["x"].get<std::string>(), integral::ReferenceException);
+    }
+    SECTION("integral::detail::Reference::operator= and integral::detail::Reference conversion operator") {
+        stateView["x"] = -42;
+        int xInt = stateView["x"];
+        REQUIRE(xInt == -42);
+        stateView["x"] = 42u;
+        unsigned xUnsigned = stateView["x"];
+        REQUIRE(xUnsigned == 42u);
+        stateView["x"] = 42.1;
+        double xDouble = stateView["x"];
+        REQUIRE(xDouble == 42.1);
+        stateView["x"] = "string1";
+        const char * xCString = stateView["x"];
+        REQUIRE(std::strcmp(xCString, "string1") == 0);
+        stateView["x"] = std::string("string2");
+        std::string xString = stateView["x"];
+        REQUIRE(stateView["x"].get<std::string>() == "string2");
+        const std::string stringWithNullCharacter("string\0with null", 17);
+        stateView["x"] = stringWithNullCharacter;
+        std::string xStringWithNull = stateView["x"];
+        REQUIRE(xStringWithNull == stringWithNullCharacter);
+        stateView["x"] = true;
+        bool xBool = stateView["x"];
+        REQUIRE(xBool == true);
+        stateView["x"] = false;
+        xBool = stateView["x"];
+        REQUIRE(xBool == false);
+        stateView["x"] = Object("object");
+        Object xObject = stateView["x"];
+        REQUIRE(xObject == Object("object"));
+    }
+    SECTION("integral::detail::Reference conversion operator with incompatible types") {
+        stateView["x"] = "string";
+        REQUIRE_THROWS_AS([&stateView]() -> void {
+            int x = stateView["x"];
+        }(), integral::ReferenceException);
+        REQUIRE_THROWS_AS([&stateView]() -> void {
+            Object x = stateView["x"];
+        }(), integral::ReferenceException);
+        stateView["x"] = Object("object");
+        REQUIRE_THROWS_AS([&stateView]() -> void {
+            int x = stateView["x"];
+        }(), integral::ReferenceException);
+        REQUIRE_THROWS_AS([&stateView]() -> void {
+            std::string x = stateView["x"];
+        }(), integral::ReferenceException);
     }
     SECTION("integral::setFunction and integral::setLuaFunction") {
         lua_newtable(luaState.get());
@@ -278,6 +329,7 @@ TEST_CASE("integral test") {
                                     integral::push<bool>(lambdaLuaState, object.flag_);
                                     return 2;
                                 })
+                                .emplace<Object>("sample", "#", 42)
                                 );
         REQUIRE_NOTHROW(stateView.doString("object = Object.new1('id')"));
         REQUIRE_NOTHROW(stateView.doString("assert(Object.new2(42):getId() == '42')"));
@@ -286,6 +338,7 @@ TEST_CASE("integral test") {
         REQUIRE_NOTHROW(stateView.doString("object:setFlag(true)"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getFlag() == true)"));
         REQUIRE_NOTHROW(stateView.doString("id, flag = object:getIdAndFlag(); assert(id == 'id' and flag == true)"));
+        REQUIRE_NOTHROW(stateView.doString("assert(Object.sample:getId() == '#42')"));
         stateView["Object"]["setId"].setFunction(&Object::setId);
         REQUIRE_NOTHROW(stateView.doString("object:setId('42'); assert(object:getId() == '42')"));
         stateView["Object"]["aux"].set(integral::Table()
@@ -300,11 +353,13 @@ TEST_CASE("integral test") {
                                            integral::push<Object>(lambdaLuaState, 10u);
                                            return 1;
                                        })
+                                        .emplace<Object>("sample", "#", 42)
                                        );
         REQUIRE_THROWS_AS(stateView.doString("Object.aux.new('string')"), integral::StateException);
         REQUIRE_NOTHROW(stateView.doString("assert(Object.aux.new2():getId() == '10')"));
         REQUIRE_NOTHROW(stateView.doString("object2 = Object.aux.new(42)"));
         REQUIRE_NOTHROW(stateView.doString("assert(Object.aux.hasSameId(object, object2) == true)"));
+        REQUIRE_NOTHROW(stateView.doString("assert(Object.aux.sample:getId() == '#42')"));
         stateView["Object"]["aux"]["get42"].setLuaFunction([](lua_State *lambdaLuaState) -> int {
             integral::push<int>(lambdaLuaState, 42);
             return 1;

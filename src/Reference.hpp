@@ -58,8 +58,14 @@ namespace integral {
             template<typename L>
             inline Reference<typename std::decay<L>::type, Reference<K, C>> operator[](L &&key) &&;
 
+            template<typename T, typename ...A>
+            Reference<K, C> & emplace(A &&...arguments);
+
             template<typename V>
-            Reference<K, C> & set(V &&value);
+            inline Reference<K, C> & set(V &&value);
+
+            template<typename V>
+            inline Reference<K, C> & operator=(V &&value);
 
             template<typename F, typename ...E, std::size_t ...I>
             inline Reference<K, C> & setFunction(F &&function, DefaultArgument<E, I> &&...defaultArguments);
@@ -69,6 +75,12 @@ namespace integral {
 
             template<typename V>
             decltype(auto) get() const;
+
+            // the conversion operator does not return a reference to an object
+            // storing a reference to a Lua object is unsafe because it might be collected
+            // Reference::get returns a reference to an object but it is not meant to be stored
+            template<typename V>
+            inline operator V() const;
 
             template<typename R, typename ...A>
             decltype(auto) call(const A &...arguments);
@@ -122,15 +134,15 @@ namespace integral {
         }
 
         template<typename K, typename C>
-        template<typename V>
-        Reference<K, C> & Reference<K, C>::set(V &&value) {
+        template<typename T, typename ...A>
+        Reference<K, C> & Reference<K, C>::emplace(A &&...arguments) {
             chainedReference_.push();
             // stack: ?
             if (lua_istable(getLuaState(), -1) != 0) {
                 // stack: chainedReferenceTable
                 exchanger::push<K>(getLuaState(), key_);
                 // stack: chainedReferenceTable | key
-                exchanger::push<typename std::decay<V>::type>(getLuaState(), std::forward<V>(value));
+                exchanger::push<T>(getLuaState(), std::forward<A>(arguments)...);
                 // stack: chainedReferenceTable | key | value
                 lua_rawset(getLuaState(), -3);
                 // stack: chainedReferenceTable
@@ -142,6 +154,18 @@ namespace integral {
                 lua_pop(getLuaState(), 1);
                 throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] reference ") + getReferenceString() + " is not a table");
             }
+        }
+
+        template<typename K, typename C>
+        template<typename V>
+        inline Reference<K, C> & Reference<K, C>::set(V &&value) {
+            return emplace<typename std::decay<V>::type>(std::forward<V>(value));
+        }
+
+        template<typename K, typename C>
+        template<typename V>
+        inline Reference<K, C> & Reference<K, C>::operator=(V &&value) {
+            return set(std::forward<V>(value));
         }
 
         template<typename K, typename C>
@@ -173,6 +197,12 @@ namespace integral {
                 // stack:
                 throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] invalid type getting reference " ) + getReferenceString() + ": " + argumentException.what());
             }
+        }
+        
+        template<typename K, typename C>
+        template<typename V>
+        inline Reference<K, C>::operator V() const {
+            return get<V>();
         }
 
         template<typename K, typename C>
