@@ -55,7 +55,7 @@ namespace integral {
         // throws StateException on error
         void doFile(const std::string &fileName) const;
 
-        // "detail::Reference::get" and "detail::reference::operator V" (conversion operator) throws ReferenceException
+        // "detail::Reference::get" and "detail::reference::operator V" (conversion operator) throw ReferenceException
         template<typename K>
         inline detail::Reference<typename std::decay<K>::type, detail::GlobalReference> operator[](K &&key) const;
 
