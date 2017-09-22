@@ -1,7 +1,6 @@
 ## TODO
-* check for more tests
-* separate core samples from samples with higher level of abstraction
 * update README.md
+* check for more tests
 * intel compiler
 * coverity
 * c++17:
