@@ -63,11 +63,10 @@ int main(int argc, char* argv[]) {
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
-
-        std::cout << "end" << std::endl;
+        
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
-        std::cerr << "exception: " << exception.what() << std::endl;
+        std::cerr << "[state] " << exception.what() << std::endl;
     } catch (...) {
         std::cerr << "unknown exception thrown" << std::endl;
     }
