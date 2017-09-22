@@ -62,7 +62,7 @@ namespace integral {
                 static void genericPush(lua_State *luaState, W &&constructorWrapper);
 
                 template<std::size_t ...S>
-                static void callConstructor(lua_State *luaState, std::integer_sequence<std::size_t, S...>);
+                static void callConstructor(lua_State *luaState, std::index_sequence<S...>);
             };
         }
 
@@ -94,7 +94,7 @@ namespace integral {
                     constexpr std::size_t keCppNumberOfArguments = sizeof...(A);
                     if (numberOfArgumentsOnStack <= keCppNumberOfArguments) {
                         lambdaConstructorWrapper.getDefaultArgumentManager().processDefaultArguments(lambdaLuaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
-                        callConstructor(lambdaLuaState, std::make_integer_sequence<std::size_t, keCppNumberOfArguments>());
+                        callConstructor(lambdaLuaState, std::make_index_sequence<keCppNumberOfArguments>());
                         return 1;
                     } else {
                         throw ArgumentException(lambdaLuaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
@@ -104,7 +104,7 @@ namespace integral {
 
             template<typename T, typename ...A, typename M>
             template<std::size_t ...S>
-            void Exchanger<ConstructorWrapper<T(A...), M>>::callConstructor(lua_State *luaState, std::integer_sequence<std::size_t, S...>) {
+            void Exchanger<ConstructorWrapper<T(A...), M>>::callConstructor(lua_State *luaState, std::index_sequence<S...>) {
                 exchanger::push<T>(luaState, exchanger::get<A>(luaState, S + 1)...);
             }
         }

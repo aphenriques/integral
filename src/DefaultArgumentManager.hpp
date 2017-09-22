@@ -2,7 +2,7 @@
 //  DefaultArgumentManager.hpp
 //  integral
 //
-//  Copyright (C) 2014, 2015, 2016  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -46,7 +46,7 @@ namespace integral {
             std::tuple<F...> defaultArguments_;
 
             template<std::size_t ...S>
-            inline void processDefaultArguments(lua_State *luaState, std::integer_sequence<std::size_t, S...>) const;
+            inline void processDefaultArguments(lua_State *luaState, std::index_sequence<S...>) const;
 
             template<typename E, std::size_t I>
             void processArgument(lua_State *luaState, const DefaultArgument<E, I> &defaultArgument) const;
@@ -66,12 +66,12 @@ namespace integral {
                     lua_pushnil(luaState);
                 }
             }
-            processDefaultArguments(luaState, std::make_integer_sequence<std::size_t, sizeof...(F)>());
+            processDefaultArguments(luaState, std::index_sequence_for<F...>());
         }
 
         template<typename ...F>
         template<std::size_t ...S>
-        inline void DefaultArgumentManager<F...>::processDefaultArguments(lua_State *luaState, std::integer_sequence<std::size_t, S...>) const {
+        inline void DefaultArgumentManager<F...>::processDefaultArguments(lua_State *luaState, std::index_sequence<S...>) const {
             generic::expandDummyTemplatePack((processArgument(luaState, std::get<S>(defaultArguments_)), 0)...);
         }
 

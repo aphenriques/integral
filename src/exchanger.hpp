@@ -166,16 +166,16 @@ namespace integral {
 
             private:
                 template<std::size_t ...S>
-                static LuaTuple<T...> get(lua_State *luaState, int index, std::integer_sequence<std::size_t, S...>);
+                static LuaTuple<T...> get(lua_State *luaState, int index, std::index_sequence<S...>);
 
                 template<std::size_t I, typename U>
                 static U getElementFromTable(lua_State *luaState, int index);
 
                 template<std::size_t ...S>
-                static void push(lua_State *luaState, const LuaTuple<T...> &tuple, std::integer_sequence<std::size_t, S...>);
+                static void push(lua_State *luaState, const LuaTuple<T...> &tuple, std::index_sequence<S...>);
 
                 template<std::size_t ...S>
-                static void push(lua_State *luaState, T &&...t, std::integer_sequence<std::size_t, S...>);
+                static void push(lua_State *luaState, T &&...t, std::index_sequence<S...>);
 
                 template<std::size_t I, typename U>
                 static void setElementInTable(lua_State *luaState, U &&element, int index);
@@ -536,22 +536,22 @@ namespace integral {
 
             template<typename ...T>
             inline LuaTuple<T...> Exchanger<LuaTuple<T...>>::get(lua_State *luaState, int index) {
-                return Exchanger<LuaTuple<T...>>::get(luaState, index, std::make_integer_sequence<std::size_t, sizeof...(T)>());
+                return Exchanger<LuaTuple<T...>>::get(luaState, index, std::index_sequence_for<T...>());
             }
 
             template<typename ...T>
             inline void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, const LuaTuple<T...> &tuple) {
-                Exchanger<LuaTuple<T...>>::push(luaState, tuple, std::make_integer_sequence<std::size_t, sizeof...(T)>());
+                Exchanger<LuaTuple<T...>>::push(luaState, tuple, std::index_sequence_for<T...>());
             }
 
             template<typename ...T>
             inline void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, T &&...t) {
-                Exchanger<LuaTuple<T...>>::push(luaState, std::forward<T>(t)..., std::make_integer_sequence<std::size_t, sizeof...(T)>());
+                Exchanger<LuaTuple<T...>>::push(luaState, std::forward<T>(t)..., std::index_sequence_for<T...>());
             }
 
             template<typename ...T>
             template<std::size_t ...S>
-            LuaTuple<T...> Exchanger<LuaTuple<T...>>::get(lua_State *luaState, int index, std::integer_sequence<std::size_t, S...>) {
+            LuaTuple<T...> Exchanger<LuaTuple<T...>>::get(lua_State *luaState, int index, std::index_sequence<S...>) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     if (lua_istable(luaState, index) != 0) {
                         const std::size_t tableSize = lua_compatibility::rawlen(luaState, index);
@@ -601,7 +601,7 @@ namespace integral {
 
             template<typename ...T>
             template<std::size_t ...S>
-            void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, const LuaTuple<T...> &tuple, std::integer_sequence<std::size_t, S...>) {
+            void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, const LuaTuple<T...> &tuple, std::index_sequence<S...>) {
                 constexpr std::size_t keTupleSize = sizeof...(T);
                 if (keTupleSize <= std::numeric_limits<int>::max()) {
                     lua_createtable(luaState, static_cast<int>(keTupleSize), 0);
@@ -614,7 +614,7 @@ namespace integral {
 
             template<typename ...T>
             template<std::size_t ...S>
-            void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, T &&...t, std::integer_sequence<std::size_t, S...>) {
+            void Exchanger<LuaTuple<T...>>::push(lua_State *luaState, T &&...t, std::index_sequence<S...>) {
                 constexpr std::size_t keTupleSize = sizeof...(T);
                 if (keTupleSize <= std::numeric_limits<int>::max()) {
                     lua_createtable(luaState, static_cast<int>(keTupleSize), 0);

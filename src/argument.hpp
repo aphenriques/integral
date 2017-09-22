@@ -36,7 +36,7 @@ namespace integral {
     namespace detail {
         namespace argument {
             template<typename ...T, std::size_t ...S>
-            constexpr auto createArgumentTagPack(std::integer_sequence<std::size_t, S...>);
+            constexpr auto createArgumentTagPack(std::index_sequence<S...>);
 
             template<typename ...T, std::size_t ...I>
             inline void checkDefaultArgumentTypeAndIndex(const MultipleInheritancePack<ArgumentTag<T, I>...> &);
@@ -50,7 +50,7 @@ namespace integral {
             //--
 
             template<typename ...T, std::size_t ...S>
-            constexpr auto createArgumentTagPack(std::integer_sequence<std::size_t, S...>) {
+            constexpr auto createArgumentTagPack(std::index_sequence<S...>) {
                 return MultipleInheritancePack<ArgumentTag<typename std::decay<T>::type, S + 1>...>();
             }
 
@@ -66,7 +66,7 @@ namespace integral {
             inline void validateDefaultArguments(const DefaultArgument<T, I> &...defaultArguments) {
                 // comma operator in "(checkDefaultArgumentTypeAndIndex<E>(...), 0)" is used for function call expansion
                 // check if each default argument type and index is valid
-                generic::expandDummyTemplatePack((checkDefaultArgumentTypeAndIndex<DefaultArgument<T, I>>(createArgumentTagPack<A...>(std::make_integer_sequence<std::size_t, sizeof...(A)>())), 0)...);
+                generic::expandDummyTemplatePack((checkDefaultArgumentTypeAndIndex<DefaultArgument<T, I>>(createArgumentTagPack<A...>(std::index_sequence_for<A...>())), 0)...);
                 // check if there is only one default argument for each index
                 MultipleInheritancePack<typename DefaultArgument<T, I>::ArgumentTag...>();
             }

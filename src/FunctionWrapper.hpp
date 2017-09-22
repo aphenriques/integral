@@ -112,7 +112,7 @@ namespace integral {
                     constexpr std::size_t keCppNumberOfArguments = sizeof...(A);
                     if (numberOfArgumentsOnStack <= keCppNumberOfArguments) {
                          lambdaFunctionWrapper.getDefaultArgumentManager().processDefaultArguments(lambdaLuaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
-                        return FunctionCaller<R, A...>::call(lambdaLuaState, lambdaFunctionWrapper.getFunction(), std::make_integer_sequence<std::size_t, keCppNumberOfArguments>());
+                        return FunctionCaller<R, A...>::call(lambdaLuaState, lambdaFunctionWrapper.getFunction(), std::make_index_sequence<keCppNumberOfArguments>());
                     } else {
                         throw ArgumentException(lambdaLuaState, keCppNumberOfArguments, numberOfArgumentsOnStack);
                     }
