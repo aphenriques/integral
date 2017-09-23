@@ -27,7 +27,7 @@
 
 * C++14 compiler; and
 * Lua 5.1 or later.
- 
+
 
 # Tested environments
 
@@ -65,6 +65,8 @@ int main(int argc, char * argv[]) {
 }
 ```
 
+See [example](samples/abstraction/state/state.cpp).
+
 ## Use existing Lua state
 
 ```cpp
@@ -75,6 +77,8 @@ int main(int argc, char * argv[]) {
     luaStateView.doString("print('hello!')");
     lua_close(luaState);
 ```
+
+See [example](samples/abstraction/state/state.cpp).
 
 ## Accessing values
 
@@ -87,6 +91,8 @@ int main(int argc, char * argv[]) {
     luaState.doString("t = {1, 'two'}");
     std::cout << luaState["t"][2].get<const char *>() << '\n'; // prints "two"
 ```
+
+See [example](samples/abstraction/reference/reference.cpp).
 
 ## TODO
 
