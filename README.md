@@ -59,8 +59,8 @@ Check `samples/abstraction` directory for examples.
 int main(int argc, char * argv[]) {
     integral::State luaState;
     luaState.openLibs();
-    luaState.doFile("path/to/script.lua");
-    luaState.doString("print('hello!')");
+    luaState.doFile("path/to/script.lua"); // executes lua script
+    luaState.doString("print('hello!')"); // prints "hello!"
     return 0;
 }
 ```
@@ -74,13 +74,13 @@ See [example](samples/abstraction/state/state.cpp).
     // luaState ownership is NOT transfered to luaStateView
     integral::StateView luaStateView(luaState); 
     luaStateView.openLibs();
-    luaStateView.doString("print('hello!')");
+    luaStateView.doString("print('hello!')"); // prints "hello!"
     lua_close(luaState);
 ```
 
 See [example](samples/abstraction/state/state.cpp).
 
-## Accessing values
+## Access and set values
 
 ```cpp
     luaState.doString("a = 42");
@@ -88,11 +88,45 @@ See [example](samples/abstraction/state/state.cpp).
     luaState["b"] = "forty two";
     luaState.doString("print(b)"); // prints "forty two"
     
-    luaState.doString("t = {1, 'two'}");
-    std::cout << luaState["t"][2].get<const char *>() << '\n'; // prints "two"
+    luaState.doString("t = {'x', {pi = 3.14}}");
+    std::cout << luaState["t"][2]["pi"].get<double>() << '\n'; // prints "3.14"
+    luaState["t"]["key"] = "value";
+    luaState.doString("print(t.key)"); // prints "value"
 ```
 
 See [example](samples/abstraction/reference/reference.cpp).
+
+## Bind function
+
+```cpp
+double getSum(double x, double y) {
+    return x + y;
+}
+
+double luaGetSum(lua_State *luaState) {
+    integral::pushCopy(luaState, integral::get<double>(luaState, 1) + integral::get<double>(luaState, 2));
+    return 1;
+}
+
+int main(int argc, char* argv[]) {
+    integral::State luaState;
+    luaState.openLibs();
+
+    luaState["getSum"].setFunction(getSum);
+    luaState.doString("print(getSum(1, -.2))"); // prints "0.8"
+
+    luaState["luaGetSum"].setLuaFunction(luaGetSum);
+    luaState.doString("print(luaGetSum(1, -.2))"); // prints "0.8"
+
+    luaState["printHello"].setFunction([]{
+        std::puts("hello!");
+    });
+    luaState.doString("printHello()"); // prints "hello!"
+
+    return EXIT_SUCCESS;
+}
+
+```
 
 ## TODO
 
