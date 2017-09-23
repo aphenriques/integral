@@ -80,7 +80,7 @@ See [example](samples/abstraction/state/state.cpp).
 
 See [example](samples/abstraction/state/state.cpp).
 
-## Access and set values
+## Get and set values
 
 ```cpp
     luaState.doString("a = 42");
@@ -125,8 +125,9 @@ int main(int argc, char* argv[]) {
 
     return EXIT_SUCCESS;
 }
-
 ```
+
+See [example](samples/abstraction/function/function.cpp).
 
 ## TODO
 
