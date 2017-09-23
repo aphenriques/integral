@@ -63,9 +63,27 @@ int main(int argc, char* argv[]) {
         luaState.doString(R"(print('luaGetQuoted("quoted") = ' .. luaGetQuoted('quoted')))");
 
         try {
-            //TODO
-        } catch (const integral::ReferenceException &referenceException) {
-            std::cout << "expected exception: {" << referenceException.what() << "}\n";
+            luaState.doString("getSum(1, 2, 3)");
+        } catch (const integral::StateException &stateException) {
+            std::cout << "expected exception: {" << stateException.what() << "}\n";
+        }
+
+        try {
+            luaState.doString("getSum(1)");
+        } catch (const integral::StateException &stateException) {
+            std::cout << "expected exception: {" << stateException.what() << "}\n";
+        }
+
+        try {
+            luaState.doString("getSum(1, 'two')");
+        } catch (const integral::StateException &stateException) {
+            std::cout << "expected exception: {" << stateException.what() << "}\n";
+        }
+
+        try {
+            luaState.doString("luaGetSum(1, 'two')");
+        } catch (const integral::StateException &stateException) {
+            std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
 
         return EXIT_SUCCESS;
