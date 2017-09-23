@@ -1,5 +1,11 @@
 ## TODO
 * update README.md
+  * usage
+    * link to sample
+    * functions and default arguments;
+    * adaptors for C++ vector, array, unordered_map and tuple to Lua table;
+    * adaptors for C++ functions to Lua functions and vice-versa.
+    * ...
 * check for more tests
 * intel compiler
 * coverity
