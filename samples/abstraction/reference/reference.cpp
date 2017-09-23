@@ -38,12 +38,20 @@ int main(int argc, char* argv[]) {
         std::cout << "cpp: c = " << c << '\n';
         luaState["d"] = "quarenta e dois";
         luaState.doString("print('lua: d = ' .. d);"
-                          "t = {1, 'two'}");
-        std::cout << "cpp: t[2] = " << luaState["t"][2].get<const char *>() << '\n';
-        
+                          "t = {'x', {pi = 3.14}}");
+        std::cout << "cpp: t[1] = " << luaState["t"][1].get<const char *>() << '\n';
+        std::cout << "cpp: t[2].pi = " << luaState["t"][2]["pi"].get<double>() << '\n';
+        luaState["t"]["key"] = "value";
+        luaState.doString("print('lua: t.key = ' .. t.key)");
 
         try {
             luaState["x"].get<std::string>();
+        } catch (const integral::ReferenceException &referenceException) {
+            std::cout << "expected exception: {" << referenceException.what() << "}\n";
+        }
+
+        try {
+            luaState["t"]["x"]["x"] = true;
         } catch (const integral::ReferenceException &referenceException) {
             std::cout << "expected exception: {" << referenceException.what() << "}\n";
         }
