@@ -108,14 +108,14 @@ namespace integral {
         lua_getinfo(luaState, "n", &debugInfo);
         if (std::strcmp(debugInfo.namewhat, "method") == 0) {
             std::ostringstream messageStream;
-            messageStream << "excessive parameters provided to method " << debugInfo.name << " (" << (maximumNumberOfArguments - 1) << " expected, got " << (actualNumberOfArguments - 1) << ")";
+            messageStream << "excessive parameters provided to method '" << debugInfo.name << "' (" << (maximumNumberOfArguments - 1) << " expected, got " << (actualNumberOfArguments - 1) << ")";
             return messageStream.str();
         }
         if (debugInfo.name == nullptr) {
             debugInfo.name = (pushGlobalFunctionName(luaState, &debugInfo) == true) ? lua_tostring(luaState, -1) : "?";
         }
         std::ostringstream messageStream;
-        messageStream << "excessive parameters provided to function " << debugInfo.name << " (" << maximumNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
+        messageStream << "excessive parameters provided to function '" << debugInfo.name << "' (" << maximumNumberOfArguments << " expected, got " << actualNumberOfArguments << ")";
         return messageStream.str();
     }
 }

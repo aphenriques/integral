@@ -80,7 +80,7 @@ public:
     const std::string & getId() const {
         return id_;
     }
-    
+
     void setId(const std::string &id) {
         id_ = id;
     }

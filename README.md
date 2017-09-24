@@ -49,7 +49,7 @@ Alternatively, build and install the library with:
 
 Include the library header `integral.h` (`namespace integral`) and link to `libintegral.a` or `libintegral.so` if the library was built separately.
 
-Check `samples/abstraction` directory for examples.
+Check [samples/abstraction](samples/abstraction) directory for examples.
 
 ## Create Lua state
 
@@ -80,14 +80,14 @@ See [example](samples/abstraction/state/state.cpp).
 
 See [example](samples/abstraction/state/state.cpp).
 
-## Get and set values
+## Get and set value
 
 ```cpp
     luaState.doString("a = 42");
     int a = luaState["a"]; // "a" is set to 42
     luaState["b"] = "forty two";
     luaState.doString("print(b)"); // prints "forty two"
-    
+
     luaState.doString("t = {'x', {pi = 3.14}}");
     std::cout << luaState["t"][2]["pi"].get<double>() << '\n'; // prints "3.14"
     luaState["t"]["key"] = "value";
@@ -108,7 +108,8 @@ double luaGetSum(lua_State *luaState) {
     return 1;
 }
 
-int main(int argc, char* argv[]) {
+// ...
+
     integral::State luaState;
     luaState.openLibs();
 
@@ -118,16 +119,61 @@ int main(int argc, char* argv[]) {
     luaState["luaGetSum"].setLuaFunction(luaGetSum);
     luaState.doString("print(luaGetSum(1, -.2))"); // prints "0.8"
 
+    // lambdas can be bound likewise
     luaState["printHello"].setFunction([]{
         std::puts("hello!");
     });
     luaState.doString("printHello()"); // prints "hello!"
-
-    return EXIT_SUCCESS;
-}
 ```
 
 See [example](samples/abstraction/function/function.cpp).
+
+## Register class
+
+```cpp
+class Object {
+public:
+    std::string name_;
+
+    Object(const std::string &name) : name_(name) {}
+
+    std::string getHello() const {
+        return std::string("Hello ") + name_ + '!';
+    }
+};
+
+// ...
+
+    luaState["Object"] = integral::ClassMetatable<Object>()
+                         .setConstructor<Object(const std::string &)>("new")
+                         .setCopyGetter("getName", &Object::name_)
+                         .setSetter("setName", &Object::name_)
+                         .setFunction("getHello", &Object::getHello)
+                         .setFunction("getBye", [](const Object &object) {
+                            return std::string("Bye ") + object.name_ + '!';
+                         })
+                         .setLuaFunction("appendName", [](lua_State *lambdaLuaState) {
+                            // objects are gotten by reference
+                            integral::get<Object>(lambdaLuaState, 1).name_ += integral::get<const char *>(lambdaLuaState, 2);
+                            return 1;
+                         });
+```
+
+See [example](samples/abstraction/class/class.cpp).
+
+## Get object
+
+Objects are gotten by value.
+
+```cpp
+    luaState.doString("object = Object.new('foo')\n"
+                      "print(object:getName())"); // prints "foo"
+    // objects are gotten by reference
+    luaState["object"].get<Object>().name_ = "foobar";
+    luaState.doString("print(object:getName())"); prints "foobar"
+```
+
+See [example](samples/abstraction/class/class.cpp).
 
 ## TODO
 

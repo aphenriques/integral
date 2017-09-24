@@ -32,12 +32,12 @@ int main(int argc, char* argv[]) {
         luaState.doString("a = 42");
         std::cout << "cpp: a = " << luaState["a"].get<int>() << '\n';
         luaState["b"].set("forty two");
-        luaState.doString("print('lua: b = ' .. b);"
+        luaState.doString("print('lua: b = ' .. b)\n"
                           "c = .42");
         double c = luaState["c"];
         std::cout << "cpp: c = " << c << '\n';
         luaState["d"] = "quarenta e dois";
-        luaState.doString("print('lua: d = ' .. d);"
+        luaState.doString("print('lua: d = ' .. d)\n"
                           "t = {'x', {pi = 3.14}}");
         std::cout << "cpp: t[1] = " << luaState["t"][1].get<const char *>() << '\n';
         std::cout << "cpp: t[2].pi = " << luaState["t"][2]["pi"].get<double>() << '\n';

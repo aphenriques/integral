@@ -26,9 +26,7 @@
 #include <lua.hpp>
 #include <integral.hpp>
 
-static const char * const luaTestCode = R"(
-print("hello from string sample code")
-)";
+static const char * const luaTestCode = "print('hello from string sample code')";
 
 int main(int argc, char* argv[]) {
     try {
@@ -45,7 +43,7 @@ int main(int argc, char* argv[]) {
         luaStateView.openLibs();
         luaStateView.doFile("sample.lua");
         luaStateView.doString(luaTestCode);
-        
+
         try {
             integral::StateView(nullptr);
         } catch (const integral::StateException &stateException) {
@@ -63,7 +61,7 @@ int main(int argc, char* argv[]) {
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
-        
+
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[state] " << exception.what() << std::endl;
