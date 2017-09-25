@@ -4,6 +4,26 @@
 
 ![Lua logo](http://www.lua.org/images/powered-by-lua.gif)
 
+# Index
+
+* [Features](#features)
+* [Error safety](#error-safety)
+* [Requirements](#requirements)
+* [Tested environments](#tested-environments)
+* [Build](#build)
+* [Usage](#usage)
+  * [Create Lua state](#create-lua-state)
+  * [Use existing Lua state](#use-existing-lua-state)
+  * [Get and set value](#get-and-set-value)
+  * [Bind function](#bind-function)
+  * [Bind class](#bind-class)
+  * [Get object](#get-object)
+  * [Bind table](#bind-table)
+* [integral reserved names in Lua](#integral-reserved-names-in-lua)
+* [Source](#source)
+* [Author](#author)
+* [License](#license)
+
 
 # Features
 
@@ -128,7 +148,7 @@ double luaGetSum(lua_State *luaState) {
 
 See [example](samples/abstraction/function/function.cpp).
 
-## Register class
+## Bind class
 
 ```cpp
 class Object {
@@ -175,7 +195,7 @@ Objects are gotten by value.
 
 See [example](samples/abstraction/class/class.cpp).
 
-## Register table
+## Bind table
 
 ```cpp
     luaState["group"] = integral::Table()

@@ -7,7 +7,6 @@
     * adaptors for C++ functions to Lua functions and vice-versa.
     * module
     * ...
-  * index
 * check for more tests
 * intel compiler
 * coverity
