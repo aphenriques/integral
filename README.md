@@ -145,18 +145,18 @@ public:
 // ...
 
     luaState["Object"] = integral::ClassMetatable<Object>()
-                         .setConstructor<Object(const std::string &)>("new")
-                         .setCopyGetter("getName", &Object::name_)
-                         .setSetter("setName", &Object::name_)
-                         .setFunction("getHello", &Object::getHello)
-                         .setFunction("getBye", [](const Object &object) {
-                            return std::string("Bye ") + object.name_ + '!';
-                         })
-                         .setLuaFunction("appendName", [](lua_State *lambdaLuaState) {
-                            // objects are gotten by reference
-                            integral::get<Object>(lambdaLuaState, 1).name_ += integral::get<const char *>(lambdaLuaState, 2);
-                            return 1;
-                         });
+                             .setConstructor<Object(const std::string &)>("new")
+                             .setCopyGetter("getName", &Object::name_)
+                             .setSetter("setName", &Object::name_)
+                             .setFunction("getHello", &Object::getHello)
+                             .setFunction("getBye", [](const Object &object) {
+                                return std::string("Bye ") + object.name_ + '!';
+                             })
+                             .setLuaFunction("appendName", [](lua_State *lambdaLuaState) {
+                                // objects are gotten by reference
+                                integral::get<Object>(lambdaLuaState, 1).name_ += integral::get<const char *>(lambdaLuaState, 2);
+                                return 1;
+                             });
 ```
 
 See [example](samples/abstraction/class/class.cpp).
@@ -174,6 +174,25 @@ Objects are gotten by value.
 ```
 
 See [example](samples/abstraction/class/class.cpp).
+
+## Register table
+
+```cpp
+    luaState["group"] = integral::Table()
+                            .set("constant", integral::Table()
+                                .set("pi", 3.14))
+                            .setFunction("printHello", []{
+                                std::puts("Hello!");
+                            })
+                            .set("Object", integral::ClassMetatable<Object>()
+                                .setConstructor<Object(const std::string &)>("new")
+                                .setFunction("getHello", &Object::getHello));
+    luaState.doString("print(group.constant.pi)\n" // prints "3.14"
+                      "group.printHello()\n" // prints "Hello!"
+                      "print(group.Object.new('object'):getHello())"); // prints "Hello object!"
+```
+
+See [example](samples/abstraction/table/table.cpp).
 
 ## TODO
 
