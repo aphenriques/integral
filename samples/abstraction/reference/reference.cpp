@@ -43,19 +43,16 @@ int main(int argc, char* argv[]) {
         std::cout << "cpp: t[2].pi = " << luaState["t"][2]["pi"].get<double>() << '\n';
         luaState["t"]["key"] = "value";
         luaState.doString("print('lua: t.key = ' .. t.key)");
-
         try {
             luaState["x"].get<std::string>();
         } catch (const integral::ReferenceException &referenceException) {
             std::cout << "expected exception: {" << referenceException.what() << "}\n";
         }
-
         try {
             luaState["t"]["x"]["x"] = true;
         } catch (const integral::ReferenceException &referenceException) {
             std::cout << "expected exception: {" << referenceException.what() << "}\n";
         }
-
         try {
             // FIXME in c++ 17: [[maybe_unused]] int x = luaState["x"];
             int x = luaState["x"];
@@ -64,7 +61,6 @@ int main(int argc, char* argv[]) {
         } catch (const integral::ReferenceException &referenceException) {
             std::cout << "expected exception: {" << referenceException.what() << "}\n";
         }
-
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[reference] " << exception.what() << std::endl;

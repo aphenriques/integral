@@ -64,25 +64,21 @@ int main(int argc, char* argv[]) {
         luaState.doString("print(object:getName())\n"
                           "object:appendName('foo')\n"
                           "print(object:getBye())");
-
         try {
             luaState.doString("object.getName()");
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
-
         try {
             luaState.doString("object:setName('x', 42)");
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
-
         try {
             luaState.doString("object:appendName(object)");
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
-
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[class] " << exception.what() << std::endl;
