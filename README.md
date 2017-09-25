@@ -170,7 +170,7 @@ Objects are gotten by value.
                       "print(object:getName())"); // prints "foo"
     // objects are gotten by reference
     luaState["object"].get<Object>().name_ = "foobar";
-    luaState.doString("print(object:getName())"); prints "foobar"
+    luaState.doString("print(object:getName())"); // prints "foobar"
 ```
 
 See [example](samples/abstraction/class/class.cpp).
