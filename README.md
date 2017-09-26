@@ -184,7 +184,7 @@ See [example](samples/abstraction/class/class.cpp).
 
 ## Get object
 
-Objects are gotten by value.
+Objects are gotten by reference.
 
 ```cpp
     luaState.doString("object = Object.new('foo')\n"
@@ -215,9 +215,9 @@ See [example](samples/abstraction/class/class.cpp).
 
 See [example](samples/abstraction/table/table.cpp).
 
-Objects are automatically converted to base classes types regardless of inheritance definition with `integral`.
-
 ## Use polymorphism
+
+Objects are automatically converted to base classes types regardless of inheritance definition with `integral`.
 
 ```cpp
 class Base {};
