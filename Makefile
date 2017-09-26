@@ -21,7 +21,7 @@ samples: static
 	cd $(PROJECT_BIN_DIR) && $(MAKE) all
 
 test: static
-	cd $(PROJECT_TEST_DIR) && $(MAKE) all
+	cd $(PROJECT_TEST_DIR) && $(MAKE) run
 
 install: all
 	mkdir -p $(INSTALL_INC) $(INSTALL_INC)/exception $(INSTALL_LIB)
