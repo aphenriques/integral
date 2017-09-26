@@ -1,7 +1,7 @@
 ## TODO
 * update README.md
   * usage
-    * polymorphism rtti
+    * inheritance
     * default arguments;
     * adaptors for C++ vector, array, unordered_map and tuple to Lua table;
     * adaptors for C++ functions to Lua functions and vice-versa.

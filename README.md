@@ -19,6 +19,7 @@
   * [Bind class](#bind-class)
   * [Get object](#get-object)
   * [Bind table](#bind-table)
+  * [Use polymorphism](#use-polymorphism)
 * [integral reserved names in Lua](#integral-reserved-names-in-lua)
 * [Source](#source)
 * [Author](#author)
@@ -213,6 +214,28 @@ See [example](samples/abstraction/class/class.cpp).
 ```
 
 See [example](samples/abstraction/table/table.cpp).
+
+Objects are automatically converted to base classes types regardless of inheritance definition with `integral`.
+
+## Use polymorphism
+
+```cpp
+class Base {};
+
+class Derived : public Base {};
+
+void callBase(const Base &) {
+    std::puts("Base");
+}
+
+// ...
+        luaState["Derived"] = integral::ClassMetatable<Derived>().setConstructor<Derived()>("new");
+        luaState["callBase"].setFunction(callBase);
+        luaState.doString("derived = Derived.new()\n"
+                          "callBase(derived)"); // prints "Base"
+```
+
+See [example](samples/abstraction/polymorphism/polymorphism.cpp).
 
 ## TODO
 
