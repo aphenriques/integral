@@ -22,6 +22,7 @@
 //
 
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <lua.hpp>
 #include <integral.hpp>

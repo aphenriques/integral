@@ -21,7 +21,7 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <lua.hpp>
 #include <integral.hpp>
