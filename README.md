@@ -16,6 +16,7 @@
   * [Use existing Lua state](#use-existing-lua-state)
   * [Get and set value](#get-and-set-value)
   * [Bind function](#bind-function)
+  * [Set default arguments](#set-default-arguments)
   * [Bind class](#bind-class)
   * [Get object](#get-object)
   * [Bind table](#bind-table)
@@ -131,9 +132,6 @@ double luaGetSum(lua_State *luaState) {
 
 // ...
 
-    integral::State luaState;
-    luaState.openLibs();
-
     luaState["getSum"].setFunction(getSum);
     luaState.doString("print(getSum(1, -.2))"); // prints "0.8"
 
@@ -147,7 +145,17 @@ double luaGetSum(lua_State *luaState) {
     luaState.doString("printHello()"); // prints "hello!"
 ```
 
-See [example](samples/abstraction/function/function.cpp).
+## Set default arguments
+
+```cpp
+    luaState["printArguments"].setFunction([](const std::string &string, int integer) {
+        std::cout << string << ", " << integer << '\n';
+    }, integral::DefaultArgument<std::string, 1>("default string"), integral::DefaultArgument<int, 2>(-1));
+    luaState.doString("printArguments(\"defined string\")"); // prints "defined string, -1"
+    luaState.doString("printArguments(nil, 42)"); // prints "default string, 42"
+    luaState.doString("printArguments()"); // prints "default string, -1"
+```
+See [example](samples/abstraction/default_argument/default_adefault_argument.cpp).
 
 ## Bind class
 

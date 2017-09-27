@@ -2,20 +2,20 @@
 * update README.md
   * usage
     * inheritance
-    * default arguments;
-    * adaptors for C++ vector, array, unordered_map and tuple to Lua table;
-    * adaptors for C++ functions to Lua functions and vice-versa.
+    * adaptors for C++ vector, array, unordered_map and tuple to Lua table
+    * adaptors for C++ functions to Lua functions and vice-versa
     * module
     * ...
 * check for more tests
 * intel compiler
 * coverity
 * c++17:
-  * c++17: type_traits is*_v and *_v
-  * c++17: enable -Wunused-parameter and use [[maybe_unused]]
-  * c++17: fold expressions (search and replace expansion/recursion functions)
-  * c++17: template type deduction by constructor
-  * c++17: makeFunctionWrapper and makeConstructorWrapper (not necessary in c++17: template type deduction in constructor)
+  * string_view
+  * type_traits is*_v and *_v
+  * enable -Wunused-parameter and use [[maybe_unused]]
+  * fold expressions (search and replace expansion/recursion functions)
+  * template type deduction by constructor
+  * makeFunctionWrapper and makeConstructorWrapper are not necessary in c++17 (template type deduction in constructor)
 * compare performance with other binding libraries
 * sandbox (in lua script?)
   * must be easily disabled
