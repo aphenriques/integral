@@ -151,9 +151,9 @@ double luaGetSum(lua_State *luaState) {
     luaState["printArguments"].setFunction([](const std::string &string, int integer) {
         std::cout << string << ", " << integer << '\n';
     }, integral::DefaultArgument<std::string, 1>("default string"), integral::DefaultArgument<int, 2>(-1));
-    luaState.doString("printArguments(\"defined string\")"); // prints "defined string, -1"
-    luaState.doString("printArguments(nil, 42)"); // prints "default string, 42"
-    luaState.doString("printArguments()"); // prints "default string, -1"
+    luaState.doString("printArguments(\"defined string\")\n" // prints "defined string, -1"
+                      "printArguments(nil, 42)\n" // prints "default string, 42"
+                      "printArguments()"); // prints "default string, -1"
 ```
 See [example](samples/abstraction/default_argument/default_adefault_argument.cpp).
 

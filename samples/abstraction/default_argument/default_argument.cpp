@@ -60,9 +60,9 @@ int main(int argc, char* argv[]) {
         luaState["printArguments"].setFunction([](const std::string &string, int integer) {
             std::cout << string << ", " << integer << '\n';
         }, integral::DefaultArgument<std::string, 1>("default string"), integral::DefaultArgument<int, 2>(-1));
-        luaState.doString("printArguments(\"defined string\")");
-        luaState.doString("printArguments(nil, 42)");
-        luaState.doString("printArguments()");
+        luaState.doString("printArguments(\"defined string\")\n"
+                          "printArguments(nil, 42)\n"
+                          "printArguments()");
         luaState["printStringAndNumber"].setFunction([](const std::string &string, double number) {
             std::cout << string << ", " << number << '\n';
         }, integral::DefaultArgument<std::string, 1>("undefined"));
