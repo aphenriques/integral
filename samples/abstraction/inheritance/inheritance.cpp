@@ -21,6 +21,7 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <lua.hpp>
@@ -66,10 +67,12 @@ int main(int argc, char* argv[]) {
                             .setBaseClass<BaseOfBase1>();
         luaState["Base2"] = integral::ClassMetatable<Base2>()
                             .setConstructor<Base2()>("new")
+                            // .setBaseClass<BaseOfBase1>() // generates compile error
                             .setFunction("base2Method", &Base2::base2Method);
         luaState["Derived"] = integral::ClassMetatable<Derived>()
                             .setConstructor<Derived()>("new")
                             .setFunction("derivedMethod", &Derived::derivedMethod)
+                            // .setBaseClass<BaseOfBase1>() // valid statement. BaseOfBase1 need not be defined as base class of Base1 in Base1 metatable
                             .setBaseClass<Base1>()
                             .setBaseClass<Base2>();
         luaState.doString("derived = Derived.new()\n"

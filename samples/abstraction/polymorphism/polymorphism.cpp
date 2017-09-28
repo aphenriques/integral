@@ -21,6 +21,7 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <lua.hpp>
@@ -30,7 +31,12 @@ class DiamondBase {};
 
 class BaseOfBase1 {};
 
-class Base1 : public BaseOfBase1, public DiamondBase {};
+class Base1 : public BaseOfBase1, public DiamondBase {
+public:
+    void base1Method() {
+        std::puts("base1Method");
+    }
+};
 
 class Base2 : public DiamondBase {};
 
@@ -67,14 +73,23 @@ int main(int argc, char* argv[]) {
                           "callBase1(derived)\n"
                           "callBase2(derived)\n"
                           "callDerived(derived)");
+        luaState["Base1"] = integral::ClassMetatable<Base1>().setConstructor<Base1()>("new");
         try {
-            luaState["Base1"] = integral::ClassMetatable<Base1>().setConstructor<Other()>("new");
             luaState.doString("callDerived(Base1.new())");
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
+        luaState["Base1"]["base1Method"].setFunction(&Base1::base1Method);
+        luaState.doString("Base1.base1Method(derived)");
         try {
-            luaState["Other"] = integral::ClassMetatable<Other>().setConstructor<Other()>("new");
+            // base classes methods are not automatically bound to derived types class metatables
+            // see the inheritance sample for methods inheritance
+            luaState.doString("derived:base1Method()");
+        } catch (const integral::StateException &stateException) {
+            std::cout << "expected exception: {" << stateException.what() << "}\n";
+        }
+        luaState["Other"] = integral::ClassMetatable<Other>().setConstructor<Other()>("new");
+        try {
             luaState.doString("callDerived(Other.new())");
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
