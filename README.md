@@ -19,6 +19,7 @@
   * [Set default arguments](#set-default-arguments)
   * [Bind class](#bind-class)
   * [Get object](#get-object)
+  * [Set inheritance](#set-inheritance)
   * [Bind table](#bind-table)
   * [Use polymorphism](#use-polymorphism)
 * [integral reserved names in Lua](#integral-reserved-names-in-lua)
@@ -203,6 +204,64 @@ Objects are gotten by reference.
 ```
 
 See [example](samples/abstraction/class/class.cpp).
+
+## Set inheritance
+
+```cpp
+class BaseOfBase1 {
+public:
+    void baseOfBase1Method() const {
+        std::puts("baseOfBase1Method");
+    }
+};
+
+class Base1 : public BaseOfBase1 {
+public:
+    void base1Method() const {
+        std::puts("base1Method");
+    }
+};
+
+class Base2 {
+public:
+    void base2Method() const {
+        std::puts("base2Method");
+    }
+};
+
+class Derived : public Base1, public Base2 {
+public:
+    void derivedMethod() const {
+        std::puts("derivedMethod");
+    }
+};
+
+// ...
+
+    integral::State luaState;
+    luaState["BaseOfBase1"] = integral::ClassMetatable<BaseOfBase1>()
+                              .setConstructor<BaseOfBase1()>("new")
+                              .setFunction("baseOfBase1Method", &BaseOfBase1::baseOfBase1Method);
+    luaState["Base1"] = integral::ClassMetatable<Base1>()
+                        .setConstructor<Base1()>("new")
+                        .setFunction("base1Method", &Base1::base1Method)
+                        .setBaseClass<BaseOfBase1>();
+    luaState["Base2"] = integral::ClassMetatable<Base2>()
+                        .setConstructor<Base2()>("new")
+                        .setFunction("base2Method", &Base2::base2Method);
+    luaState["Derived"] = integral::ClassMetatable<Derived>()
+                        .setConstructor<Derived()>("new")
+                        .setFunction("derivedMethod", &Derived::derivedMethod)
+                        .setBaseClass<Base1>()
+                        .setBaseClass<Base2>();
+    luaState.doString("derived = Derived.new()\n"
+                      "derived:base1Method()\n" // prints "base1Method"
+                      "derived:base2Method()\n" // prints "base2Method"
+                      "derived:baseOfBase1Method()\n" // prints "baseOfBase1Method"
+                      "derived:derivedMethod()"); // prints "derivedMethod"
+```
+
+See [example](samples/abstraction/inheritance/inheritance.cpp).
 
 ## Bind table
 
