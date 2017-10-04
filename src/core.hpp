@@ -55,26 +55,6 @@ namespace integral {
     // It is meant to be used as an argument to a C++ function.
     using LuaIgnoredArgument = detail::LuaIgnoredArgument;
 
-    // Adaptor to std::vector<T> and lua table.
-    // LuaVector can be seamlessly converted to std::vector.
-    template<typename T>
-    using LuaVector = detail::exchanger::LuaVector<T>;
-
-    // Adaptor to std::array<T, N> and lua table.
-    // LuaArray can be seamlessly converted to std::array.
-    template<typename T, std::size_t N>
-    using LuaArray = detail::exchanger::LuaArray<T, N>;
-
-    // Adaptor to std::unordered_map<T, U> and lua table.
-    // LuaUnorderedMap can be seamlessly converted to std::unordered_map.
-    template<typename T, typename U>
-    using LuaUnorderedMap = detail::exchanger::LuaUnorderedMap<T, U>;
-
-    // Adaptor to std::tuple<T...> and lua table.
-    // LuaTuple can be seamlessly converted to std::tuple.
-    template<typename ...T>
-    using LuaTuple = detail::exchanger::LuaTuple<T...>;
-
     //lua_CFunction like function or functor wrapper
     using LuaFunctionWrapper = detail::LuaFunctionWrapper;
 

@@ -1,8 +1,9 @@
 ## TODO
+* changes related to Lua adaptors removal: samples and README
 * update README.md
   * usage
-    * adaptors for C++ vector, array, unordered_map and tuple to Lua table
-    * adaptors for C++ functions to Lua functions and vice-versa
+    * std::vector, std::array, std::unordered_map and std::tuple to Lua table
+    * C++ functions to Lua functions and vice-versa
     * module
     * ...
 * check for more tests

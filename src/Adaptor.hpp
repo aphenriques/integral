@@ -2,7 +2,7 @@
 //  Adaptor.hpp
 //  integral
 //
-//  Copyright (C) 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2014, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -27,20 +27,18 @@
 #include <utility>
 
 namespace integral {
-    namespace detail {
-        template<typename T>
-        class Adaptor : public T {
-        public:
-            template<typename ...A>
-            inline Adaptor(A &&...arguments);
-        };
-
-        //--
-
-        template<typename T>
+    template<typename T>
+    class Adaptor : public T {
+    public:
         template<typename ...A>
-        inline Adaptor<T>::Adaptor(A &&...arguments) : T(std::forward<A>(arguments)...) {}
-    }
+        inline Adaptor(A &&...arguments);
+    };
+
+    //--
+
+    template<typename T>
+    template<typename ...A>
+    inline Adaptor<T>::Adaptor(A &&...arguments) : T(std::forward<A>(arguments)...) {}
 }
 
 #endif

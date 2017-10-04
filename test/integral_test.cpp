@@ -31,9 +31,13 @@
 #include <tuple>
 #include <unordered_map>
 #include <vector>
+#include <Adaptor.hpp>
 #include <catch.hpp>
 #include <integral.hpp>
 #include <exception/Exception.hpp>
+
+template<typename T>
+using VectorAdaptor = integral::Adaptor<std::vector<T>>;
 
 class BaseOfInnerObject {
 public:
@@ -368,25 +372,24 @@ TEST_CASE("integral test") {
     }
     SECTION("integral::push and integral::get with Adaptors") {
         const std::vector<int> vector{1, 2, 3};
-        integral::push<integral::LuaVector<int>>(luaState.get(), vector);
-        REQUIRE((integral::get<integral::LuaVector<int>>(luaState.get(), -1) == vector));
+        integral::push<std::vector<int>>(luaState.get(), vector);
+        REQUIRE((integral::get<std::vector<int>>(luaState.get(), -1) == vector));
         lua_pop(luaState.get(), 1);
-        const std::vector<std::vector<Object>> vectorOfVectors{{Object("object[0][0]")}, {Object("object[1][0]"), Object("object[1][1]")}};
-        const integral::LuaVector<integral::LuaVector<Object>> LuaVectorOfLuaVectors(vectorOfVectors.begin(), vectorOfVectors.end());
-        integral::push<integral::LuaVector<integral::LuaVector<Object>>>(luaState.get(), LuaVectorOfLuaVectors);
-        REQUIRE((integral::get<integral::LuaVector<integral::LuaVector<Object>>>(luaState.get(), -1) == LuaVectorOfLuaVectors));
+        const std::vector<std::vector<Object>> vectorOfVectors = {{Object("object[0][0]")}, {Object("object[1][0]"), Object("object[1][1]")}};
+        integral::push<std::vector<std::vector<Object>>>(luaState.get(), vectorOfVectors);
+        REQUIRE((integral::get<std::vector<std::vector<Object>>>(luaState.get(), -1) == vectorOfVectors));
         lua_pop(luaState.get(), 1);
-        const std::array<double, 3> array{{1.3, 2.2, 3.1}};
-        integral::push<integral::LuaArray<double, 3>>(luaState.get(), array);
-        REQUIRE((integral::get<integral::LuaArray<double, 3>>(luaState.get(), -1) == array));
+        const std::array<double, 3> array{1.3, 2.2, 3.1};
+        integral::push<std::array<double, 3>>(luaState.get(), array);
+        REQUIRE((integral::get<std::array<double, 3>>(luaState.get(), -1) == array));
         lua_pop(luaState.get(), 1);
-        const std::unordered_map<std::string, integral::LuaArray<Object, 2>> unorderedMapOfLuaArrays{{"a", std::array<Object, 2>{{Object("objectA1"), Object("objectA2")}}}, {"b", std::array<Object, 2>{{Object("objectB1"), Object("objectB2")}}}};
-        integral::push<integral::LuaUnorderedMap<std::string, integral::LuaArray<Object, 2>>>(luaState.get(), unorderedMapOfLuaArrays);
-        REQUIRE((integral::get<integral::LuaUnorderedMap<std::string, integral::LuaArray<Object, 2>>>(luaState.get(), -1) == unorderedMapOfLuaArrays));
+        const std::unordered_map<std::string, std::array<Object, 2>> unorderedMapOfArrays = {{"a", {Object("objectA1"), Object("objectA2")}}, {"b", {Object("objectB1"), Object("objectB2")}}};
+        integral::push<std::unordered_map<std::string, std::array<Object, 2>>>(luaState.get(), unorderedMapOfArrays);
+        REQUIRE((integral::get<std::unordered_map<std::string, std::array<Object, 2>>>(luaState.get(), -1) == unorderedMapOfArrays));
         lua_pop(luaState.get(), 1);
-        std::tuple<std::tuple<int, std::string>, Object> tuple(std::tuple<int, std::string>(42, "string"), Object("object"));
-        integral::push<integral::LuaTuple<integral::LuaTuple<int, std::string>, Object>>(luaState.get(), tuple);
-        REQUIRE((integral::get<integral::LuaTuple<integral::LuaTuple<int, std::string>, Object>>(luaState.get(), -1) == tuple));
+        std::tuple<std::tuple<int, std::string>, Object> tuple{{42, "string"}, Object("object")};
+        integral::push<std::tuple<std::tuple<int, std::string>, Object>>(luaState.get(), tuple);
+        REQUIRE((integral::get<std::tuple<std::tuple<int, std::string>, Object>>(luaState.get(), -1) == tuple));
         lua_pop(luaState.get(), 1);
     }
     SECTION("lua table to Reference") {
@@ -398,8 +401,8 @@ TEST_CASE("integral test") {
         REQUIRE_THROWS_AS(stateView["x"][2].get<int>(), integral::ReferenceException);
         REQUIRE_THROWS_AS(stateView["x"]["y"].get<std::string>(), integral::ReferenceException);
         REQUIRE_THROWS_AS(stateView["x"]["y"][1].get<int>(), integral::ReferenceException);
-        const std::unordered_map<std::string, integral::LuaArray<Object, 2>> unorderedMapOfLuaArrays{{"a", std::array<Object, 2>{{Object("objectA1"), Object("objectA2")}}}, {"b", std::array<Object, 2>{{Object("objectB1"), Object("objectB2")}}}};
-        stateView["y"].set<integral::LuaUnorderedMap<std::string, integral::LuaArray<Object, 2>>>(unorderedMapOfLuaArrays);
+        std::unordered_map<std::string, std::array<Object, 2>> unorderedMapOfArrays = {{"a", std::array<Object, 2>{Object("objectA1"), Object("objectA2")}}, {"b", std::array<Object, 2>{Object("objectB1"), Object("objectB2")}}};
+        stateView["y"].set(unorderedMapOfArrays);
         REQUIRE(stateView["y"]["a"][1].get<Object>() == Object("objectA1"));
         REQUIRE(stateView["y"]["a"][2].get<Object>() == Object("objectA2"));
         REQUIRE(stateView["y"]["b"][1].get<Object>() == Object("objectB1"));
@@ -408,48 +411,48 @@ TEST_CASE("integral test") {
     SECTION("lua table to Adaptors") {
         REQUIRE_NOTHROW(stateView.doString("x = {11, 22, 33}"));
         lua_getglobal(luaState.get(), "x");
-        REQUIRE((integral::get<integral::LuaArray<int, 3>>(luaState.get(), -1) == std::array<int, 3>{{11, 22, 33}}));
+        REQUIRE((integral::get<std::array<int, 3>>(luaState.get(), -1) == std::array<int, 3>{11, 22, 33}));
         lua_pop(luaState.get(), 1);
-        REQUIRE((stateView["x"].get<integral::LuaArray<int, 3>>() == std::array<int, 3>{{11, 22, 33}}));
+        REQUIRE((stateView["x"].get<std::array<int, 3>>() == std::array<int, 3>{11, 22, 33}));
         stateView["Object"].set(integral::ClassMetatable<Object>()
                                 .set("new", integral::ConstructorWrapper<Object(const std::string &)>()));
         REQUIRE_NOTHROW(stateView.doString("y = {Object.new('o0'), {o1 = Object.new('o1'), o2 = Object.new('o2')}}"));
         lua_getglobal(luaState.get(), "y");
-        REQUIRE(std::get<0>(integral::get<integral::LuaTuple<Object, integral::LuaUnorderedMap<std::string, Object>>>(luaState.get(), -1)).getId() == "o0");
-        REQUIRE(std::get<1>(integral::get<integral::LuaTuple<Object, integral::LuaUnorderedMap<std::string, Object>>>(luaState.get(), -1))["o1"].getId() == "o1");
-        REQUIRE(std::get<1>(integral::get<integral::LuaTuple<Object, integral::LuaUnorderedMap<std::string, Object>>>(luaState.get(), -1))["o2"].getId() == "o2");
+        REQUIRE(std::get<0>(integral::get<std::tuple<Object, std::unordered_map<std::string, Object>>>(luaState.get(), -1)).getId() == "o0");
+        REQUIRE(std::get<1>(integral::get<std::tuple<Object, std::unordered_map<std::string, Object>>>(luaState.get(), -1))["o1"].getId() == "o1");
+        REQUIRE(std::get<1>(integral::get<std::tuple<Object, std::unordered_map<std::string, Object>>>(luaState.get(), -1))["o2"].getId() == "o2");
         lua_pop(luaState.get(), 1);
-        REQUIRE(std::get<0>(stateView["y"].get<integral::LuaTuple<Object, integral::LuaUnorderedMap<std::string, Object>>>()).getId() == "o0");
-        REQUIRE(std::get<1>(stateView["y"].get<integral::LuaTuple<Object, integral::LuaUnorderedMap<std::string, Object>>>())["o1"].getId() == "o1");
-        REQUIRE(std::get<1>(stateView["y"].get<integral::LuaTuple<Object, integral::LuaUnorderedMap<std::string, Object>>>())["o2"].getId() == "o2");
+        REQUIRE(std::get<0>(stateView["y"].get<std::tuple<Object, std::unordered_map<std::string, Object>>>()).getId() == "o0");
+        REQUIRE(std::get<1>(stateView["y"].get<std::tuple<Object, std::unordered_map<std::string, Object>>>())["o1"].getId() == "o1");
+        REQUIRE(std::get<1>(stateView["y"].get<std::tuple<Object, std::unordered_map<std::string, Object>>>())["o2"].getId() == "o2");
         // numbers are converted to string by lua
         REQUIRE_NOTHROW(stateView.doString("z = {{Object.new(11), Object.new(12)}, {Object.new(21), Object.new(22)}}"));
         lua_getglobal(luaState.get(), "z");
-        REQUIRE(integral::get<integral::LuaVector<integral::LuaVector<Object>>>(luaState.get(), -1).at(0).at(0).getId() == "11");
-        REQUIRE(integral::get<integral::LuaVector<integral::LuaVector<Object>>>(luaState.get(), -1).at(0).at(1).getId() == "12");
-        REQUIRE(integral::get<integral::LuaVector<integral::LuaVector<Object>>>(luaState.get(), -1).at(1).at(0).getId() == "21");
-        REQUIRE(integral::get<integral::LuaVector<integral::LuaVector<Object>>>(luaState.get(), -1).at(1).at(1).getId() == "22");
-        REQUIRE((integral::get<integral::LuaArray<integral::LuaArray<Object, 2>, 2>>(luaState.get(), -1)[0][0].getId() == "11"));
-        REQUIRE((integral::get<integral::LuaArray<integral::LuaArray<Object, 2>, 2>>(luaState.get(), -1)[0][1].getId() == "12"));
-        REQUIRE((integral::get<integral::LuaArray<integral::LuaArray<Object, 2>, 2>>(luaState.get(), -1)[1][0].getId() == "21"));
-        REQUIRE((integral::get<integral::LuaArray<integral::LuaArray<Object, 2>, 2>>(luaState.get(), -1)[1][1].getId() == "22"));
-        REQUIRE((integral::get<integral::LuaArray<integral::LuaVector<Object>, 2>>(luaState.get(), -1)[0].at(0).getId() == "11"));
-        REQUIRE((integral::get<integral::LuaArray<integral::LuaVector<Object>, 2>>(luaState.get(), -1)[0].at(1).getId() == "12"));
-        REQUIRE((integral::get<integral::LuaArray<integral::LuaVector<Object>, 2>>(luaState.get(), -1)[1].at(0).getId() == "21"));
-        REQUIRE((integral::get<integral::LuaArray<integral::LuaVector<Object>, 2>>(luaState.get(), -1)[1].at(1).getId() == "22"));
+        REQUIRE(integral::get<std::vector<std::vector<Object>>>(luaState.get(), -1).at(0).at(0).getId() == "11");
+        REQUIRE(integral::get<std::vector<std::vector<Object>>>(luaState.get(), -1).at(0).at(1).getId() == "12");
+        REQUIRE(integral::get<std::vector<std::vector<Object>>>(luaState.get(), -1).at(1).at(0).getId() == "21");
+        REQUIRE(integral::get<std::vector<std::vector<Object>>>(luaState.get(), -1).at(1).at(1).getId() == "22");
+        REQUIRE((integral::get<std::array<std::array<Object, 2>, 2>>(luaState.get(), -1)[0][0].getId() == "11"));
+        REQUIRE((integral::get<std::array<std::array<Object, 2>, 2>>(luaState.get(), -1)[0][1].getId() == "12"));
+        REQUIRE((integral::get<std::array<std::array<Object, 2>, 2>>(luaState.get(), -1)[1][0].getId() == "21"));
+        REQUIRE((integral::get<std::array<std::array<Object, 2>, 2>>(luaState.get(), -1)[1][1].getId() == "22"));
+        REQUIRE((integral::get<std::array<std::vector<Object>, 2>>(luaState.get(), -1)[0].at(0).getId() == "11"));
+        REQUIRE((integral::get<std::array<std::vector<Object>, 2>>(luaState.get(), -1)[0].at(1).getId() == "12"));
+        REQUIRE((integral::get<std::array<std::vector<Object>, 2>>(luaState.get(), -1)[1].at(0).getId() == "21"));
+        REQUIRE((integral::get<std::array<std::vector<Object>, 2>>(luaState.get(), -1)[1].at(1).getId() == "22"));
         lua_pop(luaState.get(), 1);
-        REQUIRE(stateView["z"].get<integral::LuaVector<integral::LuaVector<Object>>>().at(0).at(0).getId() == "11");
-        REQUIRE(stateView["z"].get<integral::LuaVector<integral::LuaVector<Object>>>().at(0).at(1).getId() == "12");
-        REQUIRE(stateView["z"].get<integral::LuaVector<integral::LuaVector<Object>>>().at(1).at(0).getId() == "21");
-        REQUIRE(stateView["z"].get<integral::LuaVector<integral::LuaVector<Object>>>().at(1).at(1).getId() == "22");
-        REQUIRE((stateView["z"].get<integral::LuaArray<integral::LuaArray<Object, 2>, 2>>()[0][0].getId() == "11"));
-        REQUIRE((stateView["z"].get<integral::LuaArray<integral::LuaArray<Object, 2>, 2>>()[0][1].getId() == "12"));
-        REQUIRE((stateView["z"].get<integral::LuaArray<integral::LuaArray<Object, 2>, 2>>()[1][0].getId() == "21"));
-        REQUIRE((stateView["z"].get<integral::LuaArray<integral::LuaArray<Object, 2>, 2>>()[1][1].getId() == "22"));
-        REQUIRE((stateView["z"].get<integral::LuaArray<integral::LuaVector<Object>, 2>>()[0].at(0).getId() == "11"));
-        REQUIRE((stateView["z"].get<integral::LuaArray<integral::LuaVector<Object>, 2>>()[0].at(1).getId() == "12"));
-        REQUIRE((stateView["z"].get<integral::LuaArray<integral::LuaVector<Object>, 2>>()[1].at(0).getId() == "21"));
-        REQUIRE((stateView["z"].get<integral::LuaArray<integral::LuaVector<Object>, 2>>()[1].at(1).getId() == "22"));
+        REQUIRE(stateView["z"].get<std::vector<std::vector<Object>>>().at(0).at(0).getId() == "11");
+        REQUIRE(stateView["z"].get<std::vector<std::vector<Object>>>().at(0).at(1).getId() == "12");
+        REQUIRE(stateView["z"].get<std::vector<std::vector<Object>>>().at(1).at(0).getId() == "21");
+        REQUIRE(stateView["z"].get<std::vector<std::vector<Object>>>().at(1).at(1).getId() == "22");
+        REQUIRE((stateView["z"].get<std::array<std::array<Object, 2>, 2>>()[0][0].getId() == "11"));
+        REQUIRE((stateView["z"].get<std::array<std::array<Object, 2>, 2>>()[0][1].getId() == "12"));
+        REQUIRE((stateView["z"].get<std::array<std::array<Object, 2>, 2>>()[1][0].getId() == "21"));
+        REQUIRE((stateView["z"].get<std::array<std::array<Object, 2>, 2>>()[1][1].getId() == "22"));
+        REQUIRE((stateView["z"].get<std::array<std::vector<Object>, 2>>()[0].at(0).getId() == "11"));
+        REQUIRE((stateView["z"].get<std::array<std::vector<Object>, 2>>()[0].at(1).getId() == "12"));
+        REQUIRE((stateView["z"].get<std::array<std::vector<Object>, 2>>()[1].at(0).getId() == "21"));
+        REQUIRE((stateView["z"].get<std::array<std::vector<Object>, 2>>()[1].at(1).getId() == "22"));
     }
     SECTION("function call") {
         stateView["Object"].set(integral::ClassMetatable<Object>()
@@ -480,14 +483,12 @@ TEST_CASE("integral test") {
         REQUIRE_THROWS_AS(stateView["x"].call<void>(), integral::ReferenceException);
     }
     SECTION("LuaIgnoredArgument and LuaFunctionArgument") {
-        stateView["Vector"].set(integral::ClassMetatable<std::vector<double>>()
-                                .setFunction("new", [](const integral::LuaVector<double> &vector) -> std::vector<double> {
-                                    return vector;
-                                })
-                                .setFunction("__len", [](const std::vector<double> &vector, integral::LuaIgnoredArgument) -> std::size_t {
+        stateView["Vector"].set(integral::ClassMetatable<VectorAdaptor<double>>()
+                                .setConstructor<VectorAdaptor<double>(const std::vector<double> &)>("new")
+                                .setFunction("__len", [](const VectorAdaptor<double> &vector, integral::LuaIgnoredArgument) -> std::size_t {
                                     return vector.size();
                                 })
-                                .setFunction("transform", [](std::vector<double> &vector, const integral::LuaFunctionArgument &luaFunctionArgument) -> void {
+                                .setFunction("transform", [](VectorAdaptor<double> &vector, const integral::LuaFunctionArgument &luaFunctionArgument) -> void {
                                     std::for_each(vector.begin(), vector.end(), [&luaFunctionArgument](double &element) -> void {
                                         element = luaFunctionArgument.call<double>(element);
                                     });
@@ -498,16 +499,16 @@ TEST_CASE("integral test") {
         REQUIRE_THROWS_AS(stateView.doString("assert(#vector == 4)"), integral::StateException);
         REQUIRE_NOTHROW(stateView.doString("function getNegative(x) return -1*x end"));
         REQUIRE_NOTHROW(stateView.doString("vector:transform(getNegative)"));
-        REQUIRE_NOTHROW(stateView["vector"].get<std::vector<double>>());
-        REQUIRE(stateView["vector"].get<std::vector<double>>().size() == 3);
-        REQUIRE(stateView["vector"].get<std::vector<double>>().at(0) < 0);
-        REQUIRE(stateView["vector"].get<std::vector<double>>().at(1) < 0);
-        REQUIRE(stateView["vector"].get<std::vector<double>>().at(2) < 0);
+        REQUIRE_NOTHROW(stateView["vector"].get<VectorAdaptor<double>>());
+        REQUIRE(stateView["vector"].get<VectorAdaptor<double>>().size() == 3);
+        REQUIRE(stateView["vector"].get<VectorAdaptor<double>>().at(0) < 0);
+        REQUIRE(stateView["vector"].get<VectorAdaptor<double>>().at(1) < 0);
+        REQUIRE(stateView["vector"].get<VectorAdaptor<double>>().at(2) < 0);
         stateView["getAbs"].set(integral::makeFunctionWrapper(static_cast<double(*)(double)>(&std::abs)));
         REQUIRE_NOTHROW(stateView.doString("vector:transform(getAbs)"));
-        REQUIRE(stateView["vector"].get<std::vector<double>>().at(0) > 0);
-        REQUIRE(stateView["vector"].get<std::vector<double>>().at(1) > 0);
-        REQUIRE(stateView["vector"].get<std::vector<double>>().at(2) > 0);
+        REQUIRE(stateView["vector"].get<VectorAdaptor<double>>().at(0) > 0);
+        REQUIRE(stateView["vector"].get<VectorAdaptor<double>>().at(1) > 0);
+        REQUIRE(stateView["vector"].get<VectorAdaptor<double>>().at(2) > 0);
     }
     SECTION("polymorphism") {
         stateView["Object"].set(integral::ClassMetatable<Object>()
