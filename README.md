@@ -296,10 +296,10 @@ void callBase(const Base &) {
 }
 
 // ...
-        luaState["Derived"] = integral::ClassMetatable<Derived>().setConstructor<Derived()>("new");
-        luaState["callBase"].setFunction(callBase);
-        luaState.doString("derived = Derived.new()\n"
-                          "callBase(derived)"); // prints "Base"
+    luaState["Derived"] = integral::ClassMetatable<Derived>().setConstructor<Derived()>("new");
+    luaState["callBase"].setFunction(callBase);
+    luaState.doString("derived = Derived.new()\n"
+                      "callBase(derived)"); // prints "Base"
 ```
 
 See [example](samples/abstraction/polymorphism/polymorphism.cpp).
