@@ -1,8 +1,8 @@
 //
-//  adaptors.cpp
+//  table_conversion.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2015, 2016  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -43,9 +43,9 @@ std::vector<int> getDoubleVector(std::vector<int> vectorCopy) {
     return vectorCopy;
 }
 
-void printVectorOfVectors(const integral::LuaVector<integral::LuaVector<int>> &luaVectorOfVectors) {
+void printVectorOfVectors(const std::vector<std::vector<int>> &vectorOfVectors) {
     std::cout << "vector of vectors (C++): {";
-    for (const auto &element : luaVectorOfVectors) {
+    for (const auto &element : vectorOfVectors) {
         std::cout << " {";
         for (const auto &j : element) {
             std::cout << " " << j;
@@ -56,28 +56,26 @@ void printVectorOfVectors(const integral::LuaVector<integral::LuaVector<int>> &l
 }
 
 extern "C" {
-    LUALIB_API int luaopen_libadaptors(lua_State *luaState) {
+    LUALIB_API int luaopen_libtable_conversion(lua_State *luaState) {
         try {
             lua_newtable(luaState);
             // stack: table (module table)
 
-            // LuaVector
-            // a integral::LuaVector is seamlessly converted to (upcast to base class) and from a std::vector (it is still efficient because of move semantics). This is also true for other types of adaptors
-            integral::setFunction(luaState, "getVectorSample", std::function<integral::LuaVector<int>()>(getVectorSample));
-            integral::setFunction(luaState, "getDoubleVector", std::function<integral::LuaVector<int>(integral::LuaVector<int>)>(getDoubleVector));
-            // nested LuaVectors work as expected
+            // std::vector
+            integral::setFunction(luaState, "getVectorSample", getVectorSample);
+            integral::setFunction(luaState, "getDoubleVector", getDoubleVector);
+            // nested std::vector work as expected
             integral::setFunction(luaState, "printVectorOfVectors", printVectorOfVectors);
 
-            // LuaArray
-            // adaptors with integral::get/integral::push
-            // nested adaptors will also work as expected
+            // std::array
+            // nested table types will also work as expected
             integral::setLuaFunction(luaState, "getArrayOf3VectorsSample", [](lua_State *lambdaLuaState) -> int {
-                integral::push<integral::LuaArray<integral::LuaVector<int>, 3>>(lambdaLuaState, std::array<integral::LuaVector<int>, 3>{{std::vector<int>({11}), std::vector<int>({21, 22}), std::vector<int>({31, 32, 33})}});
+                integral::push<std::array<std::vector<int>, 3>>(lambdaLuaState, std::array<std::vector<int>, 3>{std::vector<int>({11}), std::vector<int>({21, 22}), std::vector<int>({31, 32, 33})});
                 return 1;
             });
 
             integral::setLuaFunction(luaState, "printArrayOf2Numbers", [](lua_State *lambdaLuaState) -> int {
-                std::array<int, 2> array = integral::get<integral::LuaArray<int, 2>>(lambdaLuaState, 1);
+                std::array<int, 2> array = integral::get<std::array<int, 2>>(lambdaLuaState, 1);
                 std::cout << "array (C++): {";
                 for (const auto &element : array ) {
                     std::cout << " " << element;
@@ -86,12 +84,12 @@ extern "C" {
                 return 0;
             });
 
-            // LuaUnorderedMap
-            integral::setFunction(luaState, "getUnorderedMapSample", []() -> integral::LuaUnorderedMap<std::string, int> {
-                return std::unordered_map<std::string, int>({{"um", 1}, {"dois", 2}, {"tres", 3}});
+            // std::unordered_map
+            integral::setFunction(luaState, "getUnorderedMapSample", []() -> std::unordered_map<std::string, int> {
+                return {{"um", 1}, {"dois", 2}, {"tres", 3}};
             });
 
-            integral::setFunction(luaState, "printStringDoubleUnorderedMap", [](integral::LuaUnorderedMap<std::string, double> map) -> void {
+            integral::setFunction(luaState, "printStringDoubleUnorderedMap", [](std::unordered_map<std::string, double> map) -> void {
                 std::cout << "unordered_map<string, double> (C++): {";
                 for (const auto &keyValue : map) {
                     std::cout << " [\"" << keyValue.first << "\"]=" << keyValue.second;
@@ -99,20 +97,20 @@ extern "C" {
                 std::cout << " }" << std::endl;
             });
 
-            // LuaTuple
-            integral::setFunction(luaState, "getTupleSample", []() -> integral::LuaTuple<std::string, double> {
-                return integral::LuaTuple<std::string, double>("first", 2.0);
+            // std::tuple
+            integral::setFunction(luaState, "getTupleSample", []() -> std::tuple<std::string, double> {
+                return std::tuple<std::string, double>("first", 2.0);
             });
 
-            integral::setFunction(luaState, "printBoolBoolTuple", [](integral::LuaTuple<bool, bool> tuple) -> void {
+            integral::setFunction(luaState, "printBoolBoolTuple", [](std::tuple<bool, bool> tuple) -> void {
                 std::cout << "tuple<bool, bool> (C++): ( " << std::get<0>(tuple) << ", " << std::get<1>(tuple) << " )" << std::endl;
             });
 
             return 1;
         } catch (const std::exception &exception) {
-            lua_pushstring(luaState, (std::string("[adaptors sample setup] ") + exception.what()).c_str());
+            lua_pushstring(luaState, (std::string("[table_conversion sample setup] ") + exception.what()).c_str());
         } catch (...) {
-            lua_pushstring(luaState, "[adaptors sample setup] unknown exception thrown");
+            lua_pushstring(luaState, "[table_conversion sample setup] unknown exception thrown");
         }
         // Error return outside catch scope so that the exception destructor can be called
         return lua_error(luaState);

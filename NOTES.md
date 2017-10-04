@@ -1,5 +1,4 @@
 ## TODO
-* changes related to Lua adaptors removal: samples and README
 * update README.md
   * usage
     * std::vector, std::array, std::unordered_map and std::tuple to Lua table

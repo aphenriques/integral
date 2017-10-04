@@ -1,8 +1,8 @@
 --
---  adaptors.lua
+--  table_conversion.lua
 --  integral
 --
---  Copyright (C) 2014, 2016  André Pereira Henriques
+--  Copyright (C) 2014, 2016, 2017  André Pereira Henriques
 --  aphenriques (at) outlook (dot) com
 --
 --  This file is part of integral.
@@ -24,7 +24,7 @@
 -- MacOX specific shared library extension
 package.cpath = package.cpath .. ";?.dylib"
 
-local adaptors = require("libadaptors")
+local adaptors = require("libtable_conversion")
 
 local function getStringFromTable(table)
     local returnString = "{"
@@ -44,7 +44,7 @@ local function getStringFromTable(table)
     return returnString
 end
 
-print("# LuaVector")
+print("# std::vector")
 local vectorTable = adaptors.getVectorSample()
 print(type(vectorTable))
 print(getStringFromTable(vectorTable))
@@ -55,7 +55,7 @@ local _, message = pcall(function() adaptors.printVectorOfVectors({{1}, 2}) end)
 print("invalid vector element error: " .. message)
 print("--")
 
-print("# LuaArray")
+print("# std::array")
 local arrayTable = adaptors.getArrayOf3VectorsSample()
 print(type(arrayTable))
 print(getStringFromTable(arrayTable))
@@ -65,14 +65,14 @@ local _, message = pcall(function() adaptors.printArrayOf2Numbers({1}) end)
 print("wrong array size error: " .. message)
 print("--")
 
-print("# LuaUnorderedMap")
+print("# std::unordered_map")
 local unorderedMapTable = adaptors.getUnorderedMapSample()
 print(type(unorderedMapTable))
 print(getStringFromTable(unorderedMapTable))
 adaptors.printStringDoubleUnorderedMap({pi = math.pi, rad = math.rad(1), 42})
 print("--")
 
-print("# LuaTuple")
+print("# std::tuple")
 local tuple = adaptors.getTupleSample()
 print(type(tuple))
 print(getStringFromTable(tuple))

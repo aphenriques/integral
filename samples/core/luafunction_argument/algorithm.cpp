@@ -2,7 +2,7 @@
 //  algorithm.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2014, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -25,17 +25,18 @@
 #include <exception>
 #include <iostream>
 #include <string>
+#include <vector>
 #include <lua.hpp>
 #include <integral.hpp>
 
 namespace {
-    integral::LuaVector<int> transform(integral::LuaVector<int> luaVectorCopy, const integral::LuaFunctionArgument &luaFunctionArgument) {
-        // luaVectorCopy is a copy of the lua vector
+    std::vector<int> transform(std::vector<int> vectorCopy, const integral::LuaFunctionArgument &luaFunctionArgument) {
+        // vectorCopy is a copy of the lua vector
         // the lua table argument is not modified
-        std::for_each(luaVectorCopy.begin(), luaVectorCopy.end(), [&luaFunctionArgument](int &element) -> void {
+        std::for_each(vectorCopy.begin(), vectorCopy.end(), [&luaFunctionArgument](int &element) -> void {
             element = luaFunctionArgument.call<int>(element);
         });
-        return luaVectorCopy;
+        return vectorCopy;
     }
 }
 

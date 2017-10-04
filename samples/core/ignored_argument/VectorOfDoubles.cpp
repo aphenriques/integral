@@ -2,7 +2,7 @@
 //  VectorOfDoubles.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2015, 2016  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -23,13 +23,16 @@
 
 #include <functional>
 #include <string>
+#include <vector>
 #include <lua.hpp>
+#include <Adaptor.hpp>
 #include <integral.hpp>
 
 extern "C" {
     LUALIB_API int luaopen_libVectorOfDoubles(lua_State *luaState) {
         try {
-            using VectorOfDoubles = std::vector<double>;
+            // use std::vector as a regular object type using Adaptor
+            using VectorOfDoubles = integral::Adaptor<std::vector<double>>;
             integral::pushClassMetatable<VectorOfDoubles>(luaState);
             integral::setConstructor<VectorOfDoubles()>(luaState, "new");
             // because of some legacy lua implementation details, __len receives two arguments, the second argument can be safely ignored
