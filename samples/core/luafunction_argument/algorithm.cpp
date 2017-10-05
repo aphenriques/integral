@@ -30,7 +30,7 @@
 #include <integral.hpp>
 
 namespace {
-    std::vector<int> transform(std::vector<int> vectorCopy, const integral::LuaFunctionArgument &luaFunctionArgument) {
+    std::vector<int> getTransformed(std::vector<int> vectorCopy, const integral::LuaFunctionArgument &luaFunctionArgument) {
         // vectorCopy is a copy of the lua vector
         // the lua table argument is not modified
         std::for_each(vectorCopy.begin(), vectorCopy.end(), [&luaFunctionArgument](int &element) -> void {
@@ -45,7 +45,7 @@ extern "C" {
         try {
             // module table
             lua_newtable(luaState);
-            integral::setFunction(luaState, "transform", transform);
+            integral::setFunction(luaState, "getTransformed", getTransformed);
             return 1;
         } catch (const std::exception &exception) {
             lua_pushstring(luaState, (std::string("[luafunction_argument sample setup] ") + exception.what()).c_str());

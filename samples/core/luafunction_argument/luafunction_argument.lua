@@ -2,7 +2,7 @@
 --  luafunction_argument.lua
 --  integral
 --
---  Copyright (C) 2014  André Pereira Henriques
+--  Copyright (C) 2014, 2017  André Pereira Henriques
 --  aphenriques (at) outlook (dot) com
 --
 --  This file is part of integral.
@@ -26,7 +26,7 @@ package.cpath = package.cpath .. ";?.dylib"
 
 local algorithm = require("libalgorithm")
 local vector = {1, 2, 3}
-local doubleVector = algorithm.transform(vector, function(element) return 2*element end)
+local doubleVector = algorithm.getTransformed(vector, function(element) return 2*element end)
 for i, v in ipairs(doubleVector) do
     print("[" .. i .. "]", v)
 end
