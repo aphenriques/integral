@@ -153,7 +153,7 @@ namespace integral {
     inline void pushCopy(lua_State *luaState, T &&value);
 
     // Returns a type "T" value (string or number) or object from the stack at "index" position.
-    // Objects are returned by reference.
+    // Objects (except std::vector, std::array, std::unordered_map, std::tuple and std::string) are returned by reference
     // Lua types (number, table and strings) are returned by value.
     // If the type is incorrect, an ArgumentException is thrown.
     template<typename T>
@@ -218,7 +218,7 @@ namespace integral {
     // Calls function on top of the stack
     // "arguments" are pushed by value.
     // "R" is the return type, returned as follows (such as integral::get):
-    // - objects are returned by reference;
+    // - objects (except std::vector, std::array, std::unordered_map, std::tuple and std::string) are returned by reference
     // - lua types (number, table and strings) are returned by value.
     // The function is popped from stack
     // Throws a CallerException exception on error.

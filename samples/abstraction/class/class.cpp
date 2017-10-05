@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
                                     return std::string("Bye ") + object.name_ + '!';
                                  })
                                  .setLuaFunction("appendName", [](lua_State *lambdaLuaState) {
-                                    // objects are gotten by reference
+                                    // objects (except std::vector, std::array, std::unordered_map, std::tuple and std::string) are gotten by reference
                                     integral::get<Object>(lambdaLuaState, 1).name_ += integral::get<const char *>(lambdaLuaState, 2);
                                     return 1;
                                  });
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
                           "print(object:getName())\n"
                           "object:setName('bar')\n"
                           "print(object:getHello())");
-        // objects are gotten by reference
+        // objects (except std::vector, std::array, std::unordered_map, std::tuple and std::string) are gotten by reference
         luaState["object"].get<Object>().name_ = "foobar";
         luaState.doString("print(object:getName())\n"
                           "object:appendName('foo')\n"
