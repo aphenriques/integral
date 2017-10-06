@@ -25,7 +25,6 @@
 #include <string>
 #include <vector>
 #include <lua.hpp>
-#include <Adaptor.hpp>
 #include <integral.hpp>
 
 extern "C" {

@@ -31,7 +31,6 @@
 #include <tuple>
 #include <unordered_map>
 #include <vector>
-#include <Adaptor.hpp>
 #include <catch.hpp>
 #include <integral.hpp>
 #include <exception/Exception.hpp>

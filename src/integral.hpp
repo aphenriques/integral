@@ -24,6 +24,7 @@
 #ifndef integral_integral_hpp
 #define integral_integral_hpp
 
+#include "Adaptor.hpp"
 #include "ArgumentException.hpp"
 #include "ClassMetatable.hpp"
 #include "core.hpp"
