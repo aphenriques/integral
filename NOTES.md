@@ -2,9 +2,10 @@
 * update README.md
   * usage
     * std::vector, std::array, std::unordered_map and std::tuple to Lua table
-    * C++ functions to Lua functions and vice-versa
+    * LuaIgnoredArgument
     * module
     * ...
+  * highlight comprehensive error messages 
 * check for more tests
 * intel compiler
 * coverity

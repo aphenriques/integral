@@ -15,13 +15,15 @@
   * [Create Lua state](#create-lua-state)
   * [Use existing Lua state](#use-existing-lua-state)
   * [Get and set value](#get-and-set-value)
-  * [Bind function](#bind-function)
-  * [Set default arguments](#set-default-arguments)
-  * [Bind class](#bind-class)
+  * [Register function](#register-function)
+  * [Register function with default arguments](#register-function-with-default-arguments)
+  * [Register class](#register-class)
   * [Get object](#get-object)
-  * [Set inheritance](#set-inheritance)
-  * [Bind table](#bind-table)
+  * [Register inheritance](#register-inheritance)
+  * [Register table](#register-table)
   * [Use polymorphism](#use-polymorphism)
+  * [Call function in Lua state](#call-function-in-lua-state)
+  * [Register lua function argument](#Registe-lua-function-argument)
 * [integral reserved names in Lua](#integral-reserved-names-in-lua)
 * [Source](#source)
 * [Author](#author)
@@ -119,7 +121,7 @@ See [example](samples/abstraction/state/state.cpp).
 
 See [example](samples/abstraction/reference/reference.cpp).
 
-## Bind function
+## Register function
 
 ```cpp
 double getSum(double x, double y) {
@@ -146,7 +148,7 @@ double luaGetSum(lua_State *luaState) {
     luaState.doString("printHello()"); // prints "hello!"
 ```
 
-## Set default arguments
+## Register function with default arguments
 
 ```cpp
     luaState["printArguments"].setFunction([](const std::string &string, int integer) {
@@ -158,7 +160,7 @@ double luaGetSum(lua_State *luaState) {
 ```
 See [example](samples/abstraction/default_argument/default_adefault_argument.cpp).
 
-## Bind class
+## Register class
 
 ```cpp
 class Object {
@@ -183,7 +185,7 @@ public:
                                 return std::string("Bye ") + object.name_ + '!';
                              })
                              .setLuaFunction("appendName", [](lua_State *lambdaLuaState) {
-                                // objects are gotten by reference
+                                // objects (except std::vector, std::array, std::unordered_map, std::tuple and std::string) are gotten by reference
                                 integral::get<Object>(lambdaLuaState, 1).name_ += integral::get<const char *>(lambdaLuaState, 2);
                                 return 1;
                              });
@@ -193,19 +195,19 @@ See [example](samples/abstraction/class/class.cpp).
 
 ## Get object
 
-Objects are gotten by reference.
+Objects (except std::vector, std::array, std::unordered_map, std::tuple and std::string) are gotten by reference.
 
 ```cpp
     luaState.doString("object = Object.new('foo')\n"
                       "print(object:getName())"); // prints "foo"
-    // objects are gotten by reference
+    // objects (except std::vector, std::array, std::unordered_map, std::tuple and std::string) are gotten by reference
     luaState["object"].get<Object>().name_ = "foobar";
     luaState.doString("print(object:getName())"); // prints "foobar"
 ```
 
 See [example](samples/abstraction/class/class.cpp).
 
-## Set inheritance
+## Register inheritance
 
 ```cpp
 class BaseOfBase1 {
@@ -263,7 +265,7 @@ public:
 
 See [example](samples/abstraction/inheritance/inheritance.cpp).
 
-## Bind table
+## Register table
 
 ```cpp
     luaState["group"] = integral::Table()
@@ -303,6 +305,26 @@ void callBase(const Base &) {
 ```
 
 See [example](samples/abstraction/polymorphism/polymorphism.cpp).
+
+## Call function in Lua State
+
+```cpp
+    luaState.doString("function getSum(x, y) return x + y end");
+    int x = luaState["getSum"].call<int>(2, 3); // 'x' is set to 5
+```
+
+See [example](samples/abstraction/function_call/function_call.cpp).
+
+## Register lua function argument
+
+```cpp
+    luaState["getResult"].setFunction([](int x, int y, const integral::LuaFunctionArgument &function) {
+        return function.call<int>(x, y);
+    });
+    luaState.doString("print(getResult(-1, 1, math.min))"); // prints "-1"
+```
+
+See [example](samples/abstraction/lua_function_argument/lua_function_argument.cpp).
 
 ## TODO
 
