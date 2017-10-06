@@ -19,6 +19,11 @@ PROJECT_CXXFLAGS+=-Wweak-vtables
 SHARED_LIB_EXTENSION:=dylib
 PROJECT_LDFLAGS:=-undefined dynamic_lookup
 else
+ifeq ($(shell uname -m),armv7l)
+# TODO remove this on later GCC versions
+# suppress note regarding abi change on raspberry pi
+PROJECT_CXXFLAGS+=-Wno-psabi
+endif
 PROJECT_CXXFLAGS+=-Wno-unused-but-set-parameter
 SHARED_LIB_EXTENSION:=so
 PROJECT_LDFLAGS:=
