@@ -41,7 +41,7 @@ namespace integral {
             LuaFunctionArgument(lua_State *luaState, int index);
 
             template<typename R, typename ...A>
-            inline decltype(auto) call(const A &...arguments) const;
+            inline decltype(auto) call(A &&...arguments) const;
 
         private:
             lua_State * const luaState_;
@@ -52,16 +52,23 @@ namespace integral {
             template<>
             class Exchanger<LuaFunctionArgument> {
             public:
-                static LuaFunctionArgument get(lua_State *luaState, int index);
+                inline static LuaFunctionArgument get(lua_State *luaState, int index);
             };
         }
 
         // --
 
         template<typename R, typename ...A>
-        inline decltype(auto) LuaFunctionArgument::call(const A &...arguments) const {
+        inline decltype(auto) LuaFunctionArgument::call(A &&...arguments) const {
             lua_pushvalue(luaState_, luaAbsoluteStackIndex_);
-            return Caller<R, A...>::call(luaState_, arguments...);
+            return Caller<R, A...>::call(luaState_, std::forward<A>(arguments)...);
+        }
+
+        namespace exchanger {
+            inline LuaFunctionArgument Exchanger<LuaFunctionArgument>::get(lua_State *luaState, int index) {
+                // element at index stack position is not checked with lua_isfunction because it might not be a function and have a valid __call metamethod
+                return LuaFunctionArgument(luaState, index);
+            }
         }
     }
 }

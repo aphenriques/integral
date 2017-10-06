@@ -82,8 +82,9 @@ namespace integral {
             template<typename V>
             inline operator V() const;
 
+            // the arguments are pushed by value onto the lua stack
             template<typename R, typename ...A>
-            decltype(auto) call(const A &...arguments);
+            decltype(auto) call(A &&...arguments);
 
         private:
             K key_;
@@ -207,12 +208,12 @@ namespace integral {
 
         template<typename K, typename C>
         template<typename R, typename ...A>
-        decltype(auto) Reference<K, C>::call(const A &...arguments) {
+        decltype(auto) Reference<K, C>::call(A &&...arguments) {
             push();
             // stack: ?
             try {
                 // detail::Caller<R, A...>::call pops the first element of the stack
-                return detail::Caller<R, A...>::call(getLuaState(), arguments...);
+                return detail::Caller<R, A...>::call(getLuaState(), std::forward<A>(arguments)...);
             } catch (const ArgumentException &argumentException) {
                 throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] invalid type calling function reference " ) + getReferenceString() + ": " + argumentException.what());
             } catch (const CallerException &callerException) {

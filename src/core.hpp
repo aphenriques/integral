@@ -62,8 +62,9 @@ namespace integral {
     // The object of this class cannot be stored, it only points to a function in the stack.
     // It is meant to be used as an argument to a C++ function.
     // To call the function:
-    // - R LuaFunctionArgument::call<R>(const A ...&);
+    // - R LuaFunctionArgument::call<R>(A ...&&);
     // - 'R' is a non-reference value (it can be void).
+    // The arguments are pushed by value onto the lua stack
     using LuaFunctionArgument = detail::LuaFunctionArgument;
 
     // Proxy to std::function<T>
@@ -224,7 +225,7 @@ namespace integral {
     // Throws a CallerException exception on error.
     // It is not necessary to explicitly specify argument template types.
     template<typename R, typename ...A>
-    inline decltype(auto) call(lua_State *luaState, const A &...arguments);
+    inline decltype(auto) call(lua_State *luaState, A &&...arguments);
 
     //--
 
@@ -351,8 +352,8 @@ namespace integral {
     }
 
     template<typename R, typename ...A>
-    inline decltype(auto) call(lua_State *luaState, const A &...arguments) {
-        return detail::Caller<R, A...>::call(luaState, arguments...);
+    inline decltype(auto) call(lua_State *luaState, A &&...arguments) {
+        return detail::Caller<R, A...>::call(luaState, std::forward<A>(arguments)...);
     }
 }
 

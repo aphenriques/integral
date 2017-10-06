@@ -39,13 +39,13 @@ namespace integral {
         template<typename R, typename ...A>
         class Caller {
         public:
-            static decltype(auto) call(lua_State *luaState, const A &...arguments);
+            static decltype(auto) call(lua_State *luaState, A &&...arguments);
         };
 
         template<typename ...A>
         class Caller<void, A...> {
         public:
-            static void call(lua_State *luaState, const A &...arguments);
+            static void call(lua_State *luaState, A &&...arguments);
         };
 
         using CallerException = exception::TemplateClassException<Caller, std::runtime_error>;
@@ -53,9 +53,8 @@ namespace integral {
         //--
 
         template<typename R, typename ...A>
-        decltype(auto) Caller<R, A...>::call(lua_State *luaState, const A &...arguments) {
-            static_assert(generic::getLogicalOr((IsStringLiteral<A>::value == false && std::is_reference<A>::value == true)...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
-            exchanger::pushCopy(luaState, arguments...);
+        decltype(auto) Caller<R, A...>::call(lua_State *luaState, A &&...arguments) {
+            exchanger::pushCopy(luaState, std::forward<A>(arguments)...);
             if (lua_pcall(luaState, sizeof...(A), 1, 0) == lua_compatibility::keLuaOk) {
                 try {
                     decltype(auto) returnValue = exchanger::get<R>(luaState, -1);
@@ -74,9 +73,8 @@ namespace integral {
         }
 
         template<typename ...A>
-        void Caller<void, A...>::call(lua_State *luaState, const A &...arguments) {
-            static_assert(generic::getLogicalOr((IsStringLiteral<A>::value == false && std::is_reference<A>::value == true)...) == false, "Caller arguments can not be pushed as reference. They are pushed by value");
-            exchanger::pushCopy(luaState, arguments...);
+        void Caller<void, A...>::call(lua_State *luaState, A &&...arguments) {
+            exchanger::pushCopy(luaState, std::forward<A>(arguments)...);
             if (lua_pcall(luaState, sizeof...(A), 0, 0) != lua_compatibility::keLuaOk) {
                 std::string errorMessage(lua_tostring(luaState, -1));
                 lua_pop(luaState, 1);
