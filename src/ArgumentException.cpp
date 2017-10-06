@@ -33,8 +33,14 @@ namespace integral {
     // source: http://llvm.org/docs/CodingStandards.html#provide-a-virtual-method-anchor-for-classes-in-headers
     ArgumentException::~ArgumentException() {}
 
-    ArgumentException ArgumentException::createTypeErrorException(lua_State *luaState, int index, const std::string &userDataName) {
-        return ArgumentException(luaState, index, std::string(userDataName) + " expected, got " + std::string(luaL_typename(luaState, index)));
+    ArgumentException ArgumentException::createTypeErrorException(lua_State *luaState, int index, const std::string &expectedTypeName) {
+        const int gottenTypeCode = lua_type(luaState, index);
+        const char * const gottenTypeName = lua_typename(luaState, gottenTypeCode);
+        if (gottenTypeCode != LUA_TNUMBER || expectedTypeName != gottenTypeName) {
+            return ArgumentException(luaState, index, expectedTypeName + " expected, got " + gottenTypeName);
+        } else {
+            return ArgumentException(luaState, index, "integral number type expected, got floating-point number");
+        }
     }
 
     bool ArgumentException::findField(lua_State *luaState, int index, int level) {

@@ -41,7 +41,7 @@ namespace integral {
         // this is necessary (see definition)
         ~ArgumentException() override;
 
-        static ArgumentException createTypeErrorException(lua_State *luaState, int index, const std::string &userDataName);
+        static ArgumentException createTypeErrorException(lua_State *luaState, int index, const std::string &expectedTypeName);
 
         inline ArgumentException(lua_State *luaState, int index, const std::string &extraMessage);
         inline ArgumentException(lua_State *luaState, std::size_t maximumNumberOfArguments, std::size_t actualNumberOfArguments);
