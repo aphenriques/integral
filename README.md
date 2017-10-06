@@ -23,7 +23,7 @@
   * [Register table](#register-table)
   * [Use polymorphism](#use-polymorphism)
   * [Call function in Lua state](#call-function-in-lua-state)
-  * [Register lua function argument](#Registe-lua-function-argument)
+  * [Register lua function argument](#Register-lua-function-argument)
 * [integral reserved names in Lua](#integral-reserved-names-in-lua)
 * [Source](#source)
 * [Author](#author)
