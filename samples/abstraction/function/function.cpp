@@ -23,6 +23,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <lua.hpp>
 #include <integral.hpp>
@@ -74,6 +75,23 @@ int main(int argc, char* argv[]) {
         }
         try {
             luaState.doString("luaGetSum(1, 'two')");
+        } catch (const integral::StateException &stateException) {
+            std::cout << "expected exception: {" << stateException.what() << "}\n";
+        }
+        try {
+            luaState["throw"].setFunction([]{
+                throw std::runtime_error("throw exception");
+            });
+            luaState.doString("throw()");
+        } catch (const integral::StateException &stateException) {
+            std::cout << "expected exception: {" << stateException.what() << "}\n";
+        }
+        try {
+            luaState["luaThrow"].setLuaFunction([](lua_State *) {
+                throw std::runtime_error("luaThrow exception");
+                return 0;
+            });
+            luaState.doString("luaThrow()");
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
