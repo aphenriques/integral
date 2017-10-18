@@ -332,7 +332,7 @@ See [example](samples/abstraction/lua_function_argument/lua_function_argument.cp
 
 # Automatic conversion
 
-`integral` does the folowwing conversions
+`integral` does the folowwing conversions:
 
 | C++                                                              | Lua                                            |
 | ---------------------------------------------------------------- | ---------------------------------------------- |
