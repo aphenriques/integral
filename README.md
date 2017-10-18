@@ -23,7 +23,8 @@
   * [Register table](#register-table)
   * [Use polymorphism](#use-polymorphism)
   * [Call function in Lua state](#call-function-in-lua-state)
-  * [Register lua function argument](#Register-lua-function-argument)
+  * [Register lua function argument](#register-lua-function-argument)
+* [Automatic conversion](#automatic-conversion)
 * [integral reserved names in Lua](#integral-reserved-names-in-lua)
 * [Source](#source)
 * [Author](#author)
@@ -327,6 +328,22 @@ See [example](samples/abstraction/function_call/function_call.cpp).
 See [example](samples/abstraction/lua_function_argument/lua_function_argument.cpp).
 
 ## TODO
+
+
+# Automatic conversion
+
+`integral` does the folowwing conversions
+
+| C++                                                              | Lua                                            |
+| ---------------------------------------------------------------- | ---------------------------------------------- |
+| integral types (`std::is_integral`)                              | number [integer subtype in Lua version >= 5.3] |
+| floating point types (`std::is_floating_point`)                  | number [float subtype in Lua version >= 5.3]   |
+| `bool`                                                           | boolean                                        |
+| `std::string`, `const char *`                                    | string                                         |
+| `std::vector`, `std::array`, `std::unordered_map`, `std::tuple`  | table                                          |
+| from: `integral::LuaFunctionWrapper`, `integral::FunctionWrapper`| to: function                                   |
+| to: `integral::LuaFunctionArgument`                              | from: function                                 |
+| other class types                                                | userdata                                       |
 
 
 # integral reserved names in Lua
