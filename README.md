@@ -149,6 +149,8 @@ double luaGetSum(lua_State *luaState) {
     luaState.doString("printHello()"); // prints "hello!"
 ```
 
+See [example](samples/abstraction/function/function.cpp).
+
 ## Register function with default arguments
 
 ```cpp
@@ -159,7 +161,7 @@ double luaGetSum(lua_State *luaState) {
                       "printArguments(nil, 42)\n" // prints "default string, 42"
                       "printArguments()"); // prints "default string, -1"
 ```
-See [example](samples/abstraction/default_argument/default_adefault_argument.cpp).
+See [example](samples/abstraction/default_argument/default_argument.cpp).
 
 ## Register class
 
