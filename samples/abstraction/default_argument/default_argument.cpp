@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
                                  // .setConstructor<Object(const std::string &)>("new", integral::DefaultArgument<std::string, 0>("default name"))
                                  // compile error: invalid default argument type
                                  // .setConstructor<Object(const std::string &)>("new", integral::DefaultArgument<int, 1>(42))
-                                 // compile error: more then 1 default argument definitions for a single argument
+                                 // compile error: more then 1 default argument definition for a single argument
                                  // .setConstructor<Object(const std::string &)>("new", integral::DefaultArgument<std::string, 1>("default name"), integral::DefaultArgument<std::string, 1>("other name"))
                                  .setFunction("printMessage", &Object::printMessage, integral::DefaultArgument<Object, 1>("default object"), integral::DefaultArgument<std::string, 2>("default message"));
         luaState.doString("object1 = Object.new(\"defined name\")\n"
