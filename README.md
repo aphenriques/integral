@@ -24,6 +24,7 @@
   * [Use polymorphism](#use-polymorphism)
   * [Call function in Lua state](#call-function-in-lua-state)
   * [Register lua function argument](#register-lua-function-argument)
+  * [Table conversion](#table-conversion)
 * [Automatic conversion](#automatic-conversion)
 * [integral reserved names in Lua](#integral-reserved-names-in-lua)
 * [Source](#source)
@@ -328,6 +329,27 @@ See [example](samples/abstraction/function_call/function_call.cpp).
 ```
 
 See [example](samples/abstraction/lua_function_argument/lua_function_argument.cpp).
+
+## Table conversion
+
+Lua tables are automatically converted to/from std::vector, std::array, std::unordered_map and std::tuple.
+
+```cpp
+    // std::vector
+    luaState["intVector"] = std::vector<int>{1, 2, 3};
+    luaState.doString("print(intVector[1] .. ' ' .. intVector[2] .. ' ' ..  intVector[3])"); // prints "1 2 3"
+
+    // std::array
+    luaState.doString("arrayOfVectors = {{'one', 'two'}, {'three'}}");
+    std::array<std::vector<std::string>, 2> arrayOfVectors = luaState["arrayOfVectors"];
+    std::cout << arrayOfVectors.at(0).at(0) << ' ' << arrayOfVectors.at(0).at(1) << ' ' << arrayOfVectors.at(1).at(0) << '\n'; // prints "one two three"
+
+    // std::unordered_map and std::tuple
+    luaState["mapOfTuples"] = std::unordered_map<std::string, std::tuple<int, double>>{{"one", {-1, -1.1}}, {"two", {1, 4.2}}};
+    luaState.doString("print(mapOfTuples.one[1] .. ' ' .. mapOfTuples.one[2] .. ' ' .. mapOfTuples.two[1] .. ' ' .. mapOfTuples.two[2])"); // prints "-1 -1.1 1 4.2"
+```
+
+See [example](samples/abstraction/table_conversion/table_conversion.cpp)
 
 ## TODO
 

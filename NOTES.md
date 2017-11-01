@@ -1,12 +1,10 @@
 ## TODO
 * update README.md
   * usage
-    * std::vector, std::array, std::unordered_map and std::tuple to Lua table
     * LuaIgnoredArgument
     * module
     * ...
   * highlight comprehensive error messages 
-* check for more tests
 * intel compiler
 * coverity
 * c++17:
@@ -24,13 +22,14 @@
     * class metatable reserved names
   * http://lua-users.org/wiki/SandBoxes
 * frequent
+  * run test
+  * build all samples
   * check inlines
   * check includes (alphabetical order; necessity)
   * check memory leakage
   * check copyright notices
   * check compatibility with lua 5.1, 5.2 and 5.3 and luaJIT
   * update compatibility information on README.md and lua wiki
-  * test suite
 
 ## Rationales
 * removing occurrences of exchanger::Exchanger outside of exchanger.h is not possible because LuaFunctionArgument.h includes Caller.h which includes exchanger.h (cyclic dependency due to LuaFunctionArgument::call)
