@@ -369,7 +369,7 @@ TEST_CASE("integral test") {
         });
         REQUIRE_NOTHROW(stateView.doString("assert(Object.aux.get42() == 42)"));
     }
-    SECTION("integral::push and integral::get with Adaptors") {
+    SECTION("table conversion with integral::push and integral::get") {
         const std::vector<int> vector{1, 2, 3};
         integral::push<std::vector<int>>(luaState.get(), vector);
         REQUIRE((integral::get<std::vector<int>>(luaState.get(), -1) == vector));
@@ -407,7 +407,7 @@ TEST_CASE("integral test") {
         REQUIRE(stateView["y"]["b"][1].get<Object>() == Object("objectB1"));
         REQUIRE(stateView["y"]["b"][2].get<Object>() == Object("objectB2"));
     }
-    SECTION("lua table to Adaptors") {
+    SECTION("lua table to stl types") {
         REQUIRE_NOTHROW(stateView.doString("x = {11, 22, 33}"));
         lua_getglobal(luaState.get(), "x");
         REQUIRE((integral::get<std::array<int, 3>>(luaState.get(), -1) == std::array<int, 3>{11, 22, 33}));
