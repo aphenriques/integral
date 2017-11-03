@@ -41,23 +41,29 @@ int main(int argc, char* argv[]) {
     try {
         integral::State luaState;
         luaState.openLibs();
+
         luaState["getSum"].setFunction(getSum);
         luaState.doString("print('getSum(1, -.2) = ' .. getSum(1, -.2))");
+
         luaState["luaGetSum"].setLuaFunction(luaGetSum);
         luaState.doString("print('luaGetSum(1, -.2) = ' .. luaGetSum(1, -.2))");
+
         luaState["printHello"].setFunction([]{
             std::puts("hello!");
         });
         luaState.doString("printHello()");
+
         luaState["getQuoted"].setFunction([](const std::string &string) {
             return std::string("\"") + string + '"';
         });
         luaState.doString("print('getQuoted(\"quoted\") = ' .. getQuoted('quoted'))");
+
         luaState["luaGetQuoted"].setLuaFunction([](lua_State *lambdaLuaState) {
             integral::push<std::string>(lambdaLuaState, std::string("\"") + integral::get<const char *>(lambdaLuaState, 1) + '"');
             return 1;
         });
         luaState.doString("print('luaGetQuoted(\"quoted\") = ' .. luaGetQuoted('quoted'))");
+
         try {
             luaState.doString("getSum(1, 2, 3)");
         } catch (const integral::StateException &stateException) {
@@ -95,6 +101,7 @@ int main(int argc, char* argv[]) {
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
+
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[function] " << exception.what() << std::endl;

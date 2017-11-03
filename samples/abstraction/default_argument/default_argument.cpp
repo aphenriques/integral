@@ -39,6 +39,7 @@ private:
 int main(int argc, char* argv[]) {
     try {
         integral::State luaState;
+
         // invalid integral::DefaultArgument index and/or type generates compile time errors, both setting function or constructor
         luaState["Object"] = integral::ClassMetatable<Object>()
                                  .setConstructor<Object(const std::string &)>("new", integral::DefaultArgument<std::string, 1>("default name"))
@@ -57,21 +58,25 @@ int main(int argc, char* argv[]) {
                           "object2:printMessage()\n"
                           "Object.printMessage(nil, \"defined message\")\n"
                           "Object.printMessage()\n");
+
         luaState["printArguments"].setFunction([](const std::string &string, int integer) {
             std::cout << string << ", " << integer << '\n';
         }, integral::DefaultArgument<std::string, 1>("default string"), integral::DefaultArgument<int, 2>(-1));
         luaState.doString("printArguments(\"defined string\")\n"
                           "printArguments(nil, 42)\n"
                           "printArguments()");
+
         luaState["printStringAndNumber"].setFunction([](const std::string &string, double number) {
             std::cout << string << ", " << number << '\n';
         }, integral::DefaultArgument<std::string, 1>("undefined"));
         luaState.doString("printStringAndNumber(nil, 0.1)");
+
         try {
             luaState.doString("printStringAndNumber(nil, nil)");
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
+
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[default_argument] " << exception.what() << std::endl;

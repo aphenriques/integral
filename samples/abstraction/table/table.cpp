@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
     try {
         integral::State luaState;
         luaState.openLibs();
+
         luaState["group"] = integral::Table()
                                 .set("constant", integral::Table()
                                     .set("pi", 3.14))
@@ -54,11 +55,13 @@ int main(int argc, char* argv[]) {
         luaState.doString("print(group.constant.pi)\n"
                           "group.printHello()\n"
                           "print(group.Object.new('object'):getHello())");
+
         try {
             luaState["group"]["pi"].get<double>();
         } catch (const integral::ReferenceException &referenceException) {
             std::cout << "expected exception: {" << referenceException.what() << "}\n";
         }
+
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[table] " << exception.what() << std::endl;

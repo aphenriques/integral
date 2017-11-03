@@ -30,13 +30,16 @@ int main(int argc, char* argv[]) {
     try {
         integral::State luaState;
         luaState.openLibs();
+
         luaState.doString("a = 42");
         std::cout << "cpp: a = " << luaState["a"].get<int>() << '\n';
+
         luaState["b"].set("forty two");
         luaState.doString("print('lua: b = ' .. b)\n"
                           "c = .42");
         double c = luaState["c"];
         std::cout << "cpp: c = " << c << '\n';
+
         luaState["d"] = "quarenta e dois";
         luaState.doString("print('lua: d = ' .. d)\n"
                           "t = {'x', {pi = 3.14}}");
@@ -44,6 +47,7 @@ int main(int argc, char* argv[]) {
         std::cout << "cpp: t[2].pi = " << luaState["t"][2]["pi"].get<double>() << '\n';
         luaState["t"]["key"] = "value";
         luaState.doString("print('lua: t.key = ' .. t.key)");
+
         try {
             luaState["x"].get<std::string>();
         } catch (const integral::ReferenceException &referenceException) {
@@ -62,6 +66,7 @@ int main(int argc, char* argv[]) {
         } catch (const integral::ReferenceException &referenceException) {
             std::cout << "expected exception: {" << referenceException.what() << "}\n";
         }
+
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[reference] " << exception.what() << std::endl;

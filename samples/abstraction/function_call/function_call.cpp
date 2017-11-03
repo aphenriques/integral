@@ -41,14 +41,17 @@ int main(int argc, char* argv[]) {
     try {
         integral::State luaState;
         luaState.openLibs();
+
         luaState.doString("function getSum(x, y) return x + y end");
         int x = luaState["getSum"].call<int>(2, 3);
         std::cout << "x = " << x << '\n';
+
         luaState["printMessage"].setFunction([](const char *message) {
             std::puts(message);
         }, integral::DefaultArgument<const char *, 1>("default message!"));
         luaState["printMessage"].call<void>("hello!");
         luaState["printMessage"].call<void>();
+
         luaState["Object"] = integral::ClassMetatable<Object>()
                              .setConstructor<Object(const std::string &)>("new");
         luaState.doString("setmetatable(Object, {__call = function(self, ...) return self.new(...) end})");
@@ -60,6 +63,7 @@ int main(int argc, char* argv[]) {
             std::cout << i << ' ';
         }
         std::cout << "]\n";
+
         try {
             luaState["undefined"].call<void>();
         } catch (const integral::ReferenceException &referenceException) {
@@ -75,6 +79,7 @@ int main(int argc, char* argv[]) {
         } catch (const integral::ReferenceException &referenceException) {
             std::cout << "expected exception: {" << referenceException.what() << "}\n";
         }
+
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[function_call] " << exception.what() << std::endl;

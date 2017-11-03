@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
     try {
         integral::State luaState;
         luaState.openLibs();
+
         luaState["Object"] = integral::ClassMetatable<Object>()
                                  // invalid constructor register causes compilation error
                                  // .setConstructor<Object()>("invalid")
@@ -60,11 +61,13 @@ int main(int argc, char* argv[]) {
                           "print(object:getName())\n"
                           "object:setName('bar')\n"
                           "print(object:getHello())");
+
         // objects (except std::vector, std::array, std::unordered_map, std::tuple and std::string) are gotten by reference
         luaState["object"].get<Object>().name_ = "foobar";
         luaState.doString("print(object:getName())\n"
                           "object:appendName('foo')\n"
                           "print(object:getBye())");
+
         try {
             luaState.doString("object.getName()");
         } catch (const integral::StateException &stateException) {
@@ -80,6 +83,7 @@ int main(int argc, char* argv[]) {
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
+
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[class] " << exception.what() << std::endl;

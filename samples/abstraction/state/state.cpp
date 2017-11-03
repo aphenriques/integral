@@ -36,6 +36,7 @@ int main(int argc, char* argv[]) {
         luaState.openLibs();
         luaState.doFile("sample.lua");
         luaState.doString(luaTestCode);
+
         std::cout << "StateView:\n";
         std::unique_ptr<lua_State, decltype(&lua_close)> luaStateUniquePtr(luaL_newstate(), &lua_close);
         // lua_State pointer ownership is NOT transfered to luaStateView (it remains with luaStateUniquePtr)
@@ -43,6 +44,7 @@ int main(int argc, char* argv[]) {
         luaStateView.openLibs();
         luaStateView.doFile("sample.lua");
         luaStateView.doString(luaTestCode);
+
         try {
             integral::StateView(nullptr);
         } catch (const integral::StateException &stateException) {
@@ -58,6 +60,7 @@ int main(int argc, char* argv[]) {
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
+
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[state] " << exception.what() << std::endl;

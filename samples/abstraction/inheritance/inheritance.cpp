@@ -58,6 +58,7 @@ public:
 int main(int argc, char* argv[]) {
     try {
         integral::State luaState;
+
         luaState["BaseOfBase1"] = integral::ClassMetatable<BaseOfBase1>()
                                   .setConstructor<BaseOfBase1()>("new")
                                   .setFunction("baseOfBase1Method", &BaseOfBase1::baseOfBase1Method);
@@ -80,6 +81,7 @@ int main(int argc, char* argv[]) {
                           "derived:base2Method()\n" // prints "base2Method"
                           "derived:baseOfBase1Method()\n" // prints "baseOfBase1Method"
                           "derived:derivedMethod()"); // prints "derivedMethod"
+
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[inheritance] " << exception.what() << std::endl;

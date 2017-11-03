@@ -63,6 +63,7 @@ class Other {};
 int main(int argc, char* argv[]) {
     try {
         integral::State luaState;
+
         luaState["Derived"] = integral::ClassMetatable<Derived>().setConstructor<Derived()>("new");
         luaState["callBaseOfBase1"].setFunction(callBaseOfBase1);
         luaState["callBase1"].setFunction(callBase1);
@@ -73,12 +74,14 @@ int main(int argc, char* argv[]) {
                           "callBase1(derived)\n"
                           "callBase2(derived)\n"
                           "callDerived(derived)");
+
         luaState["Base1"] = integral::ClassMetatable<Base1>().setConstructor<Base1()>("new");
         try {
             luaState.doString("callDerived(Base1.new())");
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
+
         luaState["Base1"]["base1Method"].setFunction(&Base1::base1Method);
         luaState.doString("Base1.base1Method(derived)");
         try {
@@ -88,12 +91,14 @@ int main(int argc, char* argv[]) {
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
+
         luaState["Other"] = integral::ClassMetatable<Other>().setConstructor<Other()>("new");
         try {
             luaState.doString("callDerived(Other.new())");
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
+
         try {
             luaState["callDiamondBase"].setFunction([](const DiamondBase &){});
             // ambiguous polymorphism :"diamond problem"
@@ -101,6 +106,7 @@ int main(int argc, char* argv[]) {
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
+
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[polymorphism] " << exception.what() << std::endl;

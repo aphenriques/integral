@@ -40,16 +40,20 @@ int main(int argc, char* argv[]) {
     try {
         integral::State luaState;
         luaState.openLibs();
+
         integral::pushCopy(luaState.getLuaState(), 1);
         integral::get<double>(luaState.getLuaState(), -1);
+
         luaState["getResult"].setFunction([](int x, int y, const integral::LuaFunctionArgument &function) {
             return function.call<int>(x, y);
         });
         luaState.doString("print(getResult(-1, 1, math.min))");
+
         luaState["getTransformed"].setFunction(getTransformed);
         luaState.doString("t = getTransformed({1, 2}, function(element) return 2*element end)\n"
                           "print(t[1])\n"
                           "print(t[2])");
+
         try {
             luaState.doString("print(getResult(-1, 1, function() end))");
         } catch (const integral::StateException &stateException) {
@@ -60,6 +64,7 @@ int main(int argc, char* argv[]) {
         } catch (const integral::StateException &stateException) {
             std::cout << "expected exception: {" << stateException.what() << "}\n";
         }
+
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
         std::cerr << "[lua_function_argument] " << exception.what() << std::endl;
