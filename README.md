@@ -356,7 +356,7 @@ See [example](samples/abstraction/table_conversion/table_conversion.cpp)
 
 # Automatic conversion
 
-`integral` does the folowwing conversions:
+`integral` does the following conversions:
 
 | C++                                                              | Lua                                            |
 | ---------------------------------------------------------------- | ---------------------------------------------- |
