@@ -4,7 +4,7 @@ INSTALL_TOP:=/usr/local
 INSTALL_INC:=$(INSTALL_TOP)/include/$(PROJECT)
 INSTALL_LIB:=$(INSTALL_TOP)/lib
 
-.PHONY: all static shared samples install uninstall clean
+.PHONY: all static shared samples install_dependencies uninstall_dependencies install_static install_shared install uninstall clean
 
 # Any of the following make rules can be executed with the `-j` option (`make -j`) for parallel compilation 
 
