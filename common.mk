@@ -3,12 +3,13 @@ PROJECT:=integral
 PROJECT_LIB_DIR:=src
 PROJECT_BIN_DIR:=samples
 PROJECT_TEST_DIR:=test
+PROJECT_DEPENDENCIES_DIR:=dependencies
 PROJECT_STATIC_LIB:=lib$(PROJECT).a
 
 # some variables require PROJECT_ROOT_DIR definition. That's why = is used instead of := for their definition
 PROJECT_INCLUDE_DIRS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)
 PROJECT_LDLIBS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
-PROJECT_SYSTEM_INCLUDE_DIRS:=/usr/local/include
+PROJECT_SYSTEM_INCLUDE_DIRS:=/usr/local/include $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
 PROJECT_LIB_DIRS:=/usr/local/lib
 # '?=' sets the variable if it was not previously set
 OPTIMIZATION_FLAG?=-O0

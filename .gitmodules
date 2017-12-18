@@ -1,6 +1,6 @@
 [submodule "src/exception"]
-	path = src/exception
+	path = dependencies/exception
 	url = https://github.com/aphenriques/exception.git
 [submodule "Catch"]
-	path = Catch
+	path = dependencies/Catch
 	url = https://github.com/philsquared/Catch.git

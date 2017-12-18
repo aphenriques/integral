@@ -24,9 +24,8 @@ test: static
 	cd $(PROJECT_TEST_DIR) && $(MAKE) run
 
 install: all
-	mkdir -p $(INSTALL_INC) $(INSTALL_INC)/exception $(INSTALL_LIB)
+	mkdir -p $(INSTALL_INC) $(INSTALL_LIB)
 	install -p -m 0644 $(PROJECT_LIB_DIR)/*.hpp $(INSTALL_INC)
-	install -p -m 0644 $(PROJECT_LIB_DIR)/exception/*.hpp $(INSTALL_INC)/exception
 	install -p -m 0644 $(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB) $(PROJECT_LIB_DIR)/$(PROJECT_SHARED_LIB) $(INSTALL_LIB)
 
 uninstall:
