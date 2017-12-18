@@ -28,7 +28,7 @@
 #include <string>
 #include <type_traits>
 #include <lua.hpp>
-#include "exception/TemplateClassException.hpp"
+#include <exception/TemplateClassException.hpp>
 #include "ArgumentException.hpp"
 #include "exchanger.hpp"
 #include "generic.hpp"

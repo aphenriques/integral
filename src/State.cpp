@@ -24,7 +24,7 @@
 #include "State.hpp"
 #include <string>
 #include <lua.hpp>
-#include "exception/Exception.hpp"
+#include <exception/Exception.hpp>
 
 namespace integral {
     State::State() try : StateView(luaL_newstate()) {

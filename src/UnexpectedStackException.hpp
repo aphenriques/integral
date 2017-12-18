@@ -25,7 +25,7 @@
 #define integral_UnexpectedStackException_hpp
 
 #include <lua.hpp>
-#include "exception/Exception.hpp"
+#include <exception/Exception.hpp>
 
 namespace integral {
     class UnexpectedStackException : public exception::LogicException {

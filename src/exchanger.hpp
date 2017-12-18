@@ -36,7 +36,7 @@
 #include <utility>
 #include <vector>
 #include <lua.hpp>
-#include "exception/Exception.hpp"
+#include <exception/Exception.hpp>
 #include "ArgumentException.hpp"
 #include "basic.hpp"
 #include "generic.hpp"

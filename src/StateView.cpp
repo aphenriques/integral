@@ -25,7 +25,7 @@
 #include <exception>
 #include <string>
 #include <lua.hpp>
-#include "exception/Exception.hpp"
+#include <exception/Exception.hpp>
 #include "ArgumentException.hpp"
 #include "core.hpp"
 

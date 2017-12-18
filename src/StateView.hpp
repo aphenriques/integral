@@ -28,8 +28,8 @@
 #include <type_traits>
 #include <utility>
 #include <lua.hpp>
-#include "exception/ClassException.hpp"
-#include "exception/Exception.hpp"
+#include <exception/ClassException.hpp>
+#include <exception/Exception.hpp>
 #include "core.hpp"
 #include "GlobalReference.hpp"
 #include "Reference.hpp"
