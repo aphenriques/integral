@@ -23,6 +23,22 @@ samples: static
 test: static
 	cd $(PROJECT_TEST_DIR) && $(MAKE) run
 
+install_dependencies:
+	cd $(PROJECT_DEPENDENCIES_DIR)/exception && $(MAKE) install
+
+uninstall_dependencies:
+	cd $(PROJECT_DEPENDENCIES_DIR)/exception && $(MAKE) uninstall
+
+install_static: static
+	mkdir -p $(INSTALL_INC) $(INSTALL_LIB)
+	install -p -m 0644 $(PROJECT_LIB_DIR)/*.hpp $(INSTALL_INC)
+	install -p -m 0644 $(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
+
+install_shared: shared
+	mkdir -p $(INSTALL_INC) $(INSTALL_LIB)
+	install -p -m 0644 $(PROJECT_LIB_DIR)/*.hpp $(INSTALL_INC)
+	install -p -m 0644 $(PROJECT_LIB_DIR)/$(PROJECT_SHARED_LIB) $(INSTALL_LIB)
+
 install: all
 	mkdir -p $(INSTALL_INC) $(INSTALL_LIB)
 	install -p -m 0644 $(PROJECT_LIB_DIR)/*.hpp $(INSTALL_INC)
