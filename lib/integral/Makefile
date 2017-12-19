@@ -1,4 +1,4 @@
-PROJECT_ROOT_DIR:=..
+PROJECT_ROOT_DIR:=../..
 
 include $(PROJECT_ROOT_DIR)/common.mk
 

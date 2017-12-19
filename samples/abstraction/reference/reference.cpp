@@ -24,7 +24,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <lua.hpp>
-#include <integral.hpp>
+#include <integral/integral.hpp>
 
 int main(int argc, char* argv[]) {
     try {

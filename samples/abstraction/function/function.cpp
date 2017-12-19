@@ -26,7 +26,7 @@
 #include <exception>
 #include <iostream>
 #include <lua.hpp>
-#include <integral.hpp>
+#include <integral/integral.hpp>
 
 double getSum(double x, double y) {
     return x + y;

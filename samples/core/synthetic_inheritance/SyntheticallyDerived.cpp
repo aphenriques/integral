@@ -2,7 +2,7 @@
 //  SyntheticallyDerived.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2015, 2016  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016, 2017  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -25,7 +25,7 @@
 #include <iostream>
 #include <string>
 #include <lua.hpp>
-#include <integral.hpp>
+#include <integral/integral.hpp>
 
 class BaseOfSyntheticBase {
 public:

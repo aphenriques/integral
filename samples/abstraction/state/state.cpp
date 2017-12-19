@@ -25,7 +25,7 @@
 #include <iostream>
 #include <memory>
 #include <lua.hpp>
-#include <integral.hpp>
+#include <integral/integral.hpp>
 
 static const char * const luaTestCode = "print('hello from string sample code')";
 

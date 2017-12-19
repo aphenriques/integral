@@ -24,8 +24,8 @@
 #include <iostream>
 #include <string>
 #include <lua.hpp>
-#include <integral.hpp>
-#include <utility.hpp>
+#include <integral/integral.hpp>
+#include <integral/utility.hpp>
 
 class Object {
 public:

@@ -32,7 +32,7 @@
 #include <unordered_map>
 #include <vector>
 #include <catch.hpp>
-#include <integral.hpp>
+#include <integral/integral.hpp>
 #include <exception/Exception.hpp>
 
 template<typename T>

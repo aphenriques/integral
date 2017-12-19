@@ -30,7 +30,7 @@
 #include <unordered_map>
 #include <vector>
 #include <lua.hpp>
-#include <integral.hpp>
+#include <integral/integral.hpp>
 
 class Object {
 public:

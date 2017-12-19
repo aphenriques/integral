@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <iostream>
 #include <lua.hpp>
-#include <integral.hpp>
+#include <integral/integral.hpp>
 
 std::vector<int> getTransformed(std::vector<int> vectorCopy, const integral::LuaFunctionArgument &luaFunctionArgument) {
     // vectorCopy is a copy of the lua vector

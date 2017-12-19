@@ -27,7 +27,7 @@
 #include <string>
 #include <vector>
 #include <lua.hpp>
-#include <integral.hpp>
+#include <integral/integral.hpp>
 
 namespace {
     std::vector<int> getTransformed(std::vector<int> vectorCopy, const integral::LuaFunctionArgument &luaFunctionArgument) {
