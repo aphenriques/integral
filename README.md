@@ -74,14 +74,14 @@ Alternatively, build and install the library with:
 
 # Usage
 
-Include the library header `integral.h` (`namespace integral`) and link to `libintegral.a` or `libintegral.so` if the library was built separately.
+Include the library header `integral/integral.hpp` (`namespace integral`) and link to `libintegral.a` or `libintegral.so` if the library was built separately.
 
 Check [samples/abstraction](samples/abstraction) directory for examples.
 
 ## Create Lua state
 
 ```cpp
-#include "integral.h"
+#include <integral/integral.hpp>
 
 int main(int argc, char * argv[]) {
     integral::State luaState;
