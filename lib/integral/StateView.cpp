@@ -38,6 +38,16 @@ namespace integral {
         }
     }
 
+    StateView::StateView(StateView &&stateView) : StateView(stateView.luaState_) {
+        stateView.luaState_ = nullptr;
+    }
+
+    StateView & StateView::operator=(StateView &&stateView) {
+        luaState_ = stateView.luaState_;
+        stateView.luaState_ = nullptr;
+        return *this;
+    }
+
     void StateView::doString(const std::string &string) const {
         if (luaL_dostring(getLuaState(), string.c_str()) != LUA_OK) {
             std::string errorMessage;

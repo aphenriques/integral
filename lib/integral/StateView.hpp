@@ -41,11 +41,15 @@ namespace integral {
         // non-copyable
         StateView(const StateView &) = delete;
         StateView & operator=(const StateView &) = delete;
-        
+
         // throws StateException if luaState is nullptr
         // defines StateView::atPanic as lua panic function
         StateView(lua_State *luaState);
-        
+
+        // moveable
+        StateView(StateView &&stateView);
+        StateView & operator=(StateView &&stateView);
+
         inline lua_State * getLuaState() const;
         inline void openLibs() const;
 
@@ -73,7 +77,7 @@ namespace integral {
         static const char * const kErrorStackMiscellanous;
         static const char * const kErrorStackUnspecified;
 
-        lua_State * const luaState_;
+        lua_State * luaState_;
 
         // throws StateException
         [[noreturn]] static int atPanic(lua_State *luaState);

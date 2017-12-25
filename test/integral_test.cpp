@@ -154,6 +154,15 @@ TEST_CASE("integral test") {
         REQUIRE_NOTHROW(stateView.doFile("doFileTest.lua"));
         REQUIRE_THROWS_AS(stateView.doFile("nonexistentFile"), integral::StateException);
     }
+    SECTION("integral::StateView::StateView(integral::StateView &&) and integral::StateView::operator=(integral::StateView &&)") {
+        REQUIRE_NOTHROW(stateView.doString("x = 42"));
+        integral::StateView testStateView(integral::StateView(luaState.get()));
+        REQUIRE_NOTHROW(testStateView.doString("assert(x == 42)"));
+        integral::State testState;
+        testState.openLibs();
+        testStateView = integral::StateView(testState.getLuaState());
+        REQUIRE_NOTHROW(testStateView.doString("assert(x == nil)"));
+    }
     SECTION("integral::detail::Reference::emplace and integral::detail::Reference::get") {
         stateView["x"].emplace<Object>("object");
         REQUIRE(stateView["x"].get<Object>() == Object("object"));
