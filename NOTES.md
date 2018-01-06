@@ -1,4 +1,5 @@
 ## TODO
+* remove underscores from filenames and namespaces (make everything camel case)
 * update README.md
   * usage
     * LuaIgnoredArgument
