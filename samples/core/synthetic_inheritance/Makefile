@@ -12,7 +12,7 @@ LDLIBS:=$(PROJECT_LDLIBS)
 
 # '-isystem <dir>' supress warnings from included headers in <dir>. These headers are also excluded from dependency generation
 CXXFLAGS:=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS)) -fPIC
-LDFLAGS:=$(addprefix -L, $(LIB_DIRS)) $(PROJECT_LDFLAGS) -shared
+LDFLAGS:=$(PROJECT_LDFLAGS) $(addprefix -L, $(LIB_DIRS)) -shared
 
 ################################################################################
 
