@@ -13,15 +13,16 @@ PROJECT_LDLIBS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
 PROJECT_SYSTEM_INCLUDE_DIRS=/usr/local/include $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
 PROJECT_LIB_DIRS:=/usr/local/lib
 # '?=' sets the variable if it was not previously set
-OPTIMIZATION_FLAG?=-O0
+OPTIMIZATION_FLAGS?=-O0
 # TODO with c++17: remove -Wno-unused-parameter and -Wno-unused-but-set-parameter and use [[maybe_unused]] attribute
-PROJECT_CXXFLAGS:=-std=c++14 $(OPTIMIZATION_FLAG) -Werror -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wno-missing-braces -Wno-unused-parameter -pedantic
+PROJECT_CXXFLAGS:=-std=c++14 $(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS) -Werror -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wno-missing-braces -Wno-unused-parameter -pedantic
+PROJECT_LDFLAGS:=$(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS)
 
 ifeq ($(shell uname -s),Darwin)
 # -Wweak-vtables is a clang feature
 PROJECT_CXXFLAGS+=-Wweak-vtables
 SHARED_LIB_EXTENSION:=dylib
-PROJECT_LDFLAGS:=-undefined dynamic_lookup
+PROJECT_LDFLAGS+=-undefined dynamic_lookup
 else
 ifeq ($(shell uname -m),armv7l)
 # TODO remove this on later GCC versions
@@ -30,7 +31,6 @@ PROJECT_CXXFLAGS+=-Wno-psabi
 endif
 PROJECT_CXXFLAGS+=-Wno-unused-but-set-parameter
 SHARED_LIB_EXTENSION:=so
-PROJECT_LDFLAGS:=
 endif
 
 PROJECT_SHARED_LIB:=lib$(PROJECT).$(SHARED_LIB_EXTENSION)

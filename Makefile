@@ -30,7 +30,7 @@ uninstall_exception:
 	cd $(PROJECT_DEPENDENCIES_DIR)/exception && $(MAKE) uninstall
 
 static_release: clean
-	cd $(PROJECT_LIB_DIR) && $(MAKE) static OPTIMIZATION_FLAG=-O3 FPIC_FLAG=
+	cd $(PROJECT_LIB_DIR) && $(MAKE) static OPTIMIZATION_FLAGS=-O3 FPIC_FLAG=
 
 install_static:
 	mkdir -p $(INSTALL_INC) $(INSTALL_LIB)
