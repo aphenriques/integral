@@ -24,6 +24,8 @@ PROJECT_CXXFLAGS+=-Wweak-vtables
 SHARED_LIB_EXTENSION:=dylib
 PROJECT_LDFLAGS+=-undefined dynamic_lookup
 else
+# avoids error: "ar: <file>.o: plugin needed to handle lto object"
+AR:=gcc-ar
 ifeq ($(shell uname -m),armv7l)
 # TODO remove this on later GCC versions
 # suppress note regarding abi change on raspberry pi
