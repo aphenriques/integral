@@ -52,7 +52,7 @@
 
 # Requirements
 
-* C++14 compiler; and
+* C++17 compiler; and
 * Lua 5.1 or later.
 
 
@@ -350,8 +350,6 @@ Lua tables are automatically converted to/from std::vector, std::array, std::uno
 ```
 
 See [example](samples/abstraction/table_conversion/table_conversion.cpp)
-
-## TODO
 
 
 # Automatic conversion
