@@ -59,10 +59,7 @@ int main(int argc, char* argv[]) {
             std::cout << "expected exception: {" << referenceException.what() << "}\n";
         }
         try {
-            // FIXME in c++ 17: [[maybe_unused]] int x = luaState["x"];
-            int x = luaState["x"];
-            // FIXME with c++17 remove the following line, which silences unused variable warning
-            (void)x;
+            [[maybe_unused]] int x = luaState["x"];
         } catch (const integral::ReferenceException &referenceException) {
             std::cout << "expected exception: {" << referenceException.what() << "}\n";
         }
