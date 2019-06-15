@@ -64,13 +64,13 @@ namespace integral {
         inline detail::Reference<typename std::decay<K>::type, detail::GlobalReference> operator[](K &&key) const;
 
         template<typename F>
-        inline void defineTypeFunction(F &&typeFunction);
+        inline void defineTypeFunction(F &&typeFunction) const;
 
         template<typename D, typename B>
-        inline void defineInheritance();
+        inline void defineInheritance() const;
 
         template<typename F>
-        inline void defineInheritance(F &&typeFunction);
+        inline void defineInheritance(F &&typeFunction) const;
 
     private:
         static const char * const kErrorStackArgument;
@@ -102,17 +102,17 @@ namespace integral {
     }
 
     template<typename F>
-    inline void StateView::defineTypeFunction(F &&typeFunction) {
+    inline void StateView::defineTypeFunction(F &&typeFunction) const {
         integral::defineTypeFunction(getLuaState(), std::forward<F>(typeFunction));
     }
 
     template<typename D, typename B>
-    inline void StateView::defineInheritance() {
+    inline void StateView::defineInheritance() const {
         integral::defineInheritance<D, B>(getLuaState());
     }
 
     template<typename F>
-    inline void StateView::defineInheritance(F &&typeFunction) {
+    inline void StateView::defineInheritance(F &&typeFunction) const {
         integral::defineInheritance(getLuaState(), std::forward<F>(typeFunction));
     }
 }
