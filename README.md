@@ -58,8 +58,8 @@
 
 # Tested environments
 
-* gcc (Debian 4.9.2-10) 4.9.2 on Linux; and
-* Apple LLVM version 7.0.2 (clang-700.1.81) on MacOS.
+* gcc version 8.3.0 (Ubuntu 8.3.0-6ubuntu1) on Ubuntu Linux; and
+* Apple LLVM version 10.0.0 (clang-1000.11.45.5) on MacOS.
 
 
 # Build
@@ -407,7 +407,7 @@ and cloned with:
 
 # License
 
-Copyright (C) 2013, 2014, 2015, 2016, 2017  André Pereira Henriques.
+Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019  André Pereira Henriques.
 
 integral is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
