@@ -2,7 +2,7 @@
 //  UnexpectedStackException.hpp
 //  integral
 //
-//  Copyright (C) 2016  André Pereira Henriques
+//  Copyright (C) 2016, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -26,16 +26,38 @@
 
 #include <lua.hpp>
 #include <exception/Exception.hpp>
+#include "utility.hpp"
 
 namespace integral {
     class UnexpectedStackException : public exception::LogicException {
     public:
-        UnexpectedStackException(lua_State *luaState, const std::string &fileName, int lineNumber, const std::string &functionName, const std::string &errorMessage);
-
-        UnexpectedStackException(lua_State *luaState, const std::string &fileName, int lineNumber, const std::string &functionName);
+        template<typename ...A>
+        UnexpectedStackException(lua_State *luaState, const char *fileName, int lineNumber, const char *functionName, const A &...messageParts);
 
         ~UnexpectedStackException();
     };
+
+    //--
+
+    template<typename ...A>
+    UnexpectedStackException::UnexpectedStackException(
+        lua_State *luaState,
+        const char *fileName,
+        int lineNumber,
+        const char *functionName,
+        const A &...messageParts
+    ) :
+        ::exception::LogicException(
+            fileName,
+            lineNumber,
+            functionName,
+            "[integral] invalid Lua stack: ",
+            messageParts...,
+            ". lua stack: { ",
+            utility::getStackString(luaState),
+            " }"
+        )
+    {}
 }
 
 #endif /* integral_UnexpectedStackException_hpp */

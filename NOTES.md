@@ -1,4 +1,5 @@
 ## TODO
+* optimize exception throw ([[using gnu : noinline, cold]])
 * remove underscores from filenames and namespaces (make everything camel case)
 * update README.md
   * usage

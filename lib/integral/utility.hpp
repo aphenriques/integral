@@ -2,7 +2,7 @@
 //  utility.hpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -31,12 +31,11 @@
 #include <tuple>
 #include <utility>
 #include <lua.hpp>
-#include "core.hpp"
 
 namespace integral {
     namespace utility {
         std::string getStackString(lua_State *luaState);
-        
+
         int printStack(lua_State *luaState);
 
         // stack argument: table
@@ -45,32 +44,10 @@ namespace integral {
         // stack argument: table | ?
         void setWithHelp(lua_State *luaState, const char *field, const char *fieldDescription);
 
-        // stack argument: table
-        template<typename T, typename ...E, std::size_t ...I>
-        void setLuaFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&luafunction, DefaultArgument<E, I> &&...defaultArguments);
-
-        // stack argument: table
-        template<typename T, typename ...E, std::size_t ...I>
-        void setFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&function, DefaultArgument<E, I> &&...defaultArguments);
-
         void pushNameAndValueList(lua_State *luaState, std::initializer_list<std::tuple<const char *, int>> nameAndValueList);
 
         // stack argument: table
         void setNameAndValueListWithHelp(lua_State *luaState, const char *field, std::initializer_list<std::tuple<const char *, int>> nameAndValueList);
-
-        //--
-
-        template<typename T, typename ...E, std::size_t ...I>
-        void setFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&function, DefaultArgument<E, I> &&...defaultArguments) {
-            integral::setFunction(luaState, functionName, std::forward<T>(function), std::move(defaultArguments)...);
-            setHelp(luaState, functionName, functionDescription);
-        }
-
-        template<typename T, typename ...E, std::size_t ...I>
-        void setLuaFunctionWithHelp(lua_State *luaState, const char *functionName, const char *functionDescription, T &&function, DefaultArgument<E, I> &&...defaultArguments) {
-            integral::setLuaFunction(luaState, functionName, std::forward<T>(function), std::move(defaultArguments)...);
-            setHelp(luaState, functionName, functionDescription);
-        }
     }
 }
 
