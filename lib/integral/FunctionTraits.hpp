@@ -2,7 +2,7 @@
 //  FunctionTraits.hpp
 //  integral
 //
-//  Copyright (C) 2016  André Pereira Henriques
+//  Copyright (C) 2016, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -52,6 +52,24 @@ namespace integral {
 
         template<typename R, typename T, typename ...A>
         class FunctionTraits<R(T::*)(A...) const volatile> : public FunctionSignature<R(const volatile T &, A...)> {};
+
+        template<typename R, typename ...A>
+        class FunctionTraits<R(*)(A...) noexcept> : public FunctionSignature<R(A...)> {};
+
+        template<typename R, typename ...A>
+        class FunctionTraits<R(&)(A...) noexcept> : public FunctionSignature<R(A...)> {};
+
+        template<typename R, typename T, typename ...A>
+        class FunctionTraits<R(T::*)(A...) noexcept> : public FunctionSignature<R(T &, A...)> {};
+
+        template<typename R, typename T, typename ...A>
+        class FunctionTraits<R(T::*)(A...) const noexcept> : public FunctionSignature<R(const T &, A...)> {};
+
+        template<typename R, typename T, typename ...A>
+        class FunctionTraits<R(T::*)(A...) volatile noexcept> : public FunctionSignature<R(volatile T &, A...)> {};
+
+        template<typename R, typename T, typename ...A>
+        class FunctionTraits<R(T::*)(A...) const volatile noexcept> : public FunctionSignature<R(const volatile T &, A...)> {};
     }
 }
 
