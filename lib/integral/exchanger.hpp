@@ -2,7 +2,7 @@
 //  exchanger.hpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2015, 2016, 2017  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -582,7 +582,7 @@ namespace integral {
                     lua_pop(luaState, 2);
                     return returnElement;
                 } else {
-                    throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, std::string("missing table at index ") + std::to_string(index));
+                    throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "missing table at index ", index);
                 }
             }
 
@@ -655,7 +655,7 @@ namespace integral {
                 const int stackIndexDelta = lua_gettop(luaState) - stackTopIndex;
                 // when "typename T" = LuaFunctionWrapper: nUpValues elements are removed from stack. That is why the stack is not checked for no element added or for elements removed
                 if (stackIndexDelta > 1) {
-                    throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, std::to_string(stackIndexDelta) + " elements pushed onto the stack (expected 1 element) with exchanger::push (type: '" + typeid(T).name() + "')");
+                    throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, stackIndexDelta, " elements pushed onto the stack (expected 1 element) with exchanger::push (type: '", typeid(T).name(), "')");
                 }
             }
 
