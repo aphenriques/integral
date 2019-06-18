@@ -1,5 +1,6 @@
 ## TODO
-* optimize exception throw ([[using gnu : noinline, cold]])
+* type_manager: hashmap -> array
+  * hashmap probably adds more overhead than linear search
 * remove underscores from filenames and namespaces (make everything camel case)
 * update README.md
   * usage
