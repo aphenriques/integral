@@ -28,6 +28,7 @@
 #include <exception/Exception.hpp>
 #include "ArgumentException.hpp"
 #include "core.hpp"
+#include "lua_compatibility.hpp"
 
 namespace integral {
     StateView::StateView(lua_State *luaState) : luaState_(luaState) {
@@ -49,7 +50,7 @@ namespace integral {
     }
 
     void StateView::doString(const std::string &string) const {
-        if (luaL_dostring(getLuaState(), string.c_str()) != LUA_OK) {
+        if (luaL_dostring(getLuaState(), string.c_str()) != detail::lua_compatibility::keLuaOk) {
             std::string errorMessage;
             try {
                 errorMessage = integral::get<std::string>(getLuaState(), -1);
@@ -69,7 +70,7 @@ namespace integral {
     }
 
     void StateView::doFile(const std::string &fileName) const {
-        if (luaL_dofile(getLuaState(), fileName.c_str()) != LUA_OK) {
+        if (luaL_dofile(getLuaState(), fileName.c_str()) != detail::lua_compatibility::keLuaOk) {
             std::string errorMessage;
             try {
                 errorMessage = integral::get<std::string>(getLuaState(), -1);

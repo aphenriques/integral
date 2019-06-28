@@ -26,6 +26,7 @@
 
 #include <string>
 #include <lua.hpp>
+#include "lua_compatibility.hpp"
 
 namespace integral {
     namespace detail {
@@ -56,7 +57,7 @@ namespace integral {
         }
 
         inline void GlobalReference::push() const {
-            lua_pushglobaltable(getLuaState());
+            detail::lua_compatibility::pushglobaltable(getLuaState());
         }
 
         inline std::string GlobalReference::getReferenceString() const {
