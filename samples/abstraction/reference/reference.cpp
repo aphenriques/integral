@@ -22,6 +22,7 @@
 //
 
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <lua.hpp>
 #include <integral/integral.hpp>
@@ -31,8 +32,10 @@ int main(int argc, char* argv[]) {
         integral::State luaState;
         luaState.openLibs();
 
+        std::cout << "cpp: a == nil -> " << std::boolalpha << luaState["a"].isNil() << '\n';
         luaState.doString("a = 42");
         std::cout << "cpp: a = " << luaState["a"].get<int>() << '\n';
+        std::cout << "cpp: a == nil -> " << luaState["a"].isNil() << '\n';
 
         luaState["b"].set("forty two");
         luaState.doString("print('lua: b = ' .. b)\n"

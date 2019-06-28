@@ -188,6 +188,14 @@ TEST_CASE("integral test") {
         stateView["x"].set(Object("object"));
         REQUIRE(stateView["x"].get<Object>() == Object("object"));
     }
+    SECTION("integral::detail::Reference::isNil") {
+        REQUIRE(stateView["x"].isNil() == true);
+        stateView["x"] = integral::Table();
+        REQUIRE(stateView["x"].isNil() == false);
+        REQUIRE(stateView["x"][1].isNil() == true);
+        stateView["x"][1] = 42;
+        REQUIRE(stateView["x"][1].isNil() == false);
+    }
     SECTION("integral::detail::Reference::get incompatible types") {
         stateView["x"].set("string");
         REQUIRE_THROWS_AS(stateView["x"].get<int>(), integral::ReferenceException);

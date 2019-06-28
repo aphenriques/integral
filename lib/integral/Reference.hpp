@@ -53,6 +53,7 @@ namespace integral {
 
             inline lua_State * getLuaState() const;
             void push() const;
+            bool isNil() const;
             std::string getReferenceString() const;
 
             template<typename L>
@@ -119,6 +120,21 @@ namespace integral {
                 // stack: ?
                 lua_pop(getLuaState(), 1);
                 throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] reference ") + chainedReference_.getReferenceString() + " is not a table");
+            }
+        }
+
+        template<typename K, typename C>
+        bool Reference<K, C>::isNil() const {
+            push();
+            // stack: ?
+            if (lua_isnil(getLuaState(), -1) == 0) {
+                // stack: ?
+                lua_pop(getLuaState(), 1);
+                return false;
+            } else {
+                // stack: nil
+                lua_pop(getLuaState(), 1);
+                return true;
             }
         }
 
