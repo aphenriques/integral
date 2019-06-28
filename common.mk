@@ -11,7 +11,7 @@ PROJECT_STATIC_LIB:=lib$(PROJECT).a
 PROJECT_INCLUDE_DIRS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_ROOT_DIR)
 PROJECT_LDLIBS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
 PROJECT_SYSTEM_INCLUDE_DIRS=/usr/local/include $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
-# for LuaJit:
+# for LuaJIT:
 #PROJECT_SYSTEM_INCLUDE_DIRS=/usr/local/include/luajit-2.0 $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
 PROJECT_LIB_DIRS:=/usr/local/lib
 # '?=' sets the variable if it was not previously set
@@ -26,7 +26,7 @@ ifeq ($(shell uname -s),Darwin)
 PROJECT_CXXFLAGS+=-Wweak-vtables
 SHARED_LIB_EXTENSION:=dylib
 PROJECT_LDFLAGS+=-undefined dynamic_lookup
-# for LuaJit (http://luajit.org/install.html):
+# for LuaJIT (http://luajit.org/install.html):
 #PROJECT_EXECUTABLE_LDFLAGS+=-pagezero_size 10000 -image_base 100000000
 else
 # avoids error using -flto compiler flag: "ar: <file>.o: plugin needed to handle lto object"
@@ -42,5 +42,5 @@ endif
 
 PROJECT_SHARED_LIB:=lib$(PROJECT).$(SHARED_LIB_EXTENSION)
 LIB_LUA_FLAG:=-llua
-# for LuaJit:
+# for LuaJIT:
 #LIB_LUA_FLAG:=-lluajit-5.1
