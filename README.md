@@ -26,6 +26,7 @@
   * [Register lua function argument](#register-lua-function-argument)
   * [Table conversion](#table-conversion)
   * [Register synthetic inheritance](#register-synthetic-inheritance)
+  * [Register std::reference_wrapper and std::shared_ptr](#register-stdreference_wrapper-and-stdshared_ptr)
 * [Automatic conversion](#automatic-conversion)
 * [integral reserved names in Lua](#integral-reserved-names-in-lua)
 * [Source](#source)
@@ -409,6 +410,48 @@ Synthetic inheritance can be viewed as a transformation from composition in c++ 
 ```
 
 See [example](samples/abstraction/synthetic_inheritance/synthetic_inheritance.cpp)
+
+## Register std::reference_wrapper and std::shared_ptr
+
+Synthetic inheritance may be used to treat `std::reference_wrapper<T>` and `std::shared_ptr<T>` objects as if they were T.
+
+```cpp
+    class Object {
+    public:
+        void printMessage() const {
+            std::cout << "Object " << this << " message!" << std::endl;
+        }
+    };
+
+    //...
+
+        luaState["Object"] = integral::ClassMetatable<Object>()
+            .setFunction("printMessage", &Object::printMessage);
+
+        luaState.defineReferenceWrapperInheritance<Object>();
+        // alternative expression:
+        //luaState.defineInheritance[](std::reference_wrapper<Object> *referenceWrapperPointer) -> Object * {
+        //    return &referenceWrapperPointer->get();
+        //});
+
+        Object object;
+        object.printMessage(); //prints 'Object 0x7ffee8b68560 message!'
+        luaState["objectReference"] = std::ref(object);
+        luaState.doString("objectReference:printMessage()"); //prints the same previous address 'Object 0x7ffee8b68560 message!'
+
+        luaState.defineSharedPtrInheritance<Object>();
+        // alternative expression:
+        //luaState.defineInheritance[](std::shared_ptr<Object> *sharedPtrPointer) -> Object * {
+        //    return sharedPtrPointer->get();
+        //});
+
+        std::shared_ptr<Object> objectSharedPtr = std::make_shared<Object>();
+        objectSharedPtr->printMessage(); //prints 'Object 0x7fce594077a8 message!'
+        luaState["objectSharedPtr"] = objectSharedPtr;
+        luaState.doString("objectSharedPtr:printMessage()"); //prints the same previous address 'Object 0x7fce594077a8 message!'
+```
+
+See [example](samples/abstraction/reference_wrapper_and_shared_ptr/reference_wrapper_and_shared_ptr.cpp)
 
 
 # Automatic conversion
