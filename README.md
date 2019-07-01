@@ -25,7 +25,7 @@
   * [Call function in Lua state](#call-function-in-lua-state)
   * [Register lua function argument](#register-lua-function-argument)
   * [Table conversion](#table-conversion)
-  * [Register synthetic inheritance](#synthetic-inheritance)
+  * [Register synthetic inheritance](#register-synthetic-inheritance)
 * [Automatic conversion](#automatic-conversion)
 * [integral reserved names in Lua](#integral-reserved-names-in-lua)
 * [Source](#source)
