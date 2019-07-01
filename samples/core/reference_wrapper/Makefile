@@ -2,7 +2,7 @@ PROJECT_ROOT_DIR:=../../..
 
 include $(PROJECT_ROOT_DIR)/common.mk
 
-TARGET:=reference
+TARGET:=reference_wrapper
 SRC_DIRS:=. $(wildcard */.)
 FILTER_OUT:=
 INCLUDE_DIRS:=$(PROJECT_INCLUDE_DIRS)

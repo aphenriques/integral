@@ -1,8 +1,8 @@
 //
-//  reference.cpp
+//  reference_wrapper.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2015, 2016, 2017  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016, 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -68,7 +68,7 @@ int main(int argc, char * argv[]) {
         lua_close(luaState);
         return 0;
     } catch (const std::exception &exception) {
-        std::cout << "[reference sample] " << exception.what() << std::endl;
+        std::cout << "[reference_wrapper sample] " << exception.what() << std::endl;
     } catch (...) {
         std::cout << "unknown exception thrown" << std::endl;
     }
