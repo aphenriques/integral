@@ -66,6 +66,8 @@ int main(int argc, char* argv[]) {
                             .setConstructor<Base1()>("new")
                             .setFunction("base1Method", &Base1::base1Method)
                             .setBaseClass<BaseOfBase1>();
+        // alternative expression to .setBaseClass<BaseOfBase1>():
+        // luaState.defineInheritance<Base1, BaseOfBase1>()
         luaState["Base2"] = integral::ClassMetatable<Base2>()
                             .setConstructor<Base2()>("new")
                             // .setBaseClass<BaseOfBase1>() // generates compile error

@@ -25,6 +25,7 @@
   * [Call function in Lua state](#call-function-in-lua-state)
   * [Register lua function argument](#register-lua-function-argument)
   * [Table conversion](#table-conversion)
+  * [Register synthetic inheritance](#synthetic-inheritance)
 * [Automatic conversion](#automatic-conversion)
 * [integral reserved names in Lua](#integral-reserved-names-in-lua)
 * [Source](#source)
@@ -350,6 +351,64 @@ Lua tables are automatically converted to/from std::vector, std::array, std::uno
 ```
 
 See [example](samples/abstraction/table_conversion/table_conversion.cpp)
+
+## Register synthetic inheritance
+
+Synthetic inheritance can be viewed as a transformation from composition in c++ to inheritance in lua.
+
+```cpp
+    class BaseOfSyntheticBase {
+    public:
+        void baseOfSyntheticBaseMethod() const {
+            std::cout << "baseOfSyntheticBaseMethod" << std::endl;
+        }
+    };
+
+    class SyntheticBase : public BaseOfSyntheticBase {
+    public:
+        void syntheticBaseMethod() const {
+            std::cout << "syntheticBaseMethod" << std::endl;
+        }
+    };
+
+    class SyntheticallyDerived {
+    public:
+        SyntheticBase syntheticBase_;
+
+        void syntheticallyDerivedMethod() const {
+            std::cout << "syntheticallyDerivedMethod" << std::endl;
+        }
+
+        SyntheticBase * getSyntheticBasePointer() {
+            return &syntheticBase_;
+        }
+    };
+
+    //...
+
+        integral::State luaState;
+
+        luaState["BaseOfSyntheticBase"] = integral::ClassMetatable<BaseOfSyntheticBase>()
+                                          .setFunction("baseOfSyntheticBaseMethod", &BaseOfSyntheticBase::baseOfSyntheticBaseMethod);
+
+        luaState["SyntheticBase"] = integral::ClassMetatable<SyntheticBase>()
+                                    .setFunction("syntheticBaseMethod", &SyntheticBase::syntheticBaseMethod)
+                                    .setBaseClass<BaseOfSyntheticBase>();
+
+        luaState["SyntheticallyDerived"] = integral::ClassMetatable<SyntheticallyDerived>()
+                                           .setConstructor<SyntheticallyDerived()>("new")
+                                           .setFunction("syntheticallyDerivedMethod", &SyntheticallyDerived::syntheticallyDerivedMethod)
+                                           .setBaseClass([](SyntheticallyDerived *syntheticallyDerived) -> SyntheticBase * {
+                                               return &syntheticallyDerived->syntheticBase_;
+                                           });
+
+        luaState.doString("syntheticallyDerived = SyntheticallyDerived.new()\n"
+                          "syntheticallyDerived:baseOfSyntheticBaseMethod()\n" // prints "baseOfSyntheticBaseMethod"
+                          "syntheticallyDerived:syntheticBaseMethod()\n" // prints "syntheticBaseMethod"
+                          "syntheticallyDerived:syntheticallyDerivedMethod()"); // prints "syntheticallyDerivedMethod"
+```
+
+See [example](samples/abstraction/synthetic_inheritance/synthetic_inheritance.cpp)
 
 
 # Automatic conversion
