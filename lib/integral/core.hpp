@@ -25,6 +25,8 @@
 #define integral_core_hpp
 
 #include <cstddef>
+#include <functional>
+#include <memory>
 #include <string>
 #include <utility>
 #include <lua.hpp>
@@ -139,6 +141,20 @@ namespace integral {
     // Caution! Registering a typeFunction of the form &T::getU, if getU was inherited from class 'X' the actual registered conversion will be X->U (U *(X *)). That is why is safer to register typeFunction as std::function<U *(T *)>
     template<typename F>
     inline void defineInheritance(lua_State *luaState, F &&typeFunction);
+
+    // Sets 'synthetic' inheritance between derived class std::reference_wrapper<T> to base class T
+    // std::reference_wrapper<T> class metatable need not be on the stack
+    // Methods are inherited with this function.
+    // the __index metamethod of std::reference_wrapper class metatable is overriden (preserving its previous behaviour)
+    template<typename T>
+    inline void defineReferenceWrapperInheritance(lua_State *luaState);
+
+    // Sets 'synthetic' inheritance between derived class std::shared_ptr<T> to base class T
+    // std::shared_ptr<T> class metatable need not be on the stack
+    // Methods are inherited with this function.
+    // the __index metamethod of std::shared_ptr class metatable is overriden (preserving its previous behaviour)
+    template<typename T>
+    inline void defineSharedPtrInheritance(lua_State *luaState);
 
     // Pushes a type "T" value (string or number) or object onto the stack.
     // References and pointers (except const char *) can not be pushed.
@@ -262,6 +278,26 @@ namespace integral {
     template<typename F>
     inline void defineInheritance(lua_State *luaState, F &&typeFunction) {
         detail::type_manager::defineInheritance(luaState, std::forward<F>(typeFunction));
+    }
+
+    template<typename T>
+    inline void defineReferenceWrapperInheritance(lua_State *luaState) {
+        detail::type_manager::defineInheritance(
+            luaState,
+            [](std::reference_wrapper<T> *referenceWrapperPointer) -> T * {
+                return &referenceWrapperPointer->get();
+            }
+        );
+    }
+
+    template<typename T>
+    inline void defineSharedPtrInheritance(lua_State *luaState) {
+        detail::type_manager::defineInheritance(
+            luaState,
+            [](std::shared_ptr<T> *sharedPtr) -> T * {
+                return sharedPtr->get();
+            }
+        );
     }
 
     template<typename T, typename ...A>

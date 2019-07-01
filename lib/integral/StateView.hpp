@@ -72,6 +72,12 @@ namespace integral {
         template<typename F>
         inline void defineInheritance(F &&typeFunction) const;
 
+        template<typename T>
+        inline void defineReferenceWrapperInheritance() const;
+
+        template<typename T>
+        inline void defineSharedPtrInheritance() const;
+
     private:
         static const char * const kErrorStackArgument;
         static const char * const kErrorStackMiscellanous;
@@ -114,6 +120,16 @@ namespace integral {
     template<typename F>
     inline void StateView::defineInheritance(F &&typeFunction) const {
         integral::defineInheritance(getLuaState(), std::forward<F>(typeFunction));
+    }
+
+    template<typename T>
+    inline void StateView::defineReferenceWrapperInheritance() const {
+        integral::defineReferenceWrapperInheritance<T>(getLuaState());
+    }
+
+    template<typename T>
+    inline void StateView::defineSharedPtrInheritance() const {
+        integral::defineSharedPtrInheritance<T>(getLuaState());
     }
 }
 

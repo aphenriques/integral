@@ -597,9 +597,7 @@ TEST_CASE("integral test") {
         Object cppObject("cppObject");
         stateView["cppObject"].set(std::ref(cppObject));
         REQUIRE_THROWS_AS(stateView.doString("assert(cppObject:getId() == 'cppObject')"), integral::StateException);
-        stateView.defineInheritance([](std::reference_wrapper<Object> *objectReferenceWrapper) -> Object * {
-            return &objectReferenceWrapper->get();
-        });
+        stateView.defineReferenceWrapperInheritance<Object>();
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getId() == 'cppObject')"));
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getBaseOfBaseString() == 'BaseOfBase')"));
         REQUIRE_NOTHROW(&stateView["cppObject"].get<Object>() == &cppObject);
@@ -624,9 +622,7 @@ TEST_CASE("integral test") {
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getBaseOfInnerConstant() == 21)"));
         stateView["sharedObject"].set(std::make_shared<Object>("shared"));
         REQUIRE_THROWS_AS(stateView.doString("assert(sharedObject:getId() == 'shared')"), integral::StateException);
-        stateView.defineInheritance([](std::shared_ptr<Object> *objectSharedPointer) -> Object * {
-            return objectSharedPointer->get();
-        });
+        stateView.defineSharedPtrInheritance<Object>();
         REQUIRE_NOTHROW(stateView.doString("assert(sharedObject:getId() == 'shared')"));
     }
     SECTION("ClassMetatable inheritance") {
