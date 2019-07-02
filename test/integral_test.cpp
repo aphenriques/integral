@@ -2,7 +2,7 @@
 //  integral_test.cpp
 //  integral
 //
-//  Copyright (C) 2017  André Pereira Henriques
+//  Copyright (C) 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -581,7 +581,11 @@ TEST_CASE("integral test") {
                                     .setConstructor<BaseObject()>("new")
                                     .setFunction("getBaseConstant", &BaseObject::getBaseConstant)
                                     );
+        REQUIRE(stateView.checkInheritance<BaseObject, BaseOfBaseObject>() == false);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
         stateView.defineInheritance<BaseObject, BaseOfBaseObject>();
+        REQUIRE(stateView.checkInheritance<BaseObject, BaseOfBaseObject>() == true);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
         REQUIRE_NOTHROW(stateView.doString("base = BaseObject.new()"));
         REQUIRE_NOTHROW(stateView.doString("assert(base:getBaseConstant() == 42)"));
         REQUIRE_NOTHROW(stateView.doString("assert(base:getBaseOfBaseString() == 'BaseOfBase')"));
@@ -590,6 +594,10 @@ TEST_CASE("integral test") {
                                 .setFunction("getId", std::function<std::string(const Object &)>(&Object::getId))
                                 );
         stateView.defineInheritance<Object, BaseObject>();
+        REQUIRE(stateView.checkInheritance<Object, BaseObject>() == true);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
+        REQUIRE(stateView.checkInheritance<Object, BaseOfBaseObject>() == true);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
         REQUIRE_NOTHROW(stateView.doString("object = Object.new(21)"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getId() == '21')"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getBaseConstant() == 42)"));
@@ -598,6 +606,12 @@ TEST_CASE("integral test") {
         stateView["cppObject"].set(std::ref(cppObject));
         REQUIRE_THROWS_AS(stateView.doString("assert(cppObject:getId() == 'cppObject')"), integral::StateException);
         stateView.defineReferenceWrapperInheritance<Object>();
+        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, Object>() == true);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
+        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, BaseObject>() == true);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
+        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, BaseOfBaseObject>() == true);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getId() == 'cppObject')"));
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getBaseOfBaseString() == 'BaseOfBase')"));
         REQUIRE_NOTHROW(&stateView["cppObject"].get<Object>() == &cppObject);
@@ -608,16 +622,34 @@ TEST_CASE("integral test") {
                                      .setFunction("getGreeting", &InnerObject::getGreeting)
                                      );
         stateView.defineInheritance<InnerObject, BaseOfInnerObject>();
+        REQUIRE(stateView.checkInheritance<InnerObject, BaseOfInnerObject>() == true);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
         REQUIRE_THROWS_AS(stateView.doString("assert(InnerObject.getGreeting(cppObject) == 'hello')"), integral::StateException);
         stateView.defineTypeFunction([](Object *object) -> InnerObject * {
             return &object->innerObject_;
         });
+        REQUIRE(stateView.checkInheritance<Object, InnerObject>() == false);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
+        REQUIRE(stateView.checkInheritance<Object, BaseOfInnerObject>() == false);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
+        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, InnerObject>() == false);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
+        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, BaseOfInnerObject>() == false);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
         REQUIRE_NOTHROW(stateView.doString("assert(InnerObject.getGreeting(cppObject) == 'hello')"));
         REQUIRE_THROWS_AS(stateView.doString("cppObject:getGreeting()"), integral::StateException);
         REQUIRE_THROWS_AS(stateView.doString("cppObject:getBaseOfInnerConstant()"), integral::StateException);
         stateView.defineInheritance([](Object *object) -> InnerObject * {
             return &object->innerObject_;
         });
+        REQUIRE(stateView.checkInheritance<Object, InnerObject>() == true);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
+        REQUIRE(stateView.checkInheritance<Object, BaseOfInnerObject>() == true);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
+        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, InnerObject>() == true);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
+        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, BaseOfInnerObject>() == true);
+        REQUIRE(lua_gettop(luaState.get()) == 0);
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getGreeting() == 'hello')"));
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getBaseOfInnerConstant() == 21)"));
         stateView["sharedObject"].set(std::make_shared<Object>("shared"));

@@ -2,7 +2,7 @@
 //  StateView.hpp
 //  integral
 //
-//  Copyright (C) 2016, 2017  André Pereira Henriques
+//  Copyright (C) 2016, 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -72,6 +72,9 @@ namespace integral {
         template<typename F>
         inline void defineInheritance(F &&typeFunction) const;
 
+        template<typename D, typename B>
+        inline bool checkInheritance() const;
+
         template<typename T>
         inline void defineReferenceWrapperInheritance() const;
 
@@ -120,6 +123,11 @@ namespace integral {
     template<typename F>
     inline void StateView::defineInheritance(F &&typeFunction) const {
         integral::defineInheritance(getLuaState(), std::forward<F>(typeFunction));
+    }
+
+    template<typename D, typename B>
+    inline bool StateView::checkInheritance() const {
+        return integral::checkInheritance<D, B>(getLuaState());
     }
 
     template<typename T>

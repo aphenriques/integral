@@ -2,7 +2,7 @@
 //  type_manager.hpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2016, 2017  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016, 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -132,15 +132,18 @@ namespace integral {
             template<typename F>
             void defineTypeFunction(lua_State *luaState, F &&typeFunction);
 
-            // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic' inheritance)
+            // protects from recursion in a very unlikely scenario that could happen with 'synthetic' inheritance:
+            // derived -inheritance-> base -synthetic-inheritance-> derived
             // index: metatable to be tagged
             bool checkInheritanceSearchTag(lua_State *luaState, int index);
 
-            // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic' inheritance)
+            // protects from recursion in a very unlikely scenario that could happen with 'synthetic' inheritance:
+            // derived -inheritance-> base -synthetic-inheritance-> derived
             // index: metatable to be tagged
             void tagInheritanceSearch(lua_State *luaState, int index);
 
-            // protects from recursion (it is a very unlikely scenario that could happen with 'synthetic' inheritance)
+            // protects from recursion in a very unlikely scenario that could happen with 'synthetic' inheritance:
+            // derived -inheritance-> base -synthetic-inheritance-> derived
             // index: metatable to be tagged
             void untagInheritanceSearch(lua_State *luaState, int index);
 
@@ -177,7 +180,7 @@ namespace integral {
             // stack argument: metatable
             template<typename F>
             void setInheritance(lua_State *luaState, F &&typeFunction);
-                
+
             template<typename D, typename B>
             void defineInheritance(lua_State *luaState);
 
@@ -194,6 +197,17 @@ namespace integral {
 
             // stack argument: metatable
             void setInheritanceIndexMetatable(lua_State *luaState);
+
+            // stack argument: metatable
+            bool checkInheritance(lua_State *luaState, const std::type_index &typeIndex);
+
+            // stack argument: metatable
+            template<typename T>
+            inline bool checkInheritance(lua_State *luaState);
+
+            // no stack argument
+            template<typename D, typename B>
+            bool checkInheritance(lua_State *luaState);
 
             //--
 
@@ -594,6 +608,25 @@ namespace integral {
                 // stack: metatable | inheritanceTable | baseTable
                 lua_pop(luaState, 2);
                 // stack: metatable
+            }
+
+            template<typename T>
+            inline bool checkInheritance(lua_State *luaState) {
+                // stack: metatable
+                return checkInheritance(luaState, std::type_index(typeid(T)));
+                // stack: metatable
+            }
+
+            template<typename D, typename B>
+            bool checkInheritance(lua_State *luaState) {
+                // stack:
+                pushClassMetatable<D>(luaState);
+                // stack: metatable
+                bool hasInheritance = checkInheritance<B>(luaState);
+                // stack: metatable
+                lua_pop(luaState, 1);
+                // stack:
+                return hasInheritance;
             }
         }
     }

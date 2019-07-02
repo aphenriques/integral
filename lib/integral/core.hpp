@@ -2,7 +2,7 @@
 //  core.hpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2015, 2016, 2017  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -142,6 +142,11 @@ namespace integral {
     template<typename F>
     inline void defineInheritance(lua_State *luaState, F &&typeFunction);
 
+    // Checks if typename D is derived from typename B in lua (through integral::defineInheritance, including synthetic inheritance)
+    // neither typename D nor typename B need to be on the stack
+    template<typename D, typename B>
+    inline bool checkInheritance(lua_State *luaState);
+
     // Sets 'synthetic' inheritance between derived class std::reference_wrapper<T> to base class T
     // std::reference_wrapper<T> class metatable need not be on the stack
     // Methods are inherited with this function.
@@ -278,6 +283,11 @@ namespace integral {
     template<typename F>
     inline void defineInheritance(lua_State *luaState, F &&typeFunction) {
         detail::type_manager::defineInheritance(luaState, std::forward<F>(typeFunction));
+    }
+
+    template<typename D, typename B>
+    inline bool checkInheritance(lua_State *luaState) {
+        return detail::type_manager::checkInheritance<D, B>(luaState);
     }
 
     template<typename T>
