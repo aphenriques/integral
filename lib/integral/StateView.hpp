@@ -63,6 +63,9 @@ namespace integral {
         template<typename K>
         inline detail::Reference<typename std::decay<K>::type, detail::GlobalReference> operator[](K &&key) const;
 
+        template<typename D, typename B>
+        inline void defineTypeFunction() const;
+
         template<typename F>
         inline void defineTypeFunction(F &&typeFunction) const;
 
@@ -71,9 +74,6 @@ namespace integral {
 
         template<typename F>
         inline void defineInheritance(F &&typeFunction) const;
-
-        template<typename D, typename B>
-        inline bool checkInheritance() const;
 
         template<typename T>
         inline void defineReferenceWrapperInheritance() const;
@@ -110,6 +110,11 @@ namespace integral {
         return detail::Reference<typename std::decay<K>::type, detail::GlobalReference>(std::forward<K>(key), detail::GlobalReference(luaState_));
     }
 
+    template<typename D, typename B>
+    inline void StateView::defineTypeFunction() const {
+        integral::defineTypeFunction<D, B>(getLuaState());
+    }
+
     template<typename F>
     inline void StateView::defineTypeFunction(F &&typeFunction) const {
         integral::defineTypeFunction(getLuaState(), std::forward<F>(typeFunction));
@@ -123,11 +128,6 @@ namespace integral {
     template<typename F>
     inline void StateView::defineInheritance(F &&typeFunction) const {
         integral::defineInheritance(getLuaState(), std::forward<F>(typeFunction));
-    }
-
-    template<typename D, typename B>
-    inline bool StateView::checkInheritance() const {
-        return integral::checkInheritance<D, B>(getLuaState());
     }
 
     template<typename T>

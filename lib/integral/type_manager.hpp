@@ -116,6 +116,7 @@ namespace integral {
             void setTypeFunctionHashTable(lua_State *luaState, std::size_t baseTypeHash);
 
             // stack argument: metatable
+            // this function should be used only for the creation of typeFunctionHashTable
             void pushTypeFunctionHashTable(lua_State *luaState, const std::type_index &baseTypeIndex);
 
             // stack argument: metatable
@@ -187,6 +188,10 @@ namespace integral {
             template<typename F>
             void defineInheritance(lua_State *luaState, F &&typeFunction);
 
+            // stack argument: inheritanceTable
+            // returns true if inheritanceTable has typeIndex
+            bool checkInheritanceTable(lua_State *luaState, const std::type_index &typeIndex);
+
             // stack argument: metatable
             template<typename B>
             void setInheritanceTable(lua_State *luaState);
@@ -197,17 +202,6 @@ namespace integral {
 
             // stack argument: metatable
             void setInheritanceIndexMetatable(lua_State *luaState);
-
-            // stack argument: metatable
-            bool checkInheritance(lua_State *luaState, const std::type_index &typeIndex);
-
-            // stack argument: metatable
-            template<typename T>
-            inline bool checkInheritance(lua_State *luaState);
-
-            // no stack argument
-            template<typename D, typename B>
-            bool checkInheritance(lua_State *luaState);
 
             //--
 
@@ -588,6 +582,10 @@ namespace integral {
                     lua_pushvalue(luaState, -2);
                     // stack: metatable | inheritanceTable* | gkInheritanceKey | inheritanceTable*
                     lua_rawset(luaState, -4);
+                    // stack: metatable | inheritanceTable
+                } else if (checkInheritanceTable(luaState, std::type_index(typeid(B))) == true) {
+                    // stack: metatable | inheritanceTable
+                    throw exception::LogicException(__FILE__, __LINE__, __func__, "trying to set existing inheritance");
                 }
                 // stack: metatable | inheritanceTable
                 lua_createtable(luaState, 2, 0);
@@ -608,25 +606,6 @@ namespace integral {
                 // stack: metatable | inheritanceTable | baseTable
                 lua_pop(luaState, 2);
                 // stack: metatable
-            }
-
-            template<typename T>
-            inline bool checkInheritance(lua_State *luaState) {
-                // stack: metatable
-                return checkInheritance(luaState, std::type_index(typeid(T)));
-                // stack: metatable
-            }
-
-            template<typename D, typename B>
-            bool checkInheritance(lua_State *luaState) {
-                // stack:
-                pushClassMetatable<D>(luaState);
-                // stack: metatable
-                bool hasInheritance = checkInheritance<B>(luaState);
-                // stack: metatable
-                lua_pop(luaState, 1);
-                // stack:
-                return hasInheritance;
             }
         }
     }

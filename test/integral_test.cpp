@@ -581,9 +581,7 @@ TEST_CASE("integral test") {
                                     .setConstructor<BaseObject()>("new")
                                     .setFunction("getBaseConstant", &BaseObject::getBaseConstant)
                                     );
-        REQUIRE(stateView.checkInheritance<BaseObject, BaseOfBaseObject>() == false);
         stateView.defineInheritance<BaseObject, BaseOfBaseObject>();
-        REQUIRE(stateView.checkInheritance<BaseObject, BaseOfBaseObject>() == true);
         REQUIRE_NOTHROW(stateView.doString("base = BaseObject.new()"));
         REQUIRE_NOTHROW(stateView.doString("assert(base:getBaseConstant() == 42)"));
         REQUIRE_NOTHROW(stateView.doString("assert(base:getBaseOfBaseString() == 'BaseOfBase')"));
@@ -592,8 +590,6 @@ TEST_CASE("integral test") {
                                 .setFunction("getId", std::function<std::string(const Object &)>(&Object::getId))
                                 );
         stateView.defineInheritance<Object, BaseObject>();
-        REQUIRE(stateView.checkInheritance<Object, BaseObject>() == true);
-        REQUIRE(stateView.checkInheritance<Object, BaseOfBaseObject>() == true);
         REQUIRE_NOTHROW(stateView.doString("object = Object.new(21)"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getId() == '21')"));
         REQUIRE_NOTHROW(stateView.doString("assert(object:getBaseConstant() == 42)"));
@@ -602,9 +598,6 @@ TEST_CASE("integral test") {
         stateView["cppObject"].set(std::ref(cppObject));
         REQUIRE_THROWS_AS(stateView.doString("assert(cppObject:getId() == 'cppObject')"), integral::StateException);
         stateView.defineReferenceWrapperInheritance<Object>();
-        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, Object>() == true);
-        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, BaseObject>() == true);
-        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, BaseOfBaseObject>() == true);
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getId() == 'cppObject')"));
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getBaseOfBaseString() == 'BaseOfBase')"));
         REQUIRE_NOTHROW(&stateView["cppObject"].get<Object>() == &cppObject);
@@ -615,25 +608,12 @@ TEST_CASE("integral test") {
                                      .setFunction("getGreeting", &InnerObject::getGreeting)
                                      );
         stateView.defineInheritance<InnerObject, BaseOfInnerObject>();
-        REQUIRE(stateView.checkInheritance<InnerObject, BaseOfInnerObject>() == true);
         REQUIRE_THROWS_AS(stateView.doString("assert(InnerObject.getGreeting(cppObject) == 'hello')"), integral::StateException);
-        stateView.defineTypeFunction([](Object *object) -> InnerObject * {
-            return &object->innerObject_;
-        });
-        REQUIRE(stateView.checkInheritance<Object, InnerObject>() == false);
-        REQUIRE(stateView.checkInheritance<Object, BaseOfInnerObject>() == false);
-        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, InnerObject>() == false);
-        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, BaseOfInnerObject>() == false);
-        REQUIRE_NOTHROW(stateView.doString("assert(InnerObject.getGreeting(cppObject) == 'hello')"));
         REQUIRE_THROWS_AS(stateView.doString("cppObject:getGreeting()"), integral::StateException);
         REQUIRE_THROWS_AS(stateView.doString("cppObject:getBaseOfInnerConstant()"), integral::StateException);
         stateView.defineInheritance([](Object *object) -> InnerObject * {
             return &object->innerObject_;
         });
-        REQUIRE(stateView.checkInheritance<Object, InnerObject>() == true);
-        REQUIRE(stateView.checkInheritance<Object, BaseOfInnerObject>() == true);
-        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, InnerObject>() == true);
-        REQUIRE(stateView.checkInheritance<std::reference_wrapper<Object>, BaseOfInnerObject>() == true);
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getGreeting() == 'hello')"));
         REQUIRE_NOTHROW(stateView.doString("assert(cppObject:getBaseOfInnerConstant() == 21)"));
         stateView["sharedObject"].set(std::make_shared<Object>("shared"));
@@ -694,6 +674,21 @@ TEST_CASE("integral test") {
         stateView["ObjectSharedPointer"].set(integral::ClassMetatable<std::shared_ptr<Object>>()
                                              .setBaseClass(std::function<Object *(std::shared_ptr<Object> *)>(&std::shared_ptr<Object>::get)));
         REQUIRE_NOTHROW(stateView.doString("assert(sharedObject:getId() == 'shared')"));
+    }
+    SECTION("Duplicate inheritance and type function definition exception test") {
+        stateView["BaseOfBaseObject"].set(integral::ClassMetatable<BaseOfBaseObject>());
+        stateView["BaseObject"].set(integral::ClassMetatable<BaseObject>());
+        stateView.defineInheritance<BaseObject, BaseOfBaseObject>();
+        stateView["Object"].set(integral::ClassMetatable<Object>());
+        stateView.defineInheritance<Object, BaseObject>();
+        // not a redefinition:
+        REQUIRE_NOTHROW(stateView.defineInheritance<Object, BaseOfBaseObject>());
+        REQUIRE_THROWS_AS((stateView.defineInheritance<Object, BaseObject>()), exception::LogicException);
+        // this exception leaves the stack with trash
+        lua_settop(stateView.getLuaState(), 0);
+        REQUIRE_THROWS_AS((stateView.defineTypeFunction<Object, BaseObject>()), exception::LogicException);
+        // this exception leaves the stack with trash
+        lua_settop(stateView.getLuaState(), 0);
     }
     REQUIRE(lua_gettop(luaState.get()) == 0);
 }

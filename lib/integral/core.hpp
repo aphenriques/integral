@@ -107,16 +107,20 @@ namespace integral {
     inline void pushClassMetatable(lua_State *luaState);
 
     // Sets a type conversion function of derived class D to base class B.
+    // If the (direct) type function between the classes already exists in lua, an exception is throw and the stack is left with trash
     // typename D class metatable need not be on the stack
     // The conversion to base types still happens even if this function is not used
     // This function is mostly useful when using 'synthetic' conversion:
     // type -synthetic-conversion-> D -conversion-> B
+    // It might be used to make conversion to base os base classes faster too:
+    // type -> B instead of type -> D -> B
     // Methods are not inherited with this function.
     // If D -> B is not a possible conversion, there will be a compilation error.
     template<typename D, typename B>
     inline void defineTypeFunction(lua_State *luaState);
 
     // "functionType" function/functor type in the form of: U *(T *)
+    // If the (direct) type function between the classes already exists in lua, an exception is throw and the stack is left with trash
     // Sets a type conversion function of class T to class U.
     // typename T class metatable need not be on the stack
     // Class U can be any class, not necessarily a base class
@@ -125,6 +129,7 @@ namespace integral {
     inline void defineTypeFunction(lua_State *luaState, F &&typeFunction);
 
     // Sets inheritance between derived class D to base class B.
+    // If the (direct) inheritance or type function between the classes already exists in lua, an exception is throw and the stack is left with trash
     // typename D class metatable need not be on the stack
     // Methods are inherited with this function.
     // If D -> B is not a possible conversion, there will be a compilation error.
@@ -133,6 +138,7 @@ namespace integral {
     inline void defineInheritance(lua_State *luaState);
 
     // "functionType" function/functor type in the form of: U *(T *)
+    // If the (direct) inheritance or type function between the classes already exists in lua, an exception is throw and the stack is left with trash
     // Sets 'synthetic' inheritance between class T to class U using typeFunction conversion function.
     // typename T class metatable need not be on the stack
     // Methods are inherited with this function.
@@ -142,11 +148,7 @@ namespace integral {
     template<typename F>
     inline void defineInheritance(lua_State *luaState, F &&typeFunction);
 
-    // Checks if typename D is derived from typename B in lua (through integral::defineInheritance, including synthetic inheritance)
-    // neither typename D nor typename B need to be on the stack
-    template<typename D, typename B>
-    inline bool checkInheritance(lua_State *luaState);
-
+    // FIXME: remove this function
     // Sets 'synthetic' inheritance between derived class std::reference_wrapper<T> to base class T
     // std::reference_wrapper<T> class metatable need not be on the stack
     // Methods are inherited with this function.
@@ -154,6 +156,7 @@ namespace integral {
     template<typename T>
     inline void defineReferenceWrapperInheritance(lua_State *luaState);
 
+    // FIXME: remove this function
     // Sets 'synthetic' inheritance between derived class std::shared_ptr<T> to base class T
     // std::shared_ptr<T> class metatable need not be on the stack
     // Methods are inherited with this function.
@@ -283,11 +286,6 @@ namespace integral {
     template<typename F>
     inline void defineInheritance(lua_State *luaState, F &&typeFunction) {
         detail::type_manager::defineInheritance(luaState, std::forward<F>(typeFunction));
-    }
-
-    template<typename D, typename B>
-    inline bool checkInheritance(lua_State *luaState) {
-        return detail::type_manager::checkInheritance<D, B>(luaState);
     }
 
     template<typename T>

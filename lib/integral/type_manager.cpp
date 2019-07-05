@@ -153,6 +153,7 @@ namespace integral {
                 // stack: metatable | typeHashBucket
             }
 
+            // this function should be used only for the creation of typeFunctionHashTable
             void pushTypeFunctionHashTable(lua_State *luaState, const std::type_index &baseTypeIndex) {
                 // stack: metatable
                 const std::size_t baseTypeHash = baseTypeIndex.hash_code();
@@ -167,15 +168,37 @@ namespace integral {
                     // stack: metatable | typeFunctionTable | typeHash
                     lua_rawget(luaState, -2);
                     // stack: metatable | typeFunctionTable | typeHashBucket (?)
-                    if (lua_istable(luaState, -1) != 0) {
-                        // stack: metatable | typeFunctionTable | typeHashBucket
-                        lua_remove(luaState, -2);
-                        // stack: metatable | typeHashBucket
-                    } else {
+                    if (lua_istable(luaState, -1) == 0) {
                         // stack:  metatable | typeFunctionTable | nil (?)
                         lua_pop(luaState, 1);
                         // stack:  metatable | typeFunctionTable
                         setTypeFunctionHashTable(luaState, baseTypeHash);
+                        // stack: metatable | typeHashBucket
+                    } else {
+                        // stack: metatable | typeFunctionTable | typeHashBucket
+                        lua_remove(luaState, -2);
+                        // stack: metatable | typeHashBucket
+                        lua_pushnil(luaState);
+                        // stack: metatable | typeHashBucket | nil
+                        for (int hasNext = lua_next(luaState, -2); hasNext != 0; lua_pop(luaState, 1), hasNext = lua_next(luaState, -2)) {
+                            // stack: metatable | typeHashBucket | type_index_udata (?) | function (?)
+                            std::type_index *storedTypeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -2, gkTypeIndexMetatableName));
+                            // stack: metatable | typeHashBucket | type_index_udata (?) | function (?)
+                            if (storedTypeIndex != nullptr) {
+                                // stack: metatable | typeHashBucket | type_index_udata | function (?)
+                                if (*storedTypeIndex == baseTypeIndex) {
+                                    // stack: metatable | typeHashBucket | type_index_udata | function (?)
+                                    throw exception::LogicException(__FILE__, __LINE__, __func__, "trying to set existing typeFunction");
+                                }
+                                // stack: metatable | typeHashBucket | type_index_udata | function (?)
+                                // [*]
+                            } else {
+                                // stack: metatable | typeHashBucket | ? | function (?)
+                                throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "corrupted TypeFunction typeHashBucket: expected type_index_udata at index -2");
+                            }
+                            // [-]
+                            // stack: metatable | typeHashBucket | type_index_udata | function (?)
+                        }
                         // stack: metatable | typeHashBucket
                     }
                 } else {
@@ -193,6 +216,46 @@ namespace integral {
                     setTypeFunctionHashTable(luaState, baseTypeHash);
                     // stack: metatable | typeHashBucket
                 }
+            }
+
+            bool checkInheritanceTable(lua_State *luaState, const std::type_index &typeIndex) {
+                // stack: inheritanceTable
+                const std::size_t inheritanceTableLength = lua_compatibility::rawlen(luaState, -1);
+                for (std::size_t i = 1; i <= inheritanceTableLength; ++i) {
+                    // stack: inheritanceTable
+                    lua_compatibility::pushunsigned(luaState, i);
+                    // stack: inheritanceTable | i
+                    lua_rawget(luaState, -2);
+                    // stack: inheritanceTable | baseTable (?)
+                    if (lua_istable(luaState, -1) != 0) {
+                        // stack: inheritanceTable | baseTable
+                        lua_rawgeti(luaState, -1, static_cast<lua_Integer>(InheritanceTable::kTypeIndexIndex));
+                        // stack: inheritanceTable | baseTable | baseTypeIndex (?)
+                        const std::type_index *baseTypeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -1, gkTypeIndexMetatableName));
+                        // stack: inheritanceTable | baseTable | baseTypeIndex (?)
+                        if (baseTypeIndex != nullptr) {
+                            // stack: inheritanceTable | baseTable | baseTypeIndex
+                            lua_pop(luaState, 2);
+                            // stack: inheritanceTable
+                            if (*baseTypeIndex == typeIndex) {
+                                // stack: inheritanceTable
+                                return true;
+                            }
+                            // stack: inheritanceTable
+                            // [*]
+                        } else {
+                            // stack: inheritanceTable | baseTable | ?
+                            throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "corrupted inheritanceTable: expected baseTypeIndex at index -1");
+                        }
+                    } else {
+                        // stack: inheritanceTable | ?
+                        throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "corrupted inheritanceTable: expected baseTable at index -1");
+                    }
+                    // [-]
+                    // stack: inheritanceTable
+                }
+                // stack: inheritanceTable
+                return false;
             }
 
             // not allowed to throw exception (this function is used in callInheritanceIndexMetamethod)
@@ -697,95 +760,6 @@ namespace integral {
                     // stack: metatable | metatableMetatable
                     lua_pop(luaState, 1);
                     // stack: metatable
-                }
-            }
-
-            bool checkInheritance(lua_State *luaState, const std::type_index &typeIndex) {
-                // stack: metatable
-                if (checkInheritanceSearchTag(luaState, -1) == false) {
-                    // stack: metatable
-                    lua_pushstring(luaState, gkInheritanceKey);
-                    // stack: metatable | gkInheritanceKey
-                    lua_rawget(luaState, -2);
-                    // stack: metatable | inheritanceTable (?)
-                    if (lua_istable(luaState, -1) != 0) {
-                        // stack: metatable | inheritanceTable
-                        for (std::size_t i = lua_compatibility::rawlen(luaState, -1); i >= 1; --i) {
-                            // stack: metatable | inheritanceTable
-                            lua_compatibility::pushunsigned(luaState, i);
-                            // stack: metatable | inheritanceTable | i
-                            lua_rawget(luaState, -2);
-                            // stack: metatable | inheritanceTable | baseTable (?)
-                            if (lua_istable(luaState, -1) != 0) {
-                                // stack: metatable | inheritanceTable | baseTable
-                                lua_rawgeti(luaState, -1, static_cast<lua_Integer>(InheritanceTable::kTypeIndexIndex));
-                                // stack: metatable | inheritanceTable | baseTable | baseTypeIndex (?)
-                                const std::type_index *baseTypeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -1, gkTypeIndexMetatableName));
-                                // stack: metatable | inheritanceTable | baseTable | baseTypeIndex (?)
-                                if (baseTypeIndex != nullptr) {
-                                    // stack: metatable | inheritanceTable | baseTable | baseTypeIndex
-                                    if (*baseTypeIndex == typeIndex) {
-                                        // stack: metatable | inheritanceTable | baseTable | baseTypeIndex
-                                        lua_pop(luaState, 3);
-                                        // stack: metatable
-                                        return true;
-                                    } else {
-                                        // stack: metatable | inheritanceTable | baseTable | baseTypeIndex
-                                        lua_pop(luaState, 1);
-                                        // stack: metatable | inheritanceTable | baseTable
-                                        lua_rawgeti(luaState, -1, static_cast<lua_Integer>(InheritanceTable::kMetatableIndex));
-                                        // stack: metatable | inheritanceTable | baseTable | baseMetatable (?)
-                                        if (lua_istable(luaState, -1) != 0) {
-                                            // stack: metatable | inheritanceTable | baseTable | baseMetatable
-                                            lua_remove(luaState, -2);
-                                            // stack: metatable | inheritanceTable | baseMetatable
-                                            tagInheritanceSearch(luaState, -3);
-                                            // stack: metatable | inheritanceTable | baseMetatable
-                                            const bool hasInheritance = checkInheritance(luaState, typeIndex);
-                                            // stack: metatable | inheritanceTable | baseMetatable
-                                            untagInheritanceSearch(luaState, -3);
-                                            // stack: metatable | inheritanceTable | baseMetatable
-                                            if (hasInheritance == true) {
-                                                // stack: metatable | inheritanceTable | baseMetatable
-                                                lua_pop(luaState, 2);
-                                                // stack: metatable
-                                                return true;
-                                            } else {
-                                                // stack: metatable | inheritanceTable | baseMetatable
-                                                lua_pop(luaState, 1);
-                                                // stack: metatable | inheritanceTable
-                                            }
-                                            // stack: metatable | inheritanceTable
-                                            // [*]
-                                        } else {
-                                            // stack: metatable | inheritanceTable | baseTable | ?
-                                            throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "corrupted inheritanceTable: expected baseMetatable at index -1");
-                                        }
-                                    }
-                                } else {
-                                    // stack: metatable | inheritanceTable | baseTable | ?
-                                    throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "corrupted inheritanceTable: expected baseTypeIndex at index -1");
-                                }
-                            } else {
-                                // stack: metatable | inheritanceTable | ?
-                                throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, "corrupted inheritanceTable: expected baseTable at index -1");
-                            }
-                            // [-]
-                            // stack: metatable | inheritanceTable
-                        }
-                        // stack: metatable | inheritanceTable
-                        lua_pop(luaState, 1);
-                        // stack: metatable
-                        return false;
-                    } else {
-                        // stack: metatable | nil (?)
-                        lua_pop(luaState, 1);
-                        // stack: metatable
-                        return false;
-                    }
-                } else {
-                    // stack: metatable
-                    return false;
                 }
             }
         }
