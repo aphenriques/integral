@@ -363,6 +363,7 @@ See [example](samples/abstraction/table_conversion/table_conversion.cpp)
 | `bool`                                                           | boolean                                        |
 | `std::string`, `const char *`                                    | string                                         |
 | `std::vector`, `std::array`, `std::unordered_map`, `std::tuple`  | table                                          |
+| `std::optional`                                                  | nil or converted value                         |
 | from: `integral::LuaFunctionWrapper`, `integral::FunctionWrapper`| to: function                                   |
 | to: `integral::LuaFunctionArgument`                              | from: function                                 |
 | other class types                                                | userdata                                       |

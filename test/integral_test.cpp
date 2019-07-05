@@ -27,6 +27,7 @@
 #include <array>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -116,27 +117,33 @@ TEST_CASE("integral test") {
         integral::push<bool>(luaState.get(), true);
         integral::push<bool>(luaState.get(), false);
         integral::push<Object>(luaState.get(), "object");
-        REQUIRE(integral::get<int>(luaState.get(), -9) == -42);
+        integral::push<std::optional<Object>>(luaState.get(), Object("object"));
+        integral::push<std::optional<Object>>(luaState.get(), std::nullopt);
+        REQUIRE(integral::get<int>(luaState.get(), -11) == -42);
         REQUIRE(integral::get<int>(luaState.get(), 1) == -42);
-        REQUIRE(integral::get<unsigned>(luaState.get(), -8) == 42u);
+        REQUIRE(integral::get<unsigned>(luaState.get(), -10) == 42u);
         REQUIRE(integral::get<unsigned>(luaState.get(), 2) == 42u);
-        REQUIRE(integral::get<double>(luaState.get(), -7) == 42.1);
+        REQUIRE(integral::get<double>(luaState.get(), -9) == 42.1);
         REQUIRE(integral::get<double>(luaState.get(), 3) == 42.1);
-        REQUIRE(std::strcmp(integral::get<const char *>(luaState.get(), -6), "string1") == 0);
+        REQUIRE(std::strcmp(integral::get<const char *>(luaState.get(), -8), "string1") == 0);
         REQUIRE(std::strcmp(integral::get<const char *>(luaState.get(), 4), "string1") == 0);
-        REQUIRE(integral::get<std::string>(luaState.get(), -6) == "string1");
-        REQUIRE(integral::get<std::string>(luaState.get(), -5) == "string2");
+        REQUIRE(integral::get<std::string>(luaState.get(), -8) == "string1");
+        REQUIRE(integral::get<std::string>(luaState.get(), -7) == "string2");
         REQUIRE(integral::get<std::string>(luaState.get(), 5) == "string2");
-        REQUIRE(std::strcmp(integral::get<const char *>(luaState.get(), -5), "string2") == 0);
-        REQUIRE(integral::get<std::string>(luaState.get(), -4) == stringWithNullCharacter);
+        REQUIRE(std::strcmp(integral::get<const char *>(luaState.get(), -7), "string2") == 0);
+        REQUIRE(integral::get<std::string>(luaState.get(), -6) == stringWithNullCharacter);
         REQUIRE(integral::get<std::string>(luaState.get(), 6) == stringWithNullCharacter);
-        REQUIRE(integral::get<bool>(luaState.get(), -3) == true);
+        REQUIRE(integral::get<bool>(luaState.get(), -5) == true);
         REQUIRE(integral::get<bool>(luaState.get(), 7) == true);
-        REQUIRE(integral::get<bool>(luaState.get(), -2) == false);
+        REQUIRE(integral::get<bool>(luaState.get(), -4) == false);
         REQUIRE(integral::get<bool>(luaState.get(), 8) == false);
-        REQUIRE(integral::get<Object>(luaState.get(), -1).getId() == "object");
+        REQUIRE(integral::get<Object>(luaState.get(), -3).getId() == "object");
         REQUIRE(integral::get<Object>(luaState.get(), 9).getId() == "object");
-        lua_pop(luaState.get(), 9);
+        REQUIRE(integral::get<std::optional<Object>>(luaState.get(), -2)->getId() == "object");
+        REQUIRE(integral::get<std::optional<Object>>(luaState.get(), 10)->getId() == "object");
+        REQUIRE(integral::get<std::optional<Object>>(luaState.get(), -1) == std::nullopt);
+        REQUIRE(integral::get<std::optional<Object>>(luaState.get(), 11) == std::nullopt);
+        lua_pop(luaState.get(), 11);
     }
     SECTION("integral::get incompatible types") {
         integral::push<std::string>(luaState.get(), "string");
