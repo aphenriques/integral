@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <array>
 #include <limits>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -142,6 +143,13 @@ namespace integral {
             public:
                 static std::unordered_map<T, U> get(lua_State *luaState, int index);
                 static void push(lua_State *luaState, const std::unordered_map<T, U> &unorderedMap);
+            };
+
+            template<typename T>
+            class Exchanger<std::optional<T>> {
+            public:
+                static std::optional<T> get(lua_State *luaState, int index);
+                inline static void push(lua_State *luaState, const std::optional<T>& opt);
             };
 
             template<typename ...T>
@@ -518,6 +526,23 @@ namespace integral {
                     }
                 } else {
                     throw exception::RuntimeException(__FILE__, __LINE__, __func__, "std::unordered_map is too big");
+                }
+            }
+
+            template<typename T>
+            std::optional<T> Exchanger<std::optional<T>>::get(lua_State *luaState, int index) {
+                if(lua_isnil(luaState, index) != 0) {
+                    return std::nullopt;
+                }
+                return Exchanger<T>::get(luaState, index);
+            }
+
+            template<typename T>
+            void Exchanger<std::optional<T>>::push(lua_State *luaState, const std::optional<T>& opt) {
+                if(opt) {
+                    Exchanger<T>::push(luaState, *opt);
+                } else {
+                    lua_pushnil(luaState);
                 }
             }
 

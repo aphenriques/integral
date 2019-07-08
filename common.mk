@@ -10,9 +10,14 @@ PROJECT_STATIC_LIB:=lib$(PROJECT).a
 # some variables require PROJECT_ROOT_DIR definition. That's why = is used instead of := for their definition
 PROJECT_INCLUDE_DIRS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_ROOT_DIR)
 PROJECT_LDLIBS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
+
+ifdef USE_LUAJIT
+LUAJIT_INCLUDE_FOLDER?=/usr/local/include/luajit-2.0
+PROJECT_SYSTEM_INCLUDE_DIRS:=$(LUAJIT_INCLUDE_FOLDER) $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
+else
 PROJECT_SYSTEM_INCLUDE_DIRS=/usr/local/include $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
-# for LuaJIT:
-#PROJECT_SYSTEM_INCLUDE_DIRS=/usr/local/include/luajit-2.0 $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
+endif
+
 PROJECT_LIB_DIRS:=/usr/local/lib
 # '?=' sets the variable if it was not previously set
 OPTIMIZATION_FLAGS?=-O0 -g
@@ -26,8 +31,10 @@ ifeq ($(shell uname -s),Darwin)
 PROJECT_CXXFLAGS+=-Wweak-vtables
 SHARED_LIB_EXTENSION:=dylib
 PROJECT_LDFLAGS+=-undefined dynamic_lookup
-# for LuaJIT (http://luajit.org/install.html):
-#PROJECT_EXECUTABLE_LDFLAGS+=-pagezero_size 10000 -image_base 100000000
+ifdef USE_LUAJIT
+PROJECT_EXECUTABLE_LDFLAGS+=-pagezero_size 10000 -image_base 100000000
+endif
+
 else
 # avoids error using -flto compiler flag: "ar: <file>.o: plugin needed to handle lto object"
 #AR:=gcc-ar
@@ -41,6 +48,9 @@ SHARED_LIB_EXTENSION:=so
 endif
 
 PROJECT_SHARED_LIB:=lib$(PROJECT).$(SHARED_LIB_EXTENSION)
+
+ifdef USE_LUAJIT
+LIB_LUA_FLAG:=-lluajit-5.1
+else
 LIB_LUA_FLAG:=-llua
-# for LuaJIT:
-#LIB_LUA_FLAG:=-lluajit-5.1
+endif

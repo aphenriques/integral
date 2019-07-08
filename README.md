@@ -73,6 +73,11 @@ Alternatively, build and install the library with:
     $ make
     $ make install
 
+If you want to build the library with LuaJIT use:
+
+    $ make USE_LUAJIT=YES
+    $ make USE_LUAJIT=YES install
+
 
 # Usage
 
@@ -465,6 +470,7 @@ See [example](samples/abstraction/reference_wrapper_and_shared_ptr/reference_wra
 | `bool`                                                           | boolean                                        |
 | `std::string`, `const char *`                                    | string                                         |
 | `std::vector`, `std::array`, `std::unordered_map`, `std::tuple`  | table                                          |
+| `std::optional`                                                  | nil or converted value                         |
 | from: `integral::LuaFunctionWrapper`, `integral::FunctionWrapper`| to: function                                   |
 | to: `integral::LuaFunctionArgument`                              | from: function                                 |
 | other class types                                                | userdata                                       |
