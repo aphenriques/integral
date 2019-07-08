@@ -73,6 +73,11 @@ Alternatively, build and install the library with:
     $ make
     $ make install
 
+If you want to build the library with LuaJIT use:
+
+    $ make USE_LUAJIT=YES
+    $ make USE_LUAJIT=YES install
+
 
 # Usage
 

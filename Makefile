@@ -1,6 +1,6 @@
 include common.mk
 
-INSTALL_TOP:=/usr/local
+INSTALL_TOP?=/usr/local
 INSTALL_INC:=$(INSTALL_TOP)/include/$(PROJECT)
 INSTALL_LIB:=$(INSTALL_TOP)/lib
 
@@ -35,7 +35,7 @@ static_release: clean
 install_static:
 	mkdir -p $(INSTALL_INC) $(INSTALL_LIB)
 	install -p -m 0644 $(PROJECT_LIB_DIR)/*.hpp $(INSTALL_INC)
-	install -p -m 0644 $(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
+	install -p -m 0644 $(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB) $(INSTALL_LIB)
 
 install: install_exception
 	mkdir -p $(INSTALL_INC) $(INSTALL_LIB)
