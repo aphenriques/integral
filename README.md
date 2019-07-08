@@ -25,6 +25,7 @@
   * [Call function in Lua state](#call-function-in-lua-state)
   * [Register lua function argument](#register-lua-function-argument)
   * [Table conversion](#table-conversion)
+  * [Optional](#optional)
   * [Register synthetic inheritance](#register-synthetic-inheritance)
   * [Register std::reference_wrapper and std::shared_ptr](#register-stdreference_wrapper-and-stdshared_ptr)
 * [Automatic conversion](#automatic-conversion)
@@ -357,6 +358,28 @@ Lua tables are automatically converted to/from std::vector, std::array, std::uno
 ```
 
 See [example](samples/abstraction/table_conversion/table_conversion.cpp)
+
+std::optional<T> is automatically converted to/from nil/T.
+
+## Optional
+```cpp
+    luaState["g"].setFunction([](const std::optional<std::string> &optional) {
+        if (optional.has_value() == false) {
+            std::cout << "c++: hi!" << std::endl;
+        } else {
+            std::cout << "c++: hi " << optional.value() << '!' << std::endl;
+        }
+    });
+    luaState.doString("g()"); // prints "c++: hi!"
+    luaState.doString("g('world')"); // prints "c++: hi world!"
+    std::optional<std::string> match;
+    match = luaState["string"]["match"].call<std::optional<std::string>>("aei123bcd", "123");
+    std::cout << match.value() << std::endl; // prints "123"
+    match = luaState["string"]["match"].call<std::optional<std::string>>("aei123bcd", "xyz");
+    std::cout << match.has_value() << std::endl; // prints "0"
+```
+
+See [example](samples/abstraction/optional/optional.cpp)
 
 ## Register synthetic inheritance
 
