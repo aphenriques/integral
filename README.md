@@ -359,9 +359,10 @@ Lua tables are automatically converted to/from std::vector, std::array, std::uno
 
 See [example](samples/abstraction/table_conversion/table_conversion.cpp)
 
+## Optional
+
 std::optional<T> is automatically converted to/from nil/T.
 
-## Optional
 ```cpp
     luaState["g"].setFunction([](const std::optional<std::string> &optional) {
         if (optional.has_value() == false) {
