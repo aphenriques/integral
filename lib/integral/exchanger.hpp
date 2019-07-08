@@ -149,7 +149,7 @@ namespace integral {
             class Exchanger<std::optional<T>> {
             public:
                 static std::optional<T> get(lua_State *luaState, int index);
-                inline static void push(lua_State *luaState, const std::optional<T>& opt);
+                static void push(lua_State *luaState, const std::optional<T>& optional);
             };
 
             template<typename ...T>
@@ -531,16 +531,17 @@ namespace integral {
 
             template<typename T>
             std::optional<T> Exchanger<std::optional<T>>::get(lua_State *luaState, int index) {
-                if(lua_isnil(luaState, index) != 0) {
+                if (lua_isnil(luaState, index) == 0) {
+                    return exchanger::get<T>(luaState, index);
+                } else {
                     return std::nullopt;
                 }
-                return Exchanger<T>::get(luaState, index);
             }
 
             template<typename T>
-            void Exchanger<std::optional<T>>::push(lua_State *luaState, const std::optional<T>& opt) {
-                if(opt) {
-                    Exchanger<T>::push(luaState, *opt);
+            void Exchanger<std::optional<T>>::push(lua_State *luaState, const std::optional<T>& optional) {
+                if (optional.has_value() == true) {
+                    exchanger::push<T>(luaState, *optional);
                 } else {
                     lua_pushnil(luaState);
                 }

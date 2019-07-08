@@ -139,8 +139,8 @@ TEST_CASE("integral test") {
         REQUIRE(integral::get<bool>(luaState.get(), 8) == false);
         REQUIRE(integral::get<Object>(luaState.get(), -3).getId() == "object");
         REQUIRE(integral::get<Object>(luaState.get(), 9).getId() == "object");
-        REQUIRE(integral::get<std::optional<Object>>(luaState.get(), -2)->getId() == "object");
-        REQUIRE(integral::get<std::optional<Object>>(luaState.get(), 10)->getId() == "object");
+        REQUIRE(integral::get<std::optional<Object>>(luaState.get(), -2).value().getId() == "object");
+        REQUIRE(integral::get<std::optional<Object>>(luaState.get(), 10).value().getId() == "object");
         REQUIRE(integral::get<std::optional<Object>>(luaState.get(), -1) == std::nullopt);
         REQUIRE(integral::get<std::optional<Object>>(luaState.get(), 11) == std::nullopt);
         lua_pop(luaState.get(), 11);
@@ -476,6 +476,24 @@ TEST_CASE("integral test") {
         REQUIRE((stateView["z"].get<std::array<std::vector<Object>, 2>>()[0].at(1).getId() == "12"));
         REQUIRE((stateView["z"].get<std::array<std::vector<Object>, 2>>()[1].at(0).getId() == "21"));
         REQUIRE((stateView["z"].get<std::array<std::vector<Object>, 2>>()[1].at(1).getId() == "22"));
+    }
+    SECTION("std::optional conversion") {
+        stateView["x"] = std::optional<Object>(std::nullopt);
+        REQUIRE(stateView["x"].get<std::optional<Object>>().has_value() == false);
+        stateView["x"] = std::optional<Object>("object");
+        REQUIRE(stateView["x"].get<std::optional<Object>>().value().getId() == "object");
+        REQUIRE_NOTHROW(stateView.doString("function f(x) if x == nil then return 42 else return nil end end"));
+        REQUIRE_NOTHROW(stateView["f"].call<std::optional<int>>(1).has_value() == false);
+        REQUIRE_NOTHROW(stateView["f"].call<std::optional<int>>(std::optional<int>(std::nullopt)).value() == 42);
+        stateView["g"].setFunction([](std::optional<int> x) {
+            if (x.has_value() == false) {
+                return std::optional<int>(42);
+            } else {
+                return std::optional<int>(std::nullopt);
+            }
+        });
+        REQUIRE_NOTHROW(stateView.doString("assert(g(1) == nil)"));
+        REQUIRE_NOTHROW(stateView.doString("assert(g(nil) == 42)"));
     }
     SECTION("function call") {
         stateView["Object"].set(integral::ClassMetatable<Object>()
