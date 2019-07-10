@@ -1,10 +1,4 @@
 ## TODO
-* update README.md
-  * usage
-    * LuaIgnoredArgument
-    * module
-    * ...
-  * highlight comprehensive error messages 
 * intel compiler
 * coverity
 * c++17:

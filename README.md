@@ -25,10 +25,12 @@
   * [Call function in Lua state](#call-function-in-lua-state)
   * [Register lua function argument](#register-lua-function-argument)
   * [Table conversion](#table-conversion)
+  * [Register function with ignored argument](#register-function-with-ignored-argument)
   * [Optional](#optional)
   * [Register synthetic inheritance](#register-synthetic-inheritance)
   * [std::reference_wrapper and std::shared_ptr automatic inheritance](#stdreference_wrapper-and-stdshared_ptr-automatic-inheritance)
 * [Automatic conversion](#automatic-conversion)
+* [Automatic inheritance](#automatic-inheritance)
 * [integral reserved names in Lua](#integral-reserved-names-in-lua)
 * [Source](#source)
 * [Author](#author)
@@ -49,6 +51,7 @@
 * thrown exceptions in exported functions are converted to Lua errors;
 * wrong parameter types in exported functions turn into Lua errors;
 * wrong number of parameters in exported functions turn into Lua errors;
+* clear error messages;
 * functions returning pointers (except const char * which is considered a string) and references are regarded as unsafe, therefore cannot be exported. Trying to register these functions will cause compilation error; and
 * invalid default arguments definition causes compilation error.
 
@@ -310,6 +313,7 @@ void callBase(const Base &) {
 }
 
 // ...
+
     luaState["Derived"] = integral::ClassMetatable<Derived>().setConstructor<Derived()>("new");
     luaState["callBase"].setFunction(callBase);
     luaState.doString("derived = Derived.new()\n"
@@ -358,6 +362,31 @@ Lua tables are automatically converted to/from std::vector, std::array, std::uno
 ```
 
 See [example](samples/abstraction/table_conversion/table_conversion.cpp)
+
+## Register function with ignored argument
+
+```cpp
+// std::vector<double> is automatically converted to a lua table. Vector is a regular class for integral and is not converted to a lua table
+class Vector : public std::vector<double> {};
+
+// ...
+
+        luaState["Vector"] = integral::ClassMetatable<Vector>()
+                                .setConstructor<Vector()>("new")
+                                // because of some legacy lua implementation details, __len receives two arguments, the second argument can be safely ignored
+                                .setFunction("__len", [](const Vector &vector, integral::LuaIgnoredArgument) -> std::size_t {
+                                    return vector.size();
+                                })
+                                .setFunction("pushBack", static_cast<void(Vector::*)(const double &)>(&Vector::push_back));
+
+        luaState.doString("v = Vector.new()\n"
+                          "print(#v)\n" // prints "0'
+                          "v:pushBack(42)\n"
+                          "print(#v)\n" // prints "1"
+                          "v:pushBack(42)\n"
+                          "print(#v)"); // prints "2"
+```
+See [example](samples/abstraction/ignored_argument/ignored_argument.cpp).
 
 ## Optional
 
@@ -497,6 +526,9 @@ See [example](samples/abstraction/reference_wrapper_and_shared_ptr/reference_wra
 | from: `integral::LuaFunctionWrapper`, `integral::FunctionWrapper`| to: function                                   |
 | to: `integral::LuaFunctionArgument`                              | from: function                                 |
 | other class types                                                | userdata                                       |
+
+
+# Automatic inheritance
 
 `std::reference_wrapper<T>` and `std::shared_ptr<T>` have automatic synthetic inheritance to `T` (those types' lua objects inherit `T`'s lua methods and lua base classes).
 
