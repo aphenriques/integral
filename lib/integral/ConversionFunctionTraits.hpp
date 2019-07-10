@@ -2,7 +2,7 @@
 //  ConversionFunctionTraits.hpp
 //  integral
 //
-//  Copyright (C) 2016  André Pereira Henriques
+//  Copyright (C) 2016, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -28,16 +28,9 @@ namespace integral {
     namespace detail {
         template<typename T>
         class ConversionFunctionTraits;
-        
+
         template<typename T, typename U>
         class ConversionFunctionTraits<U *(T *)> {
-        public:
-            using ConversionType = U;
-            using OriginalType = T;
-        };
-        
-        template<typename T, typename U>
-        class ConversionFunctionTraits<U *(T &)> {
         public:
             using ConversionType = U;
             using OriginalType = T;
