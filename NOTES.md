@@ -1,5 +1,4 @@
 ## TODO
-* remove underscores from filenames and namespaces (make everything camel case)
 * update README.md
   * usage
     * LuaIgnoredArgument
@@ -14,7 +13,7 @@
   * enable -Wunused-parameter and use [[maybe_unused]]
   * fold expressions (search and replace expansion/recursion functions)
   * template type deduction by constructor
-  * makeFunctionWrapper and makeConstructorWrapper are not necessary in c++17 (template type deduction in constructor)
+  * makeFunctionWrapper and makeConstructorWrapper are not necessary in c++17 (deduction guides)
 * compare performance with other binding libraries
 * sandbox (in lua script?)
   * must be easily disabled

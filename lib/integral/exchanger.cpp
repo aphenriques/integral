@@ -32,6 +32,8 @@
 namespace integral {
     namespace detail {
         namespace exchanger {
+            const char * const gkAutomaticInheritanceKey = "integral_AutomaticInheritanceKey";
+
             const char * Exchanger<const char *>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     const char * const string = lua_tostring(luaState, index);

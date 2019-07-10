@@ -27,7 +27,7 @@
   * [Table conversion](#table-conversion)
   * [Optional](#optional)
   * [Register synthetic inheritance](#register-synthetic-inheritance)
-  * [Register std::reference_wrapper and std::shared_ptr](#register-stdreference_wrapper-and-stdshared_ptr)
+  * [std::reference_wrapper and std::shared_ptr automatic inheritance](#stdreference_wrapper-and-stdshared_ptr-automatic-inheritance)
 * [Automatic conversion](#automatic-conversion)
 * [integral reserved names in Lua](#integral-reserved-names-in-lua)
 * [Source](#source)
@@ -440,9 +440,9 @@ Synthetic inheritance can be viewed as a transformation from composition in c++ 
 
 See [example](samples/abstraction/synthetic_inheritance/synthetic_inheritance.cpp)
 
-## Register std::reference_wrapper and std::shared_ptr
+## std::reference_wrapper and std::shared_ptr automatic inheritance
 
-Synthetic inheritance may be used to treat `std::reference_wrapper<T>` and `std::shared_ptr<T>` objects as if they were T.
+`std::reference_wrapper<T>` and `std::shared_ptr<T>` are registered with automatic synthetic inheritance.
 
 ```cpp
     class Object {
@@ -457,27 +457,26 @@ Synthetic inheritance may be used to treat `std::reference_wrapper<T>` and `std:
         luaState["Object"] = integral::ClassMetatable<Object>()
             .setFunction("printMessage", &Object::printMessage);
 
-        luaState.defineReferenceWrapperInheritance<Object>();
-        // alternative expression:
-        //luaState.defineInheritance[](std::reference_wrapper<Object> *referenceWrapperPointer) -> Object * {
-        //    return &referenceWrapperPointer->get();
-        //});
+        // std::reference_wrapper<T> has automatic synthetic inheritance do T as if it was defined as:
+        // luaState.defineInheritance([](std::reference_wrapper<T> *referenceWrapperPointer) -> T * {
+        //     return &referenceWrapperPointer->get();
+        // });
 
         Object object;
         object.printMessage(); //prints 'Object 0x7ffee8b68560 message!'
         luaState["objectReference"] = std::ref(object);
         luaState.doString("objectReference:printMessage()"); //prints the same previous address 'Object 0x7ffee8b68560 message!'
 
-        luaState.defineSharedPtrInheritance<Object>();
-        // alternative expression:
-        //luaState.defineInheritance[](std::shared_ptr<Object> *sharedPtrPointer) -> Object * {
-        //    return sharedPtrPointer->get();
-        //});
+        // std::shared_ptr<T> has automatic synthetic inheritance do T as if it was defined as:
+        // luaState.defineInheritance([](std::shared_ptr<T> *sharedPtrPointer) -> T * {
+        //     return sharedPtrPointer->get();
+        // });
 
         std::shared_ptr<Object> objectSharedPtr = std::make_shared<Object>();
         objectSharedPtr->printMessage(); //prints 'Object 0x7fce594077a8 message!'
         luaState["objectSharedPtr"] = objectSharedPtr;
         luaState.doString("objectSharedPtr:printMessage()"); //prints the same previous address 'Object 0x7fce594077a8 message!'
+        luaState["objectSharedPtr"].get<Object>().printMessage(); //prints the same previous address 'Object 0x7fce594077a8 message!'
 ```
 
 See [example](samples/abstraction/reference_wrapper_and_shared_ptr/reference_wrapper_and_shared_ptr.cpp)
@@ -499,6 +498,8 @@ See [example](samples/abstraction/reference_wrapper_and_shared_ptr/reference_wra
 | to: `integral::LuaFunctionArgument`                              | from: function                                 |
 | other class types                                                | userdata                                       |
 
+`std::reference_wrapper<T>` and `std::shared_ptr<T>` have automatic synthetic inheritance to `T` (those types' lua objects inherit `T`'s lua methods and lua base classes).
+
 
 # integral reserved names in Lua
 
@@ -516,6 +517,7 @@ The library also uses the following field names in its generated class metatable
 * `integral_TypeFunctionsKey`;
 * `integral_TypeIndexKey`;
 * `integral_InheritanceKey`;
+* `integral_AutomaticInheritanceKey`;
 * `integral_UserDataWrapperBaseTableKey`;
 * `integral_UnderlyingTypeFunctionKey`; and
 * `integral_InheritanceSearchTagKey`.

@@ -37,24 +37,18 @@ public:
 extern "C" {
     LUALIB_API int luaopen_libObject(lua_State *luaState) {
         try {
-            // 'synthetic inheritance' works just like inheritance with a conversion function provided
-            // it is like defining type functions, but with methods inheritance
-
             integral::pushClassMetatable<Object>(luaState);
             integral::setFunction(luaState, "print", &Object::print);
             integral::setFunction(luaState, "getShared", &std::make_shared<Object>);
 
-            // 'synthetic inheritance' can be viewed as a transformation from composition in c++ to inheritance in lua
-            integral::defineSharedPtrInheritance<Object>(luaState);
-            // alternative expressions:
-            //integral::defineInheritance(luaState, [](std::shared_ptr<Object> *sharedObject) -> Object * {
-                //return sharedObject->get();
-            //});
+            // std::shared_ptr<T> has automatic synthetic inheritance do T as if it was defined as:
+            // integral::defineInheritance(luaState, [](std::shared_ptr<T> *sharedPtrPointer) -> T * {
+            //     return sharedPtrPointer->get();
+            // });
             // or:
-            //integral::defineInheritance(luaState, std::function<Object *(std::shared_ptr<Object> *)>(&std::shared_ptr<Object>::get));
-
+            // integral::defineInheritance(luaState, std::function<T *(std::shared_ptr<T> *)>(&std::shared_ptr<T>::get));
             // the following statement may not work if the get method is from a base class of std::shared_ptr (may fail in some stdlib implementations)
-            //integral::defineInheritance<std::shared_ptr<Object>, Object>(luaState, &std::shared_ptr<Object>::get);
+            // integral::defineInheritance<std::shared_ptr<T>, T>(luaState, &std::shared_ptr<T>::get);
 
             return 1;
         } catch (const std::exception &exception) {

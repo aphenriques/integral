@@ -26,7 +26,9 @@
 
 #include <cstddef>
 #include <array>
+#include <functional>
 #include <limits>
+#include <memory>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -50,6 +52,8 @@
 namespace integral {
     namespace detail {
         namespace exchanger {
+            extern const char * const gkAutomaticInheritanceKey;
+
             template<typename T>
             T & getObject(lua_State *luaState, int index);
 
@@ -179,6 +183,41 @@ namespace integral {
                 static void setElementInTable(lua_State *luaState, const U &element, int index);
             };
 
+            template<typename D>
+            class AutomaticInheritanceBase {
+                static_assert(std::is_class<D>::value, "typename D must be a class type");
+
+            public:
+                inline static D & get(lua_State *luaState, int index);
+
+            protected:
+                template<typename B, typename ...A>
+                inline static void pushWithDirectInheritance(lua_State *luaState, A &&...arguments);
+
+                template<typename F, typename ...A>
+                inline static void pushWithTypeFunction(lua_State *luaState, const F &typeFunction, A &&...arguments);
+
+            private:
+                // setInheritanceFunction:
+                // signature: void(lua_State *)
+                // stack argument: metatable
+                // sets inheritance as type_manager::setInheritance
+                template<typename S, typename ...A>
+                inline static void pushGeneric(lua_State *luaState, const S &setInheritanceFunction, A &&...arguments);
+            };
+
+            template<typename T>
+            class Exchanger<std::reference_wrapper<T>> : public AutomaticInheritanceBase<std::reference_wrapper<T>> {
+            public:
+                inline static void push(lua_State *luaState, const std::reference_wrapper<T> &referenceWrapper);
+            };
+
+            template<typename T>
+            class Exchanger<std::shared_ptr<T>> : public AutomaticInheritanceBase<std::shared_ptr<T>> {
+            public:
+                inline static void push(lua_State *luaState, const std::shared_ptr<T> &sharedPtr);
+            };
+
             template<typename T>
             using ExchangerType = Exchanger<typename std::decay<T>::type>;
 
@@ -231,8 +270,11 @@ namespace integral {
             template<typename T, typename ...A>
             void pushObject(lua_State *luaState, A &&...arguments) {
                 basic::pushUserData<UserDataWrapper<T>>(luaState, std::forward<A>(arguments)...);
+                // stack: userdata_no_metatable
                 type_manager::pushClassMetatable<T>(luaState); // type_manager will automatically register unknown types
+                // stack: userdata_no_metatable | metatable
                 lua_setmetatable(luaState, -2);
+                // stack: userdata_with_metatable
             }
 
             template<typename T, typename Enable>
@@ -665,6 +707,94 @@ namespace integral {
                 lua_rawset(luaState, -3);
                 // stack: table
                 lua_pop(luaState, 1);
+            }
+
+            template<typename D>
+            inline D & AutomaticInheritanceBase<D>::get(lua_State *luaState, int index) {
+                return getObject<D>(luaState, index);
+            }
+
+            template<typename D>
+            template<typename B, typename ...A>
+            inline void AutomaticInheritanceBase<D>::pushWithDirectInheritance(lua_State *luaState, A &&...arguments) {
+                pushGeneric(
+                    luaState,
+                    [] (lua_State *lambdaLuaState) {
+                        type_manager::setInheritance<D, B>(lambdaLuaState);
+                    },
+                    std::forward<A>(arguments)...
+                );
+            }
+
+            template<typename D>
+            template<typename F, typename ...A>
+            inline void AutomaticInheritanceBase<D>::pushWithTypeFunction(lua_State *luaState, const F &typeFunction, A &&...arguments) {
+                using ConversionFunctionTraits = ConversionFunctionTraits<typename FunctionTraits<F>::Signature>;
+                using Derived = typename std::remove_cv<typename ConversionFunctionTraits::OriginalType>::type;
+                static_assert(std::is_same<Derived, D>::value == true, "invalid type function");
+                pushGeneric(
+                    luaState,
+                    [&typeFunction] (lua_State *lambdaLuaState) {
+                        type_manager::setInheritance(lambdaLuaState, typeFunction);
+                    },
+                    std::forward<A>(arguments)...
+                );
+            }
+
+            template<typename D>
+            template<typename S, typename ...A>
+            void AutomaticInheritanceBase<D>::pushGeneric(lua_State *luaState, const S &setInheritanceFunction, A &&...arguments) {
+                basic::pushUserData<UserDataWrapper<D>>(luaState, std::forward<A>(arguments)...);
+                // stack: userdata_no_metatable
+                type_manager::pushClassMetatable<D>(luaState); // type_manager will automatically register unknown types
+                // stack: userdata_no_metatable | metatable
+                lua_pushstring(luaState, gkAutomaticInheritanceKey);
+                // stack: userdata_no_metatable | metatable | gkAutomaticInheritanceKey
+                lua_rawget(luaState, -2);
+                // stack: userdata_no_metatable | metatable | nil or true
+                if (lua_toboolean(luaState, -1) != 0) {
+                    // stack: userdata_no_metatable | metatable | true
+                    lua_pop(luaState, 1);
+                    // stack: userdata_no_metatable | metatable
+                    lua_setmetatable(luaState, -2);
+                    // stack: userdata_with_metatable
+                } else {
+                    // stack: userdata_no_metatable | metatable | nil
+                    lua_pop(luaState, 1);
+                    // stack: userdata_no_metatable | metatable
+                    setInheritanceFunction(luaState);
+                    // stack: userdata_no_metatable | metatable
+                    lua_pushstring(luaState, gkAutomaticInheritanceKey);
+                    // stack: userdata_no_metatable | metatable | gkAutomaticInheritanceKey
+                    lua_pushboolean(luaState, 1);
+                    // stack: userdata_no_metatable | metatable | gkAutomaticInheritanceKey | true
+                    lua_rawset(luaState, -3);
+                    // stack: userdata_no_metatable | metatable
+                    lua_setmetatable(luaState, -2);
+                    // stack: userdata_with_metatable
+                }
+            }
+
+            template<typename T>
+            inline void Exchanger<std::reference_wrapper<T>>::push(lua_State *luaState, const std::reference_wrapper<T> &referenceWrapper) {
+                AutomaticInheritanceBase<std::reference_wrapper<T>>::pushWithTypeFunction(
+                    luaState,
+                    [](std::reference_wrapper<T> *referenceWrapperPointer) -> T * {
+                        return &referenceWrapperPointer->get();
+                    },
+                    referenceWrapper
+                );
+            }
+
+            template<typename T>
+            inline void Exchanger<std::shared_ptr<T>>::push(lua_State *luaState, const std::shared_ptr<T> &sharedPtr) {
+                AutomaticInheritanceBase<std::shared_ptr<T>>::pushWithTypeFunction(
+                    luaState,
+                    [](std::shared_ptr<T> *sharedPtrPointer) -> T * {
+                        return sharedPtrPointer->get();
+                    },
+                    sharedPtr
+                );
             }
 
             template<typename T>

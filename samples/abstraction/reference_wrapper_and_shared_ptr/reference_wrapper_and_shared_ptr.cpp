@@ -41,28 +41,26 @@ int main(int argc, char* argv[]) {
         luaState["Object"] = integral::ClassMetatable<Object>()
             .setFunction("printMessage", &Object::printMessage);
 
-        // 'synthetic inheritance' can be viewed as a transformation from composition in c++ to inheritance in lua
-        luaState.defineReferenceWrapperInheritance<Object>();
-        // alternative expression:
-        //luaState.defineInheritance[](std::reference_wrapper<Object> *referenceWrapperPointer) -> Object * {
-        //    return &referenceWrapperPointer->get();
-        //});
+        // std::reference_wrapper<T> has automatic synthetic inheritance do T as if it was defined as:
+        // luaState.defineInheritance([](std::reference_wrapper<T> *referenceWrapperPointer) -> T * {
+        //     return &referenceWrapperPointer->get();
+        // });
 
         Object object;
         object.printMessage(); //prints 'Object 0x7ffee8b68560 message!'
         luaState["objectReference"] = std::ref(object);
         luaState.doString("objectReference:printMessage()"); //prints the same previous address 'Object 0x7ffee8b68560 message!'
 
-        luaState.defineSharedPtrInheritance<Object>();
-        // alternative expression:
-        //luaState.defineInheritance[](std::shared_ptr<Object> *sharedPtrPointer) -> Object * {
-        //    return sharedPtrPointer->get();
-        //});
+        // std::shared_ptr<T> has automatic synthetic inheritance do T as if it was defined as:
+        // luaState.defineInheritance([](std::shared_ptr<T> *sharedPtrPointer) -> T * {
+        //     return sharedPtrPointer->get();
+        // });
 
         std::shared_ptr<Object> objectSharedPtr = std::make_shared<Object>();
         objectSharedPtr->printMessage(); //prints 'Object 0x7fce594077a8 message!'
         luaState["objectSharedPtr"] = objectSharedPtr;
         luaState.doString("objectSharedPtr:printMessage()"); //prints the same previous address 'Object 0x7fce594077a8 message!'
+        luaState["objectSharedPtr"].get<Object>().printMessage(); //prints the same previous address 'Object 0x7fce594077a8 message!'
 
         return EXIT_SUCCESS;
     } catch (const std::exception &exception) {
