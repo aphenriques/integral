@@ -52,7 +52,10 @@
 * wrong parameter types in exported functions turn into Lua errors;
 * wrong number of parameters in exported functions turn into Lua errors;
 * clear error messages;
-* functions returning pointers (except const char * which is considered a string) and references are regarded as unsafe, therefore cannot be exported. Trying to register these functions will cause compilation error; and
+* it is not possible (it will cause compilation error) to push to Lua:
+  * pointers `T *` (except `const char *` which is considered a string);
+  * non-const references `T &` (`const T &` is valid and it is pushed by value);
+  * functions returning pointers (except `const char *`) and non-const references
 * invalid default arguments definition causes compilation error.
 
 
@@ -180,30 +183,39 @@ See [example](samples/abstraction/default_argument/default_argument.cpp).
 ```cpp
 class Object {
 public:
+    const std::string greeting_;
     std::string name_;
 
-    Object(const std::string &name) : name_(name) {}
+    Object(const std::string greeting, const std::string &name) : greeting_(greeting), name_(name) {}
+
+    // const reference values are pushed by value (copied) to the Lua state
+    const std::string & getGreeting() const {
+        return greeting_;
+    }
 
     std::string getHello() const {
-        return std::string("Hello ") + name_ + '!';
+        return greeting_ + ' ' + name_ + '!';
     }
 };
 
 // ...
 
-    luaState["Object"] = integral::ClassMetatable<Object>()
-                             .setConstructor<Object(const std::string &)>("new")
-                             .setCopyGetter("getName", &Object::name_)
-                             .setSetter("setName", &Object::name_)
-                             .setFunction("getHello", &Object::getHello)
-                             .setFunction("getBye", [](const Object &object) {
-                                return std::string("Bye ") + object.name_ + '!';
-                             })
-                             .setLuaFunction("appendName", [](lua_State *lambdaLuaState) {
-                                // objects (except std::vector, std::array, std::unordered_map, std::tuple and std::string) are gotten by reference
-                                integral::get<Object>(lambdaLuaState, 1).name_ += integral::get<const char *>(lambdaLuaState, 2);
-                                return 1;
-                             });
+        luaState["Object"] = integral::ClassMetatable<Object>()
+                                 // invalid constructor register causes compilation error
+                                 // .setConstructor<Object()>("invalid")
+                                 .setConstructor<Object(const std::string &, const std::string &)>("new")
+                                 .setFunction("getGreeting", &Object::getGreeting)
+                                 .setGetter("getName", &Object::name_)
+                                 .setSetter("setName", &Object::name_)
+                                 .setFunction("getHello", &Object::getHello)
+                                 .setFunction("getBye", [](const Object &object) {
+                                    return std::string("Bye ") + object.name_ + '!';
+                                 })
+                                 .setLuaFunction("appendName", [](lua_State *lambdaLuaState) {
+                                    // objects (except std::vector, std::array, std::unordered_map, std::tuple and std::string) are gotten by reference
+                                    integral::get<Object>(lambdaLuaState, 1).name_ += integral::get<const char *>(lambdaLuaState, 2);
+                                    return 1;
+                                 });
 ```
 
 See [example](samples/abstraction/class/class.cpp).

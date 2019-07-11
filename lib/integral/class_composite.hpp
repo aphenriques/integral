@@ -2,7 +2,7 @@
 //  class_composite.hpp
 //  integral
 //
-//  Copyright (C) 2017  André Pereira Henriques
+//  Copyright (C) 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -29,7 +29,7 @@
 #include <utility>
 #include <lua.hpp>
 #include "ConversionFunctionTraits.hpp"
-#include "CopyGetter.hpp"
+#include "Getter.hpp"
 #include "Emplacer.hpp"
 #include "exchanger.hpp"
 #include "factory.hpp"
@@ -72,7 +72,7 @@ namespace integral {
                 inline decltype(auto) setConstructor(K &&key, DefaultArgument<E, I> &&...defaultArguments) &&;
 
                 template<typename K, typename R, typename S>
-                inline decltype(auto) setCopyGetter(K &&key, R S::* attribute) &&;
+                inline decltype(auto) setGetter(K &&key, R S::* attribute) &&;
 
                 template<typename K, typename R, typename S>
                 inline decltype(auto) setSetter(K &&key, R S::* attribute) &&;
@@ -207,8 +207,8 @@ namespace integral {
 
             template<typename T, typename U>
             template<typename K, typename R, typename S>
-            inline decltype(auto) ClassCompositeInterface<T, U>::setCopyGetter(K &&key, R S::* attribute) && {
-                return std::move(*this).setFunction(std::forward<K>(key), CopyGetter<S, R>(attribute));
+            inline decltype(auto) ClassCompositeInterface<T, U>::setGetter(K &&key, R S::* attribute) && {
+                return std::move(*this).setFunction(std::forward<K>(key), Getter<S, R>(attribute));
             }
 
             template<typename T, typename U>

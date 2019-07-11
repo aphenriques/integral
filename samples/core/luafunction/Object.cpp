@@ -2,7 +2,7 @@
 //  Object.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2016, 2017  André Pereira Henriques
+//  Copyright (C) 2014, 2016, 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -39,7 +39,7 @@ extern "C" {
         try {
             integral::pushClassMetatable<Object>(luaState);
             integral::setConstructor<Object(std::string)>(luaState, "new");
-            integral::setCopyGetter(luaState, "getString", &Object::string_);
+            integral::setGetter(luaState, "getString", &Object::string_);
 
             // lua function
             integral::setLuaFunction(luaState, "createSuffixedObjectLuaFunction", [](lua_State *lambdaLuaState) -> int {

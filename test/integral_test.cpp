@@ -261,7 +261,7 @@ TEST_CASE("integral test") {
         lua_newtable(luaState.get());
         integral::setFunction(luaState.get(), "getSum", getSum);
         integral::setFunction(luaState.get(), "makeObject", makeObject);
-        integral::setFunction(luaState.get(), "getObjectId", std::function<std::string(const Object &)>(&Object::getId));
+        integral::setFunction(luaState.get(), "getObjectId", &Object::getId);
         integral::setFunction(luaState.get(), "getMultiplicationFunction1", [](int x) -> integral::FunctionWrapper<int(int)> {
             return integral::makeFunctionWrapper([x](int y) -> int {
                 return x*y;
@@ -318,9 +318,9 @@ TEST_CASE("integral test") {
         integral::setFunction(luaState.get(), "getConstructor", []() -> integral::ConstructorWrapper<Object(const char *)> {
             return integral::ConstructorWrapper<Object(const char *)>();
         });
-        integral::setFunction(luaState.get(), "getId", std::function<std::string(const Object &)>(&Object::getId));
+        integral::setFunction(luaState.get(), "getId", &Object::getId);
         integral::setFunction(luaState.get(), "setId", &Object::setId);
-        integral::setCopyGetter(luaState.get(), "getFlag", &Object::flag_);
+        integral::setGetter(luaState.get(), "getFlag", &Object::flag_);
         integral::setSetter(luaState.get(), "setFlag", &Object::flag_);
         integral::setFunction(luaState.get(), "hasSameId", [](const Object &object1, const Object &object2) -> bool {
             return object1.getId() == object2.getId();
@@ -348,7 +348,7 @@ TEST_CASE("integral test") {
                                 .set("new1", integral::ConstructorWrapper<Object(const std::string &)>())
                                 .setConstructor<Object(unsigned)>("new2")
                                 .set("getId", integral::FunctionWrapper<std::string(const Object &)>(&Object::getId))
-                                .setCopyGetter("getFlag", &Object::flag_)
+                                .setGetter("getFlag", &Object::flag_)
                                 .setSetter("setFlag", &Object::flag_)
                                 .setLuaFunction("getIdAndFlag", [](lua_State *lambdaLuaState) -> int {
                                     const Object &object = integral::get<Object>(lambdaLuaState, 1);
@@ -564,7 +564,7 @@ TEST_CASE("integral test") {
     SECTION("core default argument") {
         integral::pushClassMetatable<Object>(luaState.get());
         integral::setConstructor<Object(const std::string &)>(luaState.get(), "new", integral::DefaultArgument<std::string, 1>("default"));
-        integral::setFunction(luaState.get(), "getId", std::function<std::string(const Object &)>(&Object::getId));
+        integral::setFunction(luaState.get(), "getId", &Object::getId);
         integral::setFunction(luaState.get(), "getBaseConstant", &BaseObject::getBaseConstant, integral::DefaultArgument<BaseObject, 1>());
         integral::setFunction(luaState.get(), "getSum", &getSum, integral::DefaultArgument<double, 2>(1));
         integral::setFunction(luaState.get(), "testDefault", [](int number, const std::string &string) -> std::string {
@@ -581,7 +581,7 @@ TEST_CASE("integral test") {
     SECTION("Reference default argument") {
         stateView["Object"].set(integral::ClassMetatable<Object>()
                                 .setConstructor<Object(const std::string &)>("new", integral::DefaultArgument<std::string, 1>("default"))
-                                .setFunction("getId", std::function<std::string(const Object &)>(&Object::getId))
+                                .setFunction("getId", &Object::getId)
                                 .setFunction("getBaseConstant", &BaseObject::getBaseConstant, integral::DefaultArgument<BaseObject, 1>())
                                 .setFunction("getSum", &getSum, integral::DefaultArgument<double, 2>(1))
                                 .setFunction("testDefault", [](int number, const std::string &string) -> std::string {
@@ -612,7 +612,7 @@ TEST_CASE("integral test") {
         REQUIRE_NOTHROW(stateView.doString("assert(base:getBaseOfBaseString() == 'BaseOfBase')"));
         stateView["Object"].set(integral::ClassMetatable<Object>()
                                 .setConstructor<Object(unsigned)>("new")
-                                .setFunction("getId", std::function<std::string(const Object &)>(&Object::getId))
+                                .setFunction("getId", &Object::getId)
                                 );
         stateView.defineInheritance<Object, BaseObject>();
         REQUIRE_NOTHROW(stateView.doString("object = Object.new(21)"));

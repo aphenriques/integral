@@ -1,8 +1,8 @@
 //
-//  CopyGetter.hpp
+//  Getter.hpp
 //  integral
 //
-//  Copyright (C) 2017  André Pereira Henriques
+//  Copyright (C) 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -21,15 +21,15 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_CopyGetter_hpp
-#define integral_CopyGetter_hpp
+#ifndef integral_Getter_hpp
+#define integral_Getter_hpp
 
 namespace integral {
     namespace detail {
         template<typename T, typename R>
-        class CopyGetter {
+        class Getter {
         public:
-            inline CopyGetter(R T::* attribute);
+            inline Getter(R T::* attribute);
 
             inline R operator()(const T &object) const;
 
@@ -40,10 +40,10 @@ namespace integral {
         //--
 
         template<typename T, typename R>
-        inline CopyGetter<T, R>::CopyGetter(R T::* attribute) : attribute_(attribute) {}
+        inline Getter<T, R>::Getter(R T::* attribute) : attribute_(attribute) {}
 
         template<typename T, typename R>
-        inline R CopyGetter<T, R>::operator()(const T &object) const {
+        inline R Getter<T, R>::operator()(const T &object) const {
             return object.*attribute_;
         }
     }

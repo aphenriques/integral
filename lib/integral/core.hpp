@@ -33,7 +33,7 @@
 #include "ClassMetatable.hpp"
 #include "ConstructorWrapper.hpp"
 #include "ConversionFunctionTraits.hpp"
-#include "CopyGetter.hpp"
+#include "Getter.hpp"
 #include "Setter.hpp"
 #include "DefaultArgument.hpp"
 #include "DefaultArgumentManager.hpp"
@@ -209,10 +209,10 @@ namespace integral {
     // "name": name of the bound Lua function.
     // "attribute": attribute address.
     template<typename R, typename T>
-    inline void setCopyGetter(lua_State *luaState, const std::string &name, R T::* attribute);
+    inline void setGetter(lua_State *luaState, const std::string &name, R T::* attribute);
 
     template<typename R, typename T>
-    inline void pushCopyGetter(lua_State *luaState, R T::* attribute);
+    inline void pushGetter(lua_State *luaState, R T::* attribute);
 
     // Binds a setter function in the table or metatable on top of the stack.
     // "name": name of the bound Lua function.
@@ -339,13 +339,13 @@ namespace integral {
     }
 
     template<typename R, typename T>
-    inline void setCopyGetter(lua_State *luaState, const std::string &name, R T::* attribute) {
-        setFunction(luaState, name, detail::CopyGetter<T, R>(attribute));
+    inline void setGetter(lua_State *luaState, const std::string &name, R T::* attribute) {
+        setFunction(luaState, name, detail::Getter<T, R>(attribute));
     }
 
     template<typename R, typename T>
-    inline void pushCopyGetter(lua_State *luaState, R T::* attribute) {
-        pushFunction(luaState, detail::CopyGetter<T, R>(attribute));
+    inline void pushGetter(lua_State *luaState, R T::* attribute) {
+        pushFunction(luaState, detail::Getter<T, R>(attribute));
     }
 
     template<typename R, typename T>

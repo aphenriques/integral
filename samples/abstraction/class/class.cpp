@@ -2,7 +2,7 @@
 //  class.cpp
 //  integral
 //
-//  Copyright (C) 2017  André Pereira Henriques
+//  Copyright (C) 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -28,12 +28,18 @@
 
 class Object {
 public:
+    const std::string greeting_;
     std::string name_;
 
-    Object(const std::string &name) : name_(name) {}
+    Object(const std::string greeting, const std::string &name) : greeting_(greeting), name_(name) {}
+
+    // const reference values are pushed by value (copied) to the Lua state
+    const std::string & getGreeting() const {
+        return greeting_;
+    }
 
     std::string getHello() const {
-        return std::string("Hello ") + name_ + '!';
+        return greeting_ + ' ' + name_ + '!';
     }
 };
 
@@ -45,8 +51,9 @@ int main(int argc, char* argv[]) {
         luaState["Object"] = integral::ClassMetatable<Object>()
                                  // invalid constructor register causes compilation error
                                  // .setConstructor<Object()>("invalid")
-                                 .setConstructor<Object(const std::string &)>("new")
-                                 .setCopyGetter("getName", &Object::name_)
+                                 .setConstructor<Object(const std::string &, const std::string &)>("new")
+                                 .setFunction("getGreeting", &Object::getGreeting)
+                                 .setGetter("getName", &Object::name_)
                                  .setSetter("setName", &Object::name_)
                                  .setFunction("getHello", &Object::getHello)
                                  .setFunction("getBye", [](const Object &object) {
@@ -57,7 +64,8 @@ int main(int argc, char* argv[]) {
                                     integral::get<Object>(lambdaLuaState, 1).name_ += integral::get<const char *>(lambdaLuaState, 2);
                                     return 1;
                                  });
-        luaState.doString("object = Object.new('foo')\n"
+        luaState.doString("object = Object.new('hi', 'foo')\n"
+                          "print(object:getGreeting())\n"
                           "print(object:getName())\n"
                           "object:setName('bar')\n"
                           "print(object:getHello())");

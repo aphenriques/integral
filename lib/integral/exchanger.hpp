@@ -804,7 +804,8 @@ namespace integral {
 
             template<typename T, typename ...A>
             void push(lua_State *luaState, A &&...arguments) {
-                static_assert(std::is_reference<T>::value == false, "cannot push reference");
+                // "const T &" is pushed as "T" (by value)
+                static_assert(std::is_reference<T>::value == false || std::is_const<typename std::remove_reference<T>::type>::value == true, "cannot push non-const reference");
                 const int stackTopIndex = lua_gettop(luaState);
                 ExchangerType<T>::push(luaState, std::forward<A>(arguments)...);
                 // stack: ?...

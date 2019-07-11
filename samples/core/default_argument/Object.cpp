@@ -2,7 +2,7 @@
 //  Object.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2015, 2016, 2017  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016, 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -54,7 +54,7 @@ extern "C" {
             // will fail:
             //integral::setConstructor<Object(const std::string &)>(luaState, "new", integral::DefaultArgument<std::string, 1>("default Object.new argument"), integral::DefaultArgument<std::string, 1>("wrong redefinition of default argument"));
 
-            integral::setCopyGetter(luaState, "getString", &Object::string_);
+            integral::setGetter(luaState, "getString", &Object::string_);
 
             // default argument in function
             integral::setFunction(luaState, "testDefault", &Object::testDefault, integral::DefaultArgument<Object, 1>("default Object.testDefault Object argument"), integral::DefaultArgument<int, 2>(42));

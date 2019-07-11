@@ -2,7 +2,7 @@
 //  Object.cpp
 //  integral
 //
-//  Copyright (C) 2014, 2015, 2016, 2017  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016, 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -85,7 +85,7 @@ extern "C" {
             integral::setFunction(luaState, "getPersistence", &Object::getPersistence);
 
             // getter (by value only) and setter functions
-            integral::setCopyGetter(luaState, "getNumber", &Object::number_);
+            integral::setGetter(luaState, "getNumber", &Object::number_);
             integral::setSetter(luaState, "setNumber", &Object::number_);
 
             return 1;
