@@ -381,6 +381,8 @@ namespace integral {
             // metatable[gkTypeFunctionsKey] = typeFunctionTable
             template<typename D, typename B>
             void setTypeFunction(lua_State *luaState) {
+                static_assert(std::is_same<typename std::remove_cv<D>::type, D>::value == true, "D is cv qualified");
+                static_assert(std::is_same<typename std::remove_cv<B>::type, B>::value == true, "B is cv qualified");
                 static_assert(std::is_same<D, B>::value == false, "conversion to itself");
                 static_assert(std::is_base_of<B, D>::value == true, "D must be derived from B");
                 std::type_index typeIndex = typeid(B);
@@ -408,6 +410,7 @@ namespace integral {
                 using ConversionFunctionTraits = ConversionFunctionTraits<typename FunctionTraits<F>::Signature>;
                 using OriginalType = typename ConversionFunctionTraits::OriginalType;
                 using ConversionType = typename ConversionFunctionTraits::ConversionType;
+                static_assert(std::is_same<typename std::remove_cv<ConversionType>::type, ConversionType>::value == true, "ConversionType is cv qualified");
                 static_assert(std::is_same<typename std::remove_cv<OriginalType>::type, ConversionType>::value == false, "conversion to itself");
                 std::type_index typeIndex = typeid(ConversionType);
                 // stack: metatable
@@ -513,6 +516,8 @@ namespace integral {
 
             template<typename D, typename B>
             void setInheritance(lua_State *luaState) {
+                static_assert(std::is_same<typename std::remove_cv<D>::type, D>::value == true, "D is cv qualified");
+                static_assert(std::is_same<typename std::remove_cv<B>::type, B>::value == true, "B is cv qualified");
                 static_assert(std::is_same<D, B>::value == false, "inheritance to itself");
                 static_assert(std::is_base_of<B, D>::value == true, "D must be derived from B");
                 // stack: metatable
