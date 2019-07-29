@@ -43,3 +43,6 @@
   * "Direct access in function ..."
   * To fix this, on target (not project) settings set:
     * Inline Methods Hidden > No
+* error using -flto compiler flag: "ar: <file>.o: plugin needed to handle lto object"
+  * define:
+    * AR=gcc-ar

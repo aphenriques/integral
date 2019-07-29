@@ -49,7 +49,8 @@ namespace integral {
 
             Reference(Reference &&) = default;
 
-            inline Reference(K &&key, C &&chainedReference);
+            template<typename L, typename D>
+            inline Reference(L &&key, D &&chainedReference);
 
             inline lua_State * getLuaState() const;
             void push() const;
@@ -97,7 +98,8 @@ namespace integral {
         //--
 
         template<typename K, typename C>
-        inline Reference<K, C>::Reference(K &&key, C &&chainedReference) : key_(std::forward<K>(key)), chainedReference_(std::forward<C>(chainedReference)) {}
+        template<typename L, typename D>
+        inline Reference<K, C>::Reference(L &&key, D &&chainedReference) : key_(std::forward<L>(key)), chainedReference_(std::forward<D>(chainedReference)) {}
 
         template<typename K, typename C>
         inline lua_State * Reference<K, C>::getLuaState() const {

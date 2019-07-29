@@ -15,7 +15,8 @@ ifdef USE_LUAJIT
 LUAJIT_INCLUDE_FOLDER?=/usr/local/include/luajit-2.0
 PROJECT_SYSTEM_INCLUDE_DIRS:=$(LUAJIT_INCLUDE_FOLDER) $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
 else
-PROJECT_SYSTEM_INCLUDE_DIRS=/usr/local/include $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
+LUA_INCLUDE_FOLDER?=/usr/local/include
+PROJECT_SYSTEM_INCLUDE_DIRS:=$(LUA_INCLUDE_FOLDER) $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
 endif
 
 PROJECT_LIB_DIRS:=/usr/local/lib
@@ -34,10 +35,7 @@ PROJECT_LDFLAGS+=-undefined dynamic_lookup
 ifdef USE_LUAJIT
 PROJECT_EXECUTABLE_LDFLAGS+=-pagezero_size 10000 -image_base 100000000
 endif
-
 else
-# avoids error using -flto compiler flag: "ar: <file>.o: plugin needed to handle lto object"
-#AR:=gcc-ar
 ifeq ($(shell uname -m),armv7l)
 # TODO remove this on later GCC versions
 # suppress note regarding abi change on raspberry pi
