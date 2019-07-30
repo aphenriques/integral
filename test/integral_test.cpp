@@ -494,6 +494,11 @@ TEST_CASE("integral test") {
         });
         REQUIRE_NOTHROW(stateView.doString("assert(g(1) == nil)"));
         REQUIRE_NOTHROW(stateView.doString("assert(g(nil) == 42)"));
+        stateView.doString("x = nil");
+        std::optional<Object> optionalX;
+        // the following expression throws because of an obscure c++ behaviour
+        // see https://stackoverflow.com/a/45865802
+        REQUIRE_THROWS_AS(optionalX = stateView["x"], integral::ReferenceException);
     }
     SECTION("function call") {
         stateView["Object"].set(integral::ClassMetatable<Object>()
