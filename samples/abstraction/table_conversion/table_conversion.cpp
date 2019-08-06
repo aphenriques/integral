@@ -43,7 +43,7 @@ private:
     const std::string name_;
 };
 
-int main(int argc, char* argv[]) {
+int main() {
     try {
         integral::State luaState;
         luaState.openLibs();

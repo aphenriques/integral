@@ -63,7 +63,7 @@ namespace integral {
             }
 
             template<typename ...A, typename ...T, std::size_t ...I>
-            inline void validateDefaultArguments(const DefaultArgument<T, I> &...defaultArguments) {
+            inline void validateDefaultArguments(const DefaultArgument<T, I> &... /*defaultArguments*/) {
                 // comma operator in "(checkDefaultArgumentTypeAndIndex<E>(...), 0)" is used for function call expansion
                 // check if each default argument type and index is valid
                 generic::expandDummyTemplatePack((checkDefaultArgumentTypeAndIndex<DefaultArgument<T, I>>(createArgumentTagPack<A...>(std::index_sequence_for<A...>())), 0)...);

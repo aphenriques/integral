@@ -51,7 +51,7 @@ namespace integral {
         //--
 
         namespace exchanger {
-            inline LuaIgnoredArgument Exchanger<LuaIgnoredArgument>::get(lua_State *luaState, int index) {
+            inline LuaIgnoredArgument Exchanger<LuaIgnoredArgument>::get(lua_State * /*luaState*/, int /*index*/) {
                 return LuaIgnoredArgument();
             }
         }

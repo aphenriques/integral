@@ -28,7 +28,7 @@
 // std::vector<double> is automatically converted to a lua table. Vector is a regular class for integral and is not converted to a lua table
 class Vector : public std::vector<double> {};
 
-int main(int argc, char* argv[]) {
+int main() {
     try {
         integral::State luaState;
         luaState.openLibs();

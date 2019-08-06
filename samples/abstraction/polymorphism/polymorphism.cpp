@@ -60,7 +60,7 @@ void callDerived(const Derived &) {
 
 class Other {};
 
-int main(int argc, char* argv[]) {
+int main() {
     try {
         integral::State luaState;
 

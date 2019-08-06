@@ -25,7 +25,7 @@
 #include <lua.hpp>
 #include <integral/integral.hpp>
 
-int main(int argc, char * argv[]) {
+int main() {
     lua_State *luaState = nullptr;
 
     try {

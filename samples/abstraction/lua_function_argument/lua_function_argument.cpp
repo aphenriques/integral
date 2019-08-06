@@ -36,7 +36,7 @@ std::vector<int> getTransformed(std::vector<int> vectorCopy, const integral::Lua
     return vectorCopy;
 }
 
-int main(int argc, char* argv[]) {
+int main() {
     try {
         integral::State luaState;
         luaState.openLibs();

@@ -55,7 +55,7 @@ public:
     }
 };
 
-int main(int argc, char* argv[]) {
+int main() {
     try {
         integral::State luaState;
 

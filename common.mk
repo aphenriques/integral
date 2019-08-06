@@ -22,26 +22,19 @@ endif
 PROJECT_LIB_DIRS:=/usr/local/lib
 # '?=' sets the variable if it was not previously set
 OPTIMIZATION_FLAGS?=-O0 -g
-PROJECT_CXXFLAGS:=-std=c++17 $(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS) -Werror -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wno-missing-braces -Wno-unused-parameter -pedantic
+PROJECT_CXXFLAGS:=-std=c++17 $(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS) -Werror -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
 PROJECT_LDFLAGS:=$(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS)
 # requires PROJECT_LDFLAGS definition. That's why = is used instead of :=
 PROJECT_EXECUTABLE_LDFLAGS=$(PROJECT_LDFLAGS)
 
 ifeq ($(shell uname -s),Darwin)
 # -Wweak-vtables is a clang feature
-PROJECT_CXXFLAGS+=-Wweak-vtables
 SHARED_LIB_EXTENSION:=dylib
 PROJECT_LDFLAGS+=-undefined dynamic_lookup
 ifdef USE_LUAJIT
 PROJECT_EXECUTABLE_LDFLAGS+=-pagezero_size 10000 -image_base 100000000
 endif
 else
-ifeq ($(shell uname -m),armv7l)
-# TODO remove this on later GCC versions
-# suppress note regarding abi change on raspberry pi
-PROJECT_CXXFLAGS+=-Wno-psabi
-endif
-PROJECT_CXXFLAGS+=-Wno-unused-but-set-parameter
 SHARED_LIB_EXTENSION:=so
 endif
 

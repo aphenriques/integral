@@ -816,7 +816,7 @@ namespace integral {
                 }
             }
 
-            inline void pushCopy(lua_State *luaState) {}
+            inline void pushCopy(lua_State * /*luaState*/) {}
 
             template<typename A, typename ...B>
             void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments) {

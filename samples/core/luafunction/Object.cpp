@@ -88,7 +88,7 @@ extern "C" {
 
             // alternative way to push LuaFunctions
             lua_pushstring(luaState, "printMessage");
-            integral::push<integral::LuaFunctionWrapper>(luaState, [](lua_State *lambdaLuaState) -> int {
+            integral::push<integral::LuaFunctionWrapper>(luaState, [](lua_State * /*lambdaLuaState*/) -> int {
                 std::cout << "message from LuaFunctionWrapper" << std::endl;
                 return 0;
             });

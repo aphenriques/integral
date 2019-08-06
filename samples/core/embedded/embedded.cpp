@@ -32,7 +32,7 @@ public:
     }
 };
 
-int main(int argc, char * argv[]) {
+int main() {
     lua_State *luaState = nullptr;
 
     try {

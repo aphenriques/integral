@@ -29,7 +29,7 @@
 
 static const char * const luaTestCode = "print('hello from string sample code')";
 
-int main(int argc, char* argv[]) {
+int main() {
     try {
         std::cout << "State:\n";
         integral::State luaState;

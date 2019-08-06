@@ -54,7 +54,7 @@ public:
     }
 };
 
-int main(int argc, char* argv[]) {
+int main() {
     try {
         // 'synthetic inheritance' works just like inheritance with a conversion function provided
         // it is like defining type functions, but with methods inheritance

@@ -27,7 +27,7 @@
 #include <lua.hpp>
 #include <integral/integral.hpp>
 
-int main(int argc, char* argv[]) {
+int main() {
     try {
         integral::State luaState;
         luaState.openLibs();
