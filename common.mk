@@ -11,6 +11,12 @@ PROJECT_STATIC_LIB:=lib$(PROJECT).a
 PROJECT_INCLUDE_DIRS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_ROOT_DIR)
 PROJECT_LDLIBS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
 
+ifeq ($(shell $(CXX) -v 2>&1 | grep -c "clang version"), 1)
+COMPILER:=clang
+else
+COMPILER:=gcc
+endif
+
 ifdef USE_LUAJIT
 LUAJIT_INCLUDE_FOLDER?=/usr/local/include/luajit-2.0
 PROJECT_SYSTEM_INCLUDE_DIRS:=$(LUAJIT_INCLUDE_FOLDER) $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
@@ -27,7 +33,7 @@ PROJECT_LDFLAGS:=$(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS)
 # requires PROJECT_LDFLAGS definition. That's why = is used instead of :=
 PROJECT_EXECUTABLE_LDFLAGS=$(PROJECT_LDFLAGS)
 
-ifeq ($(shell uname -s),Darwin)
+ifeq ($(COMPILER), clang)
 # -Wweak-vtables is a clang feature
 PROJECT_CXXFLAGS+=-Wweak-vtables
 SHARED_LIB_EXTENSION:=dylib
