@@ -80,11 +80,15 @@ Alternatively, build and install the library with:
     $ make
     $ make install
 
-If you want to build the library with LuaJIT use:
+To build the library, the test or the samples with LuaJIT, use:
 
-    $ make USE_LUAJIT=YES
-    $ make USE_LUAJIT=YES install
+    $ make WITH_LUAJIT=y
 
+It is possible to override compiler flags like the following example:
+
+    $ make 'CXXFLAGS=-std=c++17 -I/path/to/luajit/include' LDFLAGS=-L/path/to/luajit/lib LDLIBS=-lluajitlibrary
+
+or defining them as environment variables.
 
 # Usage
 

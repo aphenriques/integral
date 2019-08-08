@@ -7,41 +7,75 @@ PROJECT_TEST_DIR:=test
 PROJECT_DEPENDENCIES_DIR:=dependencies
 PROJECT_STATIC_LIB:=lib$(PROJECT).a
 
-# some variables require PROJECT_ROOT_DIR definition. That's why = is used instead of := for their definition
-PROJECT_INCLUDE_DIRS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_ROOT_DIR)
-PROJECT_LDLIBS=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
+# PROJECT_ROOT_DIR is defined later. That's why = is used instead of :=
+PROJECT_LIB_INCLUDE_DIR=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_ROOT_DIR)
+PROJECT_EXCEPTION_INCLUDE_DIR=$(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
+PROJECT_STATIC_LIB_LDLIB=$(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
 
-ifdef USE_LUAJIT
-LUAJIT_INCLUDE_FOLDER?=/usr/local/include/luajit-2.0
-PROJECT_SYSTEM_INCLUDE_DIRS:=$(LUAJIT_INCLUDE_FOLDER) $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
-else
-LUA_INCLUDE_FOLDER?=/usr/local/include
-PROJECT_SYSTEM_INCLUDE_DIRS:=$(LUA_INCLUDE_FOLDER) $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/exception/include
-endif
-
-PROJECT_LIB_DIRS:=/usr/local/lib
+ifeq ($(WITH_LUAJIT), y)
+LUA_INCLUDE_DIR?=/usr/local/include/luajit-2.0
+LUA_LDLIB?=-lluajit-5.1
+else ifeq ($(or $(WITH_LUAJIT), n), n)
 # '?=' sets the variable if it was not previously set
-OPTIMIZATION_FLAGS?=-O0 -g
-PROJECT_CXXFLAGS:=-std=c++17 $(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS) -Werror -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
-PROJECT_LDFLAGS:=$(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS)
-# requires PROJECT_LDFLAGS definition. That's why = is used instead of :=
-PROJECT_EXECUTABLE_LDFLAGS=$(PROJECT_LDFLAGS)
+LUA_INCLUDE_DIR?=/usr/local/include
+LUA_LDLIB?=-llua
+else
+$(error Invalid parameter value)
+endif
 
-ifeq ($(shell uname -s),Darwin)
-# -Wweak-vtables is a clang feature
-SHARED_LIB_EXTENSION:=dylib
-PROJECT_LDFLAGS+=-undefined dynamic_lookup
-ifdef USE_LUAJIT
-PROJECT_EXECUTABLE_LDFLAGS+=-pagezero_size 10000 -image_base 100000000
+ifeq ($(OPTIMIZED), y)
+OPTIMIZATION_FLAGS:=-O3 -march=native -flto
+else ifeq ($(or $(OPTIMIZED), n), n)
+OPTIMIZATION_FLAGS?=-O0 -g
+else
+$(error Invalid parameter value)
+endif
+
+ifeq ($(SANITIZED), y)
+ifneq ($(OPTIMIZED), y)
+SANITIZE_FLAGS:=-fsanitize=address -fno-omit-frame-pointer
+else
+$(error Cannot have SANITIZED=y and OPTIMIZED=y)
+endif
+else ifneq ($(or $(SANITIZED), n), n)
+$(error Invalid parameter value)
+endif
+
+ifeq ($(WITH_FPIC), n)
+FPIC_FLAG:=
+else ifeq ($(or $(WITH_FPIC), y), y)
+FPIC_FLAG?=-fPIC
+else
+$(error Invalid parameter value)
+endif
+
+ifndef CXXFLAGS
+PROJECT_CXXFLAGS?=-std=c++17 -Werror -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic $(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS) $(FPIC_FLAG) -isystem $(LUA_INCLUDE_DIR)
+endif # ndef CXXFLAGS
+
+ifeq ($(shell uname -s), Darwin)
+SHARED_LIB_EXTENSION?=dylib
+PROJECT_DARWIN_SHARED_LDFLAGS?=-undefined dynamic_lookup
+ifdef WITH_LUAJIT
+PROJECT_DARWIN_LUAJIT_EXECUTABLE_LDFLAGS?=-pagezero_size 10000 -image_base 100000000
 endif
 else
-SHARED_LIB_EXTENSION:=so
+SHARED_LIB_EXTENSION?=so
 endif
 
 PROJECT_SHARED_LIB:=lib$(PROJECT).$(SHARED_LIB_EXTENSION)
 
-ifdef USE_LUAJIT
-LIB_LUA_FLAG:=-lluajit-5.1
-else
-LIB_LUA_FLAG:=-llua
+ifndef LDFLAGS
+LUA_LIB_DIR?=/usr/local/lib
+PROJECT_LDFLAGS?=$(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS) -L$(LUA_LIB_DIR)
+PROJECT_SHARED_LDFLAGS?=$(PROJECT_LDFLAGS) $(PROJECT_DARWIN_SHARED_LDFLAGS)
+PROJECT_EXECUTABLE_LDFLAGS?=$(PROJECT_LDFLAGS) $(PROJECT_DARWIN_LUAJIT_EXECUTABLE_LDFLAGS)
+endif
+
+ifndef LDLIBS
+PROJECT_EXECUTABLE_LDLIBS?=$(LUA_LDLIB) -ldl
+endif
+
+ifndef ARFLAGS
+PROJECT_ARFLAGS?=rcs
 endif

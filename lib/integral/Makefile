@@ -5,16 +5,13 @@ include $(PROJECT_ROOT_DIR)/common.mk
 SRC_DIRS:=. $(wildcard */.)
 FILTER_OUT:=
 INCLUDE_DIRS:=
-SYSTEM_INCLUDE_DIRS:=$(PROJECT_SYSTEM_INCLUDE_DIRS)
+SYSTEM_INCLUDE_DIRS:=$(PROJECT_EXCEPTION_INCLUDE_DIR)
 LIB_DIRS:=
-LDLIBS:=
 
-# '?=' sets the variable if it was not previously set
-FPIC_FLAG?=-fPIC
 # '-isystem <dir>' supress warnings from included headers in <dir>. These headers are also excluded from dependency generation
-CXXFLAGS+=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS)) $(FPIC_FLAG)
-ARFLAGS:=rcs
-LDFLAGS+= $(PROJECT_LDFLAGS) -shared $(addprefix -L, $(LIB_DIRS))
+override CXXFLAGS+=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS))
+override ARFLAGS+=$(PROJECT_ARFLAGS)
+override LDFLAGS+=$(PROJECT_SHARED_LDFLAGS) -shared $(addprefix -L, $(LIB_DIRS))
 
 ################################################################################
 

@@ -5,14 +5,14 @@ include $(PROJECT_ROOT_DIR)/common.mk
 TARGET:=integral_test
 SRC_DIRS:=. $(wildcard */.)
 FILTER_OUT:=
-INCLUDE_DIRS:=$(PROJECT_INCLUDE_DIRS)
-SYSTEM_INCLUDE_DIRS:=$(PROJECT_SYSTEM_INCLUDE_DIRS) $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/Catch2/single_include
-LIB_DIRS:=$(PROJECT_LIB_DIRS)
-LDLIBS:=$(PROJECT_LDLIBS) $(LIB_LUA_FLAG) -ldl
+INCLUDE_DIRS:=$(PROJECT_LIB_INCLUDE_DIR)
+SYSTEM_INCLUDE_DIRS:=$(PROJECT_EXCEPTION_INCLUDE_DIR) $(PROJECT_ROOT_DIR)/$(PROJECT_DEPENDENCIES_DIR)/Catch2/single_include
+LIB_DIRS:=
 
 # '-isystem <dir>' supress warnings from included headers in <dir>. These headers are also excluded from dependency generation
-CXXFLAGS:=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS))
-LDFLAGS:=$(PROJECT_EXECUTABLE_LDFLAGS) $(addprefix -L, $(LIB_DIRS))
+override CXXFLAGS+=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS))
+override LDFLAGS+=$(PROJECT_EXECUTABLE_LDFLAGS) $(addprefix -L, $(LIB_DIRS))
+override LDLIBS+=$(PROJECT_EXECUTABLE_LDLIBS) $(PROJECT_STATIC_LIB_LDLIB)
 
 ################################################################################
 
@@ -24,7 +24,7 @@ DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 .PHONY: all run clean
 
 all:
-	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) all
+	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) static
 	$(MAKE) $(TARGET)
 
 run: all
