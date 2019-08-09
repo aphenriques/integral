@@ -73,7 +73,7 @@
 
 # Build
 
-Grab all the source files (*.hpp and *.cpp) in `src` directory and build (there is no preprocessor configuration for the library).
+Grab the `dependecies/exception/include/exception` directory and all the source files (*.hpp and *.cpp) in `lib` directory and build (there is no preprocessor configuration for the library).
 
 Alternatively, build and install the library with:
 
