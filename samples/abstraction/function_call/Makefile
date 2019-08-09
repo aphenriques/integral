@@ -5,10 +5,10 @@ include $(PROJECT_ROOT_DIR)/common.mk
 TARGET:=function_call
 SRC_DIRS:=. $(wildcard */.)
 FILTER_OUT:=
-INCLUDE_DIRS:=$(PROJECT_INCLUDE_DIRS)
-SYSTEM_INCLUDE_DIRS:=$(PROJECT_SYSTEM_INCLUDE_DIRS)
-LIB_DIRS:=$(PROJECT_LIB_DIRS)
-LDLIBS:=$(PROJECT_LDLIBS) $(LIB_LUA_FLAG) -ldl
+INCLUDE_DIRS:=$(PROJECT_STATIC_LIB_INCLUDE_DIR)
+SYSTEM_INCLUDE_DIRS:=$(LUA_INCLUDE_DIR) $(PROJECT_EXCEPTION_INCLUDE_DIR)
+LIB_DIRS:=$(LUA_LIB_DIR)
+LDLIBS:=$(PROJECT_STATIC_LIB_LDLIB) $(LUA_LDLIB) -ldl
 
 # '-isystem <dir>' supress warnings from included headers in <dir>. These headers are also excluded from dependency generation
 CXXFLAGS:=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS))
@@ -24,7 +24,7 @@ DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 .PHONY: all run clean
 
 all:
-	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) all
+	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) static
 	$(MAKE) $(TARGET)
 
 run: all

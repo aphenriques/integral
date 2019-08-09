@@ -5,14 +5,14 @@ include $(PROJECT_ROOT_DIR)/common.mk
 TARGET:=VectorOfDoubles
 SRC_DIRS:=. $(wildcard */.)
 FILTER_OUT:=
-INCLUDE_DIRS:=$(PROJECT_INCLUDE_DIRS)
-SYSTEM_INCLUDE_DIRS:=$(PROJECT_SYSTEM_INCLUDE_DIRS)
+INCLUDE_DIRS:=$(PROJECT_STATIC_LIB_INCLUDE_DIR)
+SYSTEM_INCLUDE_DIRS:=$(LUA_INCLUDE_DIR) $(PROJECT_EXCEPTION_INCLUDE_DIR)
 LIB_DIRS:=
-LDLIBS:=$(PROJECT_LDLIBS)
+LDLIBS:=$(PROJECT_STATIC_LIB_LDLIB)
 
 # '-isystem <dir>' supress warnings from included headers in <dir>. These headers are also excluded from dependency generation
-CXXFLAGS:=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS)) -fPIC
-LDFLAGS:=$(PROJECT_LDFLAGS) $(addprefix -L, $(LIB_DIRS)) -shared
+CXXFLAGS:=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS))
+LDFLAGS:=$(PROJECT_SHARED_LDFLAGS) $(addprefix -L, $(LIB_DIRS))
 
 ################################################################################
 
@@ -26,7 +26,7 @@ DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 .PHONY: all clean
 
 all:
-	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) all
+	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) static
 	$(MAKE) $(SHARED_LIB)
 
 $(SHARED_LIB): $(OBJS) $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)

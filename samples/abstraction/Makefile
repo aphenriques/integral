@@ -21,4 +21,4 @@ $(SUBDIRS_TARGETS):
 $(addsuffix all,$(SUBDIRS)): lib
 
 lib:
-	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) all
+	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) static

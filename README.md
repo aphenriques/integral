@@ -84,11 +84,10 @@ To build the library, the test or the samples with LuaJIT, use:
 
     $ make WITH_LUAJIT=y
 
-It is possible to override compiler flags like the following example:
+Lua and LuaJIT compiler settings can be defined with:
 
-    $ make 'CXXFLAGS=-std=c++17 -I/path/to/luajit/include' LDFLAGS=-L/path/to/luajit/lib LDLIBS=-lluajitlibrary
+    $ make LUA_INCLUDE_DIR=/path/to/lua[jit]/include LUA_LIB_DIR=-L/path/to/lua[jit]/lib LUA_LDLIB=-llua[jit]library [WITH_LUAJIT=y]
 
-or defining them as environment variables.
 
 # Usage
 
