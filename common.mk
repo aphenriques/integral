@@ -55,8 +55,6 @@ else
 $(error Invalid parameter value)
 endif
 
-PROJECT_CXXFLAGS:=$(EXTRA_CXXFLAGS) -std=c++17 -Werror -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic $(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS) $(FPIC_FLAG)
-
 ifeq ($(shell uname -s), Darwin)
 SHARED_LIB_EXTENSION:=dylib
 PROJECT_DARWIN_SHARED_LDFLAGS:=-undefined dynamic_lookup
@@ -68,6 +66,8 @@ SHARED_LIB_EXTENSION:=so
 endif
 
 PROJECT_SHARED_LIB:=lib$(PROJECT).$(SHARED_LIB_EXTENSION)
+
+PROJECT_CXXFLAGS:=$(EXTRA_CXXFLAGS) -std=c++17 -Werror -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic $(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS) $(FPIC_FLAG)
 
 PROJECT_COMMON_LDFLAGS:=$(EXTRA_LDFLAGS) $(OPTIMIZATION_FLAGS) $(SANITIZE_FLAGS)
 PROJECT_SHARED_LDFLAGS:=$(PROJECT_COMMON_LDFLAGS) -shared $(PROJECT_DARWIN_SHARED_LDFLAGS)
