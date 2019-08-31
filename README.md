@@ -578,7 +578,7 @@ The library also uses the following field names in its generated class metatable
 
 and cloned with:
 
-    git clone git://github.com/aphenriques/integral.git
+    git clone --recurse-submodules git://github.com/aphenriques/integral.git
 
 
 # Author
