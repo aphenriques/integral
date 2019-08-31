@@ -10,7 +10,6 @@ LIB_DIRS:=
 
 # '-isystem <dir>' supress warnings from included headers in <dir>. These headers are also excluded from dependency generation
 CXXFLAGS:=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS))
-ARFLAGS:=$(PROJECT_ARFLAGS)
 LDFLAGS:=$(PROJECT_SHARED_LDFLAGS) $(addprefix -L, $(LIB_DIRS))
 ARFLAGS:=rcs
 
