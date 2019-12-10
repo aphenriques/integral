@@ -2,7 +2,7 @@
 //  State.hpp
 //  integral
 //
-//  Copyright (C) 2016  André Pereira Henriques
+//  Copyright (C) 2016, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -35,9 +35,13 @@ namespace integral {
         // non-copyable
         State(const State &) = delete;
         State & operator=(const State &) = delete;
-        
+
         // throws exception::RuntimeException if cannot create lua state
         State();
+
+        // moveable
+        State(State &&state);
+
         ~State();
     };
 }

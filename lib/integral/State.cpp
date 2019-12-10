@@ -2,7 +2,7 @@
 //  State.cpp
 //  integral
 //
-//  Copyright (C) 2016  André Pereira Henriques
+//  Copyright (C) 2016, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -31,6 +31,8 @@ namespace integral {
     } catch (const StateException &stateException) {
         throw exception::RuntimeException(__FILE__, __LINE__, __func__, std::string("[integral] failed to create new lua state: { ") + stateException.what() + " }");
     }
+
+    State::State(State &&state) : StateView(std::move(state)) {}
 
     State::~State() {
         if (getLuaState() != nullptr) {
