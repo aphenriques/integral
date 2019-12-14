@@ -2,7 +2,7 @@
 //  DefaultArgumentManager.hpp
 //  integral
 //
-//  Copyright (C) 2014, 2015, 2016, 2017  André Pereira Henriques
+//  Copyright (C) 2014, 2015, 2016, 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -71,7 +71,10 @@ namespace integral {
 
         template<typename ...F>
         template<std::size_t ...S>
-        inline void DefaultArgumentManager<F...>::processDefaultArguments(lua_State *luaState, std::index_sequence<S...>) const {
+        // [[maybe_unused]] is used because of a bug in gcc 7.4 which incorrectly shows the following warning:
+        // error: parameter ‘luaState’ set but not used [-Werror=unused-but-set-parameter]
+        // FIXME remove [[maybe_unused]] in future versions
+        inline void DefaultArgumentManager<F...>::processDefaultArguments([[maybe_unused]] lua_State *luaState, std::index_sequence<S...>) const {
             generic::expandDummyTemplatePack((processArgument(luaState, std::get<S>(defaultArguments_)), 0)...);
         }
 

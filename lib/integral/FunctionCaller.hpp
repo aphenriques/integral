@@ -2,7 +2,7 @@
 //  FunctionCaller.hpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2016, 2017  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016, 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -34,14 +34,14 @@ namespace integral {
     namespace detail {
         template<typename R, typename ...A>
         class FunctionCaller {
-        public:        
+        public:
             template<std::size_t ...S>
             static int call(lua_State *luaState, const std::function<R(A...)> &function, std::index_sequence<S...>);
         };
 
         template<typename ...A>
         class FunctionCaller<void, A...> {
-        public:        
+        public:
             template<std::size_t ...S>
             static int call(lua_State *luaState, const std::function<void(A...)> &function, std::index_sequence<S...>);
         };
@@ -57,7 +57,10 @@ namespace integral {
 
         template<typename ...A>
         template<std::size_t ...S>
-        int FunctionCaller<void, A...>::call(lua_State *luaState, const std::function<void(A...)> &function, std::index_sequence<S...>) {
+        // [[maybe_unused]] is used because of a bug in gcc 7.4 which incorrectly shows the following warning:
+        // error: parameter ‘luaState’ set but not used [-Werror=unused-but-set-parameter]
+        // FIXME remove [[maybe_unused]] in future versions
+        int FunctionCaller<void, A...>::call([[maybe_unused]] lua_State *luaState, const std::function<void(A...)> &function, std::index_sequence<S...>) {
             function(exchanger::get<A>(luaState, S + 1)...);
             return 0;
         }
