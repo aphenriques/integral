@@ -2,7 +2,7 @@
 //  exchanger.cpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2016  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -74,7 +74,11 @@ namespace integral {
 
             bool Exchanger<bool>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
-                    return lua_toboolean(luaState, index) != 0;
+                    if (lua_isboolean(luaState, index) != 0) {
+                        return lua_toboolean(luaState, index) != 0;
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TBOOLEAN));
+                    }
                 } else {
                     const bool *userData = type_manager::getConvertibleType<bool>(luaState, index);
                     if (userData != nullptr) {
