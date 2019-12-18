@@ -2,7 +2,7 @@
 //  table_composite.hpp
 //  integral
 //
-//  Copyright (C) 2017  André Pereira Henriques
+//  Copyright (C) 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -68,7 +68,8 @@ namespace integral {
 
                 TableComposite(TableComposite &&) = default;
 
-                inline TableComposite(C &&chainedTableComposite, K &&key, V &&value);
+                template<typename L, typename W>
+                inline TableComposite(C &&chainedTableComposite, L &&key, W &&value);
 
                 void push(lua_State *luaState) const;
 
@@ -117,7 +118,8 @@ namespace integral {
 
             // TableComposite
             template<typename C, typename K, typename V>
-            inline TableComposite<C, K, V>::TableComposite(C &&chainedTableComposite, K &&key, V &&value) : chainedTableComposite_(std::forward<C>(chainedTableComposite)), key_(std::forward<K>(key)), value_(std::forward<V>(value)) {}
+            template<typename L, typename W>
+            inline TableComposite<C, K, V>::TableComposite(C &&chainedTableComposite, L &&key, W &&value) : chainedTableComposite_(std::forward<C>(chainedTableComposite)), key_(std::forward<L>(key)), value_(std::forward<W>(value)) {}
 
             template<typename C, typename K, typename V>
             void TableComposite<C, K, V>::push(lua_State *luaState) const {

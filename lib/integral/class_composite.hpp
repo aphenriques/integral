@@ -67,7 +67,7 @@ namespace integral {
 
                 template<typename K, typename F>
                 inline decltype(auto) setLuaFunction(K &&key, F &&luaFunction) &&;
-                
+
                 template<typename F, typename K, typename ...E, std::size_t ...I>
                 inline decltype(auto) setConstructor(K &&key, DefaultArgument<E, I> &&...defaultArguments) &&;
 
@@ -99,7 +99,8 @@ namespace integral {
 
                 ClassMetatableComposite(ClassMetatableComposite &&) = default;
 
-                inline ClassMetatableComposite(C &&chainedClassMetatableComposite, K &&key, V &&value);
+                template<typename L, typename W>
+                inline ClassMetatableComposite(C &&chainedClassMetatableComposite, L &&key, W &&value);
 
                 void push(lua_State *luaState) const;
 
@@ -235,7 +236,8 @@ namespace integral {
 
             // ClassMetatableComposite
             template<typename T, typename C, typename K, typename V>
-            inline ClassMetatableComposite<T, C, K, V>::ClassMetatableComposite(C &&chainedClassMetatableComposite, K &&key, V &&value) : chainedClassMetatableComposite_(std::forward<C>(chainedClassMetatableComposite)), key_(std::forward<K>(key)), value_(std::forward<V>(value)) {}
+            template<typename L, typename W>
+            inline ClassMetatableComposite<T, C, K, V>::ClassMetatableComposite(C &&chainedClassMetatableComposite, L &&key, W &&value) : chainedClassMetatableComposite_(std::forward<C>(chainedClassMetatableComposite)), key_(std::forward<L>(key)), value_(std::forward<W>(value)) {}
 
             template<typename T, typename C, typename K, typename V>
             void ClassMetatableComposite<T, C, K, V>::push(lua_State *luaState) const {
