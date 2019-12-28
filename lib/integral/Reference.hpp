@@ -2,7 +2,7 @@
 //  Reference.hpp
 //  integral
 //
-//  Copyright (C) 2016, 2017  André Pereira Henriques
+//  Copyright (C) 2016, 2017, 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -24,41 +24,19 @@
 #ifndef integral_Reference_hpp
 #define integral_Reference_hpp
 
-#include <type_traits>
-#include <utility>
-#include <lua.hpp>
-#include <exception/Exception.hpp>
-#include <exception/TemplateClassException.hpp>
+#include "ReferenceInterface.hpp"
 #include "ArgumentException.hpp"
 #include "Caller.hpp"
-#include "exchanger.hpp"
-#include "factory.hpp"
-#include "GlobalReference.hpp"
-#include "serializer.hpp"
 
 namespace integral {
     namespace detail {
         template<typename K, typename C>
-        class Reference {
-            static_assert(std::is_reference<K>::value == false, "K cannot be a reference type");
-            static_assert(std::is_reference<C>::value == false, "C cannot be a reference type");
+        class Reference : public ReferenceInterface<Reference<K, C>> {
         public:
-            // non-copyable
-            Reference(const Reference &) = delete;
-            Reference & operator=(const Reference &) = delete;
-
-            Reference(Reference &&) = default;
-
             template<typename L, typename D>
             inline Reference(L &&key, D &&chainedReference);
 
-            inline lua_State * getLuaState() const;
-            void push() const;
             bool isNil() const;
-            std::string getReferenceString() const;
-
-            template<typename L>
-            inline Reference<typename std::decay<L>::type, Reference<K, C>> operator[](L &&key) &&;
 
             template<typename T, typename ...A>
             Reference<K, C> & emplace(A &&...arguments);
@@ -87,91 +65,51 @@ namespace integral {
             // the arguments are pushed by value onto the lua stack
             template<typename R, typename ...A>
             decltype(auto) call(A &&...arguments);
-
-        private:
-            K key_;
-            C chainedReference_;
         };
-
-        using ReferenceException = exception::TemplateClassException<Reference, exception::RuntimeException>;
 
         //--
 
         template<typename K, typename C>
         template<typename L, typename D>
-        inline Reference<K, C>::Reference(L &&key, D &&chainedReference) : key_(std::forward<L>(key)), chainedReference_(std::forward<D>(chainedReference)) {}
-
-        template<typename K, typename C>
-        inline lua_State * Reference<K, C>::getLuaState() const {
-            return chainedReference_.getLuaState();
-        }
-
-        template<typename K, typename C>
-        inline void Reference<K, C>::push() const {
-            chainedReference_.push();
-            // stack: ?
-            if (lua_istable(getLuaState(), -1) != 0) {
-                // stack: chainedReferenceTable
-                exchanger::push<K>(getLuaState(), key_);
-                // stack: chainedReferenceTable | key
-                lua_rawget(getLuaState(), -2);
-                // stack: chainedReferenceTable | reference
-                lua_remove(getLuaState(), -2);
-                // stack: reference
-            } else {
-                // stack: ?
-                lua_pop(getLuaState(), 1);
-                throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] reference ") + chainedReference_.getReferenceString() + " is not a table");
-            }
-        }
+        inline Reference<K, C>::Reference(L &&key, D &&chainedReference) :
+            ReferenceInterface<Reference<K, C>>(std::forward<L>(key), std::forward<D>(chainedReference))
+        {}
 
         template<typename K, typename C>
         bool Reference<K, C>::isNil() const {
-            push();
+            ReferenceInterface<Reference<K, C>>::push();
             // stack: ?
-            if (lua_isnil(getLuaState(), -1) == 0) {
+            if (lua_isnil((ReferenceInterface<Reference<K, C>>::getLuaState()), -1) == 0) {
                 // stack: ?
-                lua_pop(getLuaState(), 1);
+                lua_pop((ReferenceInterface<Reference<K, C>>::getLuaState()), 1);
                 return false;
             } else {
                 // stack: nil
-                lua_pop(getLuaState(), 1);
+                lua_pop((ReferenceInterface<Reference<K, C>>::getLuaState()), 1);
                 return true;
             }
         }
 
         template<typename K, typename C>
-        std::string Reference<K, C>::getReferenceString() const {
-            return chainedReference_.getReferenceString() + "[" + serializer::getString(key_) + "]";
-        }
-
-
-        template<typename K, typename C>
-        template<typename L>
-        inline Reference<typename std::decay<L>::type, Reference<K, C>> Reference<K, C>::operator[](L &&key) && {
-            return Reference<typename std::decay<L>::type, Reference<K, C>>(std::forward<L>(key), std::move(*this));
-        }
-
-        template<typename K, typename C>
         template<typename T, typename ...A>
         Reference<K, C> & Reference<K, C>::emplace(A &&...arguments) {
-            chainedReference_.push();
+            ReferenceInterface<Reference<K, C>>::getChainedReference().push();
             // stack: ?
-            if (lua_istable(getLuaState(), -1) != 0) {
+            if (lua_istable((ReferenceInterface<Reference<K, C>>::getLuaState()), -1) != 0) {
                 // stack: chainedReferenceTable
-                exchanger::push<K>(getLuaState(), key_);
+                exchanger::push<K>((ReferenceInterface<Reference<K, C>>::getLuaState()), ReferenceInterface<Reference<K, C>>::getKey());
                 // stack: chainedReferenceTable | key
-                exchanger::push<T>(getLuaState(), std::forward<A>(arguments)...);
+                exchanger::push<T>((ReferenceInterface<Reference<K, C>>::getLuaState()), std::forward<A>(arguments)...);
                 // stack: chainedReferenceTable | key | value
-                lua_rawset(getLuaState(), -3);
+                lua_rawset((ReferenceInterface<Reference<K, C>>::getLuaState()), -3);
                 // stack: chainedReferenceTable
-                lua_pop(getLuaState(), 1);
+                lua_pop((ReferenceInterface<Reference<K, C>>::getLuaState()), 1);
                 // stack:
                 return *this;
             } else {
                 // stack: ?
-                lua_pop(getLuaState(), 1);
-                throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] reference ") + getReferenceString() + " is not a table");
+                lua_pop((ReferenceInterface<Reference<K, C>>::getLuaState()), 1);
+                throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] reference ") + ReferenceInterface<Reference<K, C>>::getReferenceString() + " is not a table");
             }
         }
 
@@ -202,22 +140,22 @@ namespace integral {
         template<typename K, typename C>
         template<typename V>
         decltype(auto) Reference<K, C>::get() const {
-            push();
+            ReferenceInterface<Reference<K, C>>::push();
             // stack: ?
             try {
-                decltype(auto) returnValue = exchanger::get<V>(getLuaState(), -1);
+                decltype(auto) returnValue = exchanger::get<V>((ReferenceInterface<Reference<K, C>>::getLuaState()), -1);
                 // stack: value
-                lua_pop(getLuaState(), 1);
+                lua_pop((ReferenceInterface<Reference<K, C>>::getLuaState()), 1);
                 // stack:
                 return returnValue;
             } catch (const ArgumentException &argumentException) {
                 // stack: ?
-                lua_pop(getLuaState(), 1);
+                lua_pop((ReferenceInterface<Reference<K, C>>::getLuaState()), 1);
                 // stack:
-                throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] invalid type getting reference " ) + getReferenceString() + ": " + argumentException.what());
+                throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] invalid type getting reference " ) + ReferenceInterface<Reference<K, C>>::getReferenceString() + ": " + argumentException.what());
             }
         }
-        
+
         template<typename K, typename C>
         template<typename V>
         inline Reference<K, C>::operator V() const {
@@ -227,15 +165,15 @@ namespace integral {
         template<typename K, typename C>
         template<typename R, typename ...A>
         decltype(auto) Reference<K, C>::call(A &&...arguments) {
-            push();
+            ReferenceInterface<Reference<K, C>>::push();
             // stack: ?
             try {
                 // detail::Caller<R, A...>::call pops the first element of the stack
-                return detail::Caller<R, A...>::call(getLuaState(), std::forward<A>(arguments)...);
+                return detail::Caller<R, A...>::call((ReferenceInterface<Reference<K, C>>::getLuaState()), std::forward<A>(arguments)...);
             } catch (const ArgumentException &argumentException) {
-                throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] invalid type calling function reference " ) + getReferenceString() + ": " + argumentException.what());
+                throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] invalid type calling function reference " ) + ReferenceInterface<Reference<K, C>>::getReferenceString() + ": " + argumentException.what());
             } catch (const CallerException &callerException) {
-                throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] error calling function reference " ) + getReferenceString() + ": " + callerException.what());
+                throw ReferenceException(__FILE__, __LINE__, __func__, std::string("[integral] error calling function reference " ) + ReferenceInterface<Reference<K, C>>::getReferenceString() + ": " + callerException.what());
             }
         }
     }
