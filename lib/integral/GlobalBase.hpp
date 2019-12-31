@@ -1,8 +1,8 @@
 //
-//  GlobalReference.hpp
+//  GlobalBase.hpp
 //  integral
 //
-//  Copyright (C) 2016, 2017, 2019  André Pereira Henriques
+//  Copyright (C) 2019  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -21,36 +21,39 @@
 //  along with integral.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef integral_GlobalReference_hpp
-#define integral_GlobalReference_hpp
+#ifndef integral_GlobalBase_hpp
+#define integral_GlobalBase_hpp
 
-#include "GlobalBase.hpp"
+#include <string>
+#include <lua.hpp>
+#include "lua_compatibility.hpp"
 
-namespace integral::detail {
-    class GlobalReference : public GlobalBase {
+namespace integral {
+    class GlobalBase {
     public:
-        GlobalReference(GlobalReference &&) = default;
+        // non-copyable
+        GlobalBase(const GlobalBase &) = delete;
+        GlobalBase & operator=(const GlobalBase &) = delete;
 
-        inline GlobalReference(lua_State *luaState);
+        GlobalBase(GlobalBase &&) = default;
+        GlobalBase() = default;
 
-        inline lua_State * getLuaState() const;
-        inline void push() const;
+        inline std::string getReferenceString() const;
 
-    private:
-        lua_State *luaState_;
+    protected:
+        inline void push(lua_State *luaState) const;
     };
 
     //--
 
-    inline GlobalReference::GlobalReference(lua_State *luaState) : luaState_(luaState) {}
-
-    inline lua_State * GlobalReference::getLuaState() const {
-        return luaState_;
+    inline std::string GlobalBase::getReferenceString() const {
+        return "_G";
     }
 
-    inline void GlobalReference::push() const {
-        GlobalBase::push(getLuaState());
+    inline void GlobalBase::push(lua_State *luaState) const {
+        detail::lua_compatibility::pushglobaltable(luaState);
     }
 }
 
 #endif
+

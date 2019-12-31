@@ -15,6 +15,7 @@
   * [Create Lua state](#create-lua-state)
   * [Use existing Lua state](#use-existing-lua-state)
   * [Get and set value](#get-and-set-value)
+  * [Reference lua variables](#reference-lua-variables)
   * [Register function](#register-function)
   * [Register function with default arguments](#register-function-with-default-arguments)
   * [Register class](#register-class)
@@ -68,7 +69,7 @@
 # Tested environments
 
 * gcc version 8.3.0 (Ubuntu 8.3.0-6ubuntu1) on Ubuntu Linux; and
-* Apple clang version 11.0.0 (clang-1100.0.33.12) on MacOS.
+* Apple clang version 11.0.0 (clang-1100.0.33.16) on MacOS.
 
 
 # Build
@@ -139,6 +140,22 @@ See [example](samples/abstraction/state/state.cpp).
 ```
 
 See [example](samples/abstraction/reference/reference.cpp).
+
+## Reference lua variables
+
+```cpp
+    luaState["x"] = 42;
+    luaState["y"] = integral::Global()["x"]; // equivalent to "y = x" in lua
+    luaState.doString("print(y)"); // prints "42"
+
+    luaState["global"] = integral::Global(); // equivalent to "global = _G" in lua
+    luaState.doString("print(global.y)"); // prints "42"
+
+    luaState["t"] = integral::Table().set("x", integral::Global()["global"]["y"]); // equivalent to "t = {x = global.y}" in lua
+    luaState.doString("print(t.x)"); // prints "42"
+```
+
+See [example](samples/abstraction/global/global.cpp).
 
 ## Register function
 
@@ -584,6 +601,12 @@ and cloned with:
 # Author
 
 `integral` was made by André Pereira Henriques [aphenriques (at) outlook (dot) com].
+
+
+## Donation
+
+* BTC: 1BdPza4JSYxKt4YAgPm579ZEqK2hHQNfij
+* ETH: 0xc8eD4EcCAd66BD928EB9B1696a05AeFf8DBA699e
 
 
 # License

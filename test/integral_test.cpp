@@ -708,5 +708,12 @@ TEST_CASE("integral test") {
         // this exception leaves the stack with trash
         lua_settop(stateView.getLuaState(), 0);
     }
+    SECTION("Global") {
+        stateView["x"] = 42;
+        stateView["global"] = integral::Global();
+        REQUIRE_NOTHROW(stateView.doString("assert(global.x == x)"));
+        stateView["global"]["y"] = integral::Global()["x"];
+        REQUIRE_NOTHROW(stateView.doString("assert(global.x == y)"));
+    }
     REQUIRE(lua_gettop(luaState.get()) == 0);
 }

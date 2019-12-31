@@ -29,6 +29,7 @@
 #include "ClassMetatable.hpp"
 #include "core.hpp"
 #include "DefaultArgument.hpp"
+#include "Global.hpp"
 #include "State.hpp"
 #include "StateView.hpp"
 #include "Table.hpp"
