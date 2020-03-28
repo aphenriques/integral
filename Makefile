@@ -41,6 +41,11 @@ install_static: install_exception
 	install -p -m 0644 $(PROJECT_LIB_DIR)/*.hpp $(INSTALL_INC)
 	install -p -m 0644 $(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB) $(INSTALL_LIB)
 
+install_shared: install_exception
+	mkdir -p $(INSTALL_INC) $(INSTALL_LIB)
+	install -p -m 0644 $(PROJECT_LIB_DIR)/*.hpp $(INSTALL_INC)
+	install -p -m 0644 $(PROJECT_LIB_DIR)/$(PROJECT_SHARED_LIB) $(INSTALL_LIB)
+
 install: install_exception
 	mkdir -p $(INSTALL_INC) $(INSTALL_LIB)
 	install -p -m 0644 $(PROJECT_LIB_DIR)/*.hpp $(INSTALL_INC)
