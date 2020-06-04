@@ -101,6 +101,17 @@ double getSum(double x, double y) {
     return x + y;
 }
 
+void pushModule(lua_State *luaState) {
+    integral::push<integral::Table>(luaState);
+    integral::setFunction(
+        luaState,
+        "get42",
+        [] {
+            return 42;
+        }
+    );
+}
+
 TEST_CASE("integral test") {
     std::unique_ptr<lua_State, decltype(&lua_close)> luaState(luaL_newstate(), &lua_close);
     REQUIRE(luaState.get() != nullptr);
@@ -527,6 +538,12 @@ TEST_CASE("integral test") {
         REQUIRE_THROWS_AS(stateView["makeObject"].call<int>("id-42"), integral::ReferenceException);
         REQUIRE_NOTHROW(stateView["dummy"].call<void>());
         REQUIRE_THROWS_AS(stateView["x"].call<void>(), integral::ReferenceException);
+    }
+    SECTION("Pusher") {
+        stateView["module"].set(
+            integral::Pusher(pushModule)
+        );
+        REQUIRE_NOTHROW(stateView.doString("assert(module.get42() == 42)"));
     }
     SECTION("LuaIgnoredArgument and LuaFunctionArgument") {
         stateView["Vector"].set(integral::ClassMetatable<VectorAdaptor<double>>()

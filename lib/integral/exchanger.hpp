@@ -2,7 +2,7 @@
 //  exchanger.hpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019, 2020  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -44,6 +44,7 @@
 #include "basic.hpp"
 #include "generic.hpp"
 #include "lua_compatibility.hpp"
+#include "LuaFunctionWrapper.hpp"
 #include "type_manager.hpp"
 #include "UnexpectedStackException.hpp"
 #include "UserDataWrapper.hpp"
@@ -218,15 +219,27 @@ namespace integral {
                 inline static void push(lua_State *luaState, const std::shared_ptr<T> &sharedPtr);
             };
 
+            template<>
+            class Exchanger<LuaFunctionWrapper> {
+            public:
+                static LuaFunctionWrapper get(lua_State *luaState, int index);
+
+                template<typename F>
+                static void push(lua_State *luaState, F &&luaFunction, int nUpValues = 0);
+
+            private:
+                static const char * const kMetatableName_;
+            };
+
             template<typename T>
             using ExchangerType = Exchanger<typename std::decay<T>::type>;
 
             template<typename T>
             inline decltype(auto) get(lua_State *luaState, int index);
 
-            // throws exception if more than 1 element is pushed onto the stack
-            // when "typename T" = LuaFunctionWrapper: nUpValues elements are removed from stack.
-            // if more than one element is pushed on the stack, an exception is thrown
+
+            // it T != LuaFunctionWrapper, pushes only 1 element onto the stack (otherwise throws an exception)
+            // it T == LuaFunctionWrapper, removes up values and pushes only 1 element onto the stack (otherwise throws an exception)
             template<typename T, typename ...A>
             void push(lua_State *luaState, A &&...arguments);
 
@@ -797,6 +810,42 @@ namespace integral {
                 );
             }
 
+            template<typename F>
+            void Exchanger<LuaFunctionWrapper>::push(lua_State *luaState, F &&luaFunction, int nUpValues) {
+                if (lua_gettop(luaState) >= nUpValues) {
+                    // stack: upValues...
+                    basic::pushUserData<LuaFunctionWrapper>(luaState, std::forward<F>(luaFunction));
+                    // stack: upValues... | userdata
+                    basic::pushClassMetatable<LuaFunctionWrapper>(luaState, kMetatableName_);
+                    // stack: upValues... | userdata | metatable
+                    lua_setmetatable(luaState, -2);
+                    // stack: upValues... | userdata
+                    if (nUpValues != 0) {
+                        lua_insert(luaState, -1 - nUpValues);
+                    }
+                    // stack: userdata | upValues...
+                    lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
+                        try {
+                            const LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(lambdaLuaState, lua_upvalueindex(1), kMetatableName_));
+                            if (luaFunctionWrapper != nullptr) {
+                                return luaFunctionWrapper->getLuaFunction()(lambdaLuaState);
+                            } else {
+                                throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted LuaFunctionWrapper");
+                            }
+                        } catch (const std::exception &exception) {
+                            lua_pushstring(lambdaLuaState, (std::string("[integral] ") + exception.what()).c_str());
+                        } catch (...) {
+                            lua_pushstring(lambdaLuaState, "[integral] unknown exception thrown");
+                        }
+                        // error return outside catch scope so that the exception destructor can be called
+                        return lua_error(lambdaLuaState);
+                    }, 1 + nUpValues);
+                    // stack: function
+                } else {
+                    throw exception::LogicException(__FILE__, __LINE__, __func__, "lua stack top < nUpValues");
+                }
+            }
+
             template<typename T>
             inline decltype(auto) get(lua_State *luaState, int index) {
                 return ExchangerType<T>::get(luaState, index);
@@ -806,13 +855,17 @@ namespace integral {
             void push(lua_State *luaState, A &&...arguments) {
                 // "const T &" is pushed as "T" (by value)
                 static_assert(std::is_reference<T>::value == false || std::is_const<typename std::remove_reference<T>::type>::value == true, "cannot push non-const reference");
-                const int stackTopIndex = lua_gettop(luaState);
-                ExchangerType<T>::push(luaState, std::forward<A>(arguments)...);
-                // stack: ?...
-                const int stackIndexDelta = lua_gettop(luaState) - stackTopIndex;
-                // when "typename T" = LuaFunctionWrapper: nUpValues elements are removed from stack. That is why the stack is not checked for no element added or for elements removed
-                if (stackIndexDelta > 1) {
-                    throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, stackIndexDelta, " elements pushed onto the stack (expected 1 element) with exchanger::push (type: '", typeid(T).name(), "')");
+                if constexpr (std::is_same<typename std::decay<T>::type, LuaFunctionWrapper>::value == false) {
+                    const int stackTopIndex = lua_gettop(luaState);
+                    ExchangerType<T>::push(luaState, std::forward<A>(arguments)...);
+                    // stack: ?...
+                    const int stackIndexDelta = lua_gettop(luaState) - stackTopIndex;
+                    if (stackIndexDelta != 1) {
+                        throw UnexpectedStackException(luaState, __FILE__, __LINE__, __func__, stackIndexDelta, " elements pushed onto the stack (expected 1 element) with exchanger::push (type: '", typeid(T).name(), "')");
+                    }
+                } else {
+                    // LuaFunctionWrapper has a different logic to check the stack because of upvalues (see Exchanger<LuaFunctionWrapper>::push)
+                    ExchangerType<T>::push(luaState, std::forward<A>(arguments)...);
                 }
             }
 

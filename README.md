@@ -27,6 +27,7 @@
   * [Register lua function argument](#register-lua-function-argument)
   * [Table conversion](#table-conversion)
   * [Register function with ignored argument](#register-function-with-ignored-argument)
+  * [Pusher function values](#pusher-function-values)
   * [Optional](#optional)
   * [Register synthetic inheritance](#register-synthetic-inheritance)
   * [std::reference_wrapper and std::shared_ptr automatic inheritance](#stdreference_wrapper-and-stdshared_ptr-automatic-inheritance)
@@ -420,6 +421,27 @@ class Vector : public std::vector<double> {};
                           "print(#v)"); // prints "2"
 ```
 See [example](samples/abstraction/ignored_argument/ignored_argument.cpp).
+
+## Pusher function values
+
+```cpp
+void pushModule(lua_State *luaState) {
+    integral::push<integral::Table>(luaState);
+    integral::setFunction(
+        luaState,
+        "printHello",
+        [] {
+            std::cout << "Hello!" << std::endl;
+        }
+    );
+}
+
+// ...
+
+        luaState["module"] = integral::Pusher(pushModule);
+        luaState.doString("module.printHello()"); // prints "Hello!"
+```
+See [example](samples/abstraction/pusher/pusher.cpp).
 
 ## Optional
 

@@ -2,7 +2,7 @@
 //  LuaFunctionWrapper.hpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2015, 2016  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2015, 2016, 2020  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -27,7 +27,6 @@
 #include <functional>
 #include <utility>
 #include <lua.hpp>
-#include "exchanger.hpp"
 
 namespace integral {
     namespace detail {
@@ -56,20 +55,7 @@ namespace integral {
             std::function<int(lua_State *)> luaFunction_;
         };
 
-        namespace exchanger {
-            template<>
-            class Exchanger<LuaFunctionWrapper> {
-            public:
-                static LuaFunctionWrapper get(lua_State *luaState, int index);
-
-                // Attention: nUpValues > 0 distorts the premise that exchanger::push pushes a single element onto the lua stack because it removes nUpValues from the lua stack
-                template<typename F>
-                static void push(lua_State *luaState, F &&luaFunction, int nUpValues = 0);
-
-            private:
-                static const char * const kMetatableName_;
-            };
-        }
+        // exchanger::Exchanger<LuaFunctionWrapper> is in exceptions.cpp because exchanger::push depends on it
 
         //--
 
@@ -82,34 +68,6 @@ namespace integral {
 
         inline const std::function<int(lua_State *)> & LuaFunctionWrapper::getLuaFunction() const {
             return luaFunction_;
-        }
-
-        namespace exchanger {
-            template<typename F>
-            void Exchanger<LuaFunctionWrapper>::push(lua_State *luaState, F &&luaFunction, int nUpValues) {
-                basic::pushUserData<LuaFunctionWrapper>(luaState, std::forward<F>(luaFunction));
-                basic::pushClassMetatable<LuaFunctionWrapper>(luaState, kMetatableName_);
-                lua_setmetatable(luaState, -2);
-                if (nUpValues != 0) {
-                    lua_insert(luaState, -1 - nUpValues);
-                }
-                lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
-                    try {
-                        const LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(lambdaLuaState, lua_upvalueindex(1), kMetatableName_));
-                        if (luaFunctionWrapper != nullptr) {
-                            return luaFunctionWrapper->getLuaFunction()(lambdaLuaState);
-                        } else {
-                            throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted LuaFunctionWrapper");
-                        }
-                    } catch (const std::exception &exception) {
-                        lua_pushstring(lambdaLuaState, (std::string("[integral] ") + exception.what()).c_str());
-                    } catch (...) {
-                        lua_pushstring(lambdaLuaState, "[integral] unknown exception thrown");
-                    }
-                    // error return outside catch scope so that the exception destructor can be called
-                    return lua_error(lambdaLuaState);
-                }, 1 + nUpValues);
-            }
         }
     }
 }

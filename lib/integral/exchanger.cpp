@@ -88,6 +88,32 @@ namespace integral {
                     }
                 }
             }
+
+            const char * const Exchanger<LuaFunctionWrapper>::kMetatableName_ = "integral_LuaFunctionWrapperMetatableName";
+
+            LuaFunctionWrapper Exchanger<LuaFunctionWrapper>::get(lua_State *luaState, int index) {
+                if (lua_iscfunction(luaState, index) == 0) {
+                    if (lua_getupvalue(luaState, index, 1) != nullptr) {
+                        // stack: upvalue
+                        const LuaFunctionWrapper *luaFunctionWrapperPointer = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState, -1, kMetatableName_));
+                        if (luaFunctionWrapperPointer != nullptr) {
+                            LuaFunctionWrapper luaFunctionWrapper = *luaFunctionWrapperPointer;
+                            lua_pop(luaState, 1);
+                            // stack:
+                            return luaFunctionWrapper;
+                        } else {
+                            const ArgumentException argumentException = ArgumentException::createTypeErrorException(luaState, index, "LuaFunctionWrapper");
+                            lua_pop(luaState, 1);
+                            // stack:
+                            throw argumentException;
+                        }
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, "LuaFunctionWrapper (no upvalue)");
+                    }
+                } else {
+                    throw ArgumentException::createTypeErrorException(luaState, index, "lua_CFuntion");
+                }
+            }
         }
     }
 }

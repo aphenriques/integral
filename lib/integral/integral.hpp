@@ -30,6 +30,7 @@
 #include "core.hpp"
 #include "DefaultArgument.hpp"
 #include "Global.hpp"
+#include "Pusher.hpp"
 #include "State.hpp"
 #include "StateView.hpp"
 #include "Table.hpp"
