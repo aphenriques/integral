@@ -27,7 +27,7 @@
   * [Register lua function argument](#register-lua-function-argument)
   * [Table conversion](#table-conversion)
   * [Register function with ignored argument](#register-function-with-ignored-argument)
-  * [Pusher function values](#pusher-function-values)
+  * [Pusher function value](#pusher-function-value)
   * [Optional](#optional)
   * [Register synthetic inheritance](#register-synthetic-inheritance)
   * [std::reference_wrapper and std::shared_ptr automatic inheritance](#stdreference_wrapper-and-stdshared_ptr-automatic-inheritance)
@@ -422,7 +422,7 @@ class Vector : public std::vector<double> {};
 ```
 See [example](samples/abstraction/ignored_argument/ignored_argument.cpp).
 
-## Pusher function values
+## Pusher function value
 
 ```cpp
 void pushModule(lua_State *luaState) {
