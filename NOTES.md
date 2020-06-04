@@ -1,20 +1,7 @@
 ## TODO
 * intel compiler
 * coverity
-* c++17:
-  * string_view
-  * type_traits is*_v and *_v
-  * enable -Wunused-parameter and use [[maybe_unused]]
-  * fold expressions (search and replace expansion/recursion functions)
-  * template type deduction by constructor
-  * makeFunctionWrapper and makeConstructorWrapper are not necessary in c++17 (deduction guides)
 * compare performance with other binding libraries
-* sandbox (in lua script?)
-  * must be easily disabled
-  * hide:
-    * registry reserved names
-    * class metatable reserved names
-  * http://lua-users.org/wiki/SandBoxes
 * frequent
   * run test
   * build all samples
@@ -31,7 +18,6 @@
 * LuaPack (multiple return) adds complexity spread out through too much code (high maintence). Adaptors such as LuaTuple offers similar functionality
 * safety, robustness and clarity must be prioritized over performance:
   * shrinking integral reserved names string size decreases clarity (and it had little performance impact on preliminary tests)
-  * script integration should not be used for logic intensive operations
   * usage
     * monitoring
     * configuration
