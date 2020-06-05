@@ -71,7 +71,7 @@
 # Tested environments
 
 * gcc version 8.3.0 (Ubuntu 8.3.0-6ubuntu1) on Ubuntu Linux; and
-* Apple clang version 11.0.0 (clang-1100.0.33.16) on MacOS.
+* Apple clang version 11.0.3 (clang-1103.0.32.62) on MacOS.
 
 
 # Build
