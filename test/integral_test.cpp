@@ -2,7 +2,7 @@
 //  integral_test.cpp
 //  integral
 //
-//  Copyright (C) 2017, 2019  André Pereira Henriques
+//  Copyright (C) 2017, 2019, 2020  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -321,6 +321,31 @@ TEST_CASE("integral test") {
         REQUIRE_NOTHROW(stateView.doString("assert(lib.getMultiplicationFunction2(21)(2) == 42)"));
         REQUIRE_NOTHROW(stateView.doString("assert(lib.getMultiplicationFunction3(21)(2) == 42)"));
         REQUIRE_NOTHROW(stateView.doString("assert(lib.getMultiplicationFunction4(21)(2) == 42)"));
+    }
+    SECTION("integral::get<integral::LuaFunctionWrapper>") {
+        stateView["getSum1"].setFunction(
+            [](int x, int y) {
+                return x + y;
+            }
+        );
+        stateView["getSum2"].setLuaFunction(
+            [](lua_State *lambdaLuaState) {
+                integral::pushCopy(lambdaLuaState, integral::get<int>(lambdaLuaState, 1) + integral::get<int>(lambdaLuaState, 2));
+                return 1;
+            }
+        );
+        REQUIRE_NOTHROW(stateView.doString("assert(getSum1(1, 2) == 3)"));
+        REQUIRE_NOTHROW(stateView.doString("assert(getSum2(1, 2) == 3)"));
+        stateView["call"].setLuaFunction(
+            [](lua_State *lambdaLuaState) {
+                const integral::LuaFunctionWrapper luaFunctionWrapper = integral::get<integral::LuaFunctionWrapper>(lambdaLuaState, 1);
+                lua_remove(lambdaLuaState, 1);
+                luaFunctionWrapper.getLuaFunction()(lambdaLuaState);
+                return 1;
+            }
+        );
+        REQUIRE_NOTHROW(stateView.doString("assert(call(getSum1, 1, 2) == 3)"));
+        REQUIRE_NOTHROW(stateView.doString("assert(call(getSum2, 1, 2) == 3)"));
     }
     SECTION("integral::pushClassMetatable, methods, constructor and integral::IgnoredArgument") {
         integral::pushClassMetatable<Object>(luaState.get());

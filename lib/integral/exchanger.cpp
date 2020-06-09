@@ -2,7 +2,7 @@
 //  exchanger.cpp
 //  integral
 //
-//  Copyright (C) 2013, 2014, 2016, 2019  André Pereira Henriques
+//  Copyright (C) 2013, 2014, 2016, 2019, 2020  André Pereira Henriques
 //  aphenriques (at) outlook (dot) com
 //
 //  This file is part of integral.
@@ -92,7 +92,7 @@ namespace integral {
             const char * const Exchanger<LuaFunctionWrapper>::kMetatableName_ = "integral_LuaFunctionWrapperMetatableName";
 
             LuaFunctionWrapper Exchanger<LuaFunctionWrapper>::get(lua_State *luaState, int index) {
-                if (lua_iscfunction(luaState, index) == 0) {
+                if (lua_iscfunction(luaState, index) != 0) {
                     if (lua_getupvalue(luaState, index, 1) != nullptr) {
                         // stack: upvalue
                         const LuaFunctionWrapper *luaFunctionWrapperPointer = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState, -1, kMetatableName_));
