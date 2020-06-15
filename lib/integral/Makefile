@@ -1,22 +1,22 @@
-PROJECT_ROOT_DIR:=../..
+INTEGRAL_ROOT_DIR:=../..
 
-include $(PROJECT_ROOT_DIR)/common.mk
+include $(INTEGRAL_ROOT_DIR)/common.mk
 
 SRC_DIRS:=. $(wildcard */.)
 FILTER_OUT:=
 INCLUDE_DIRS:=
-SYSTEM_INCLUDE_DIRS:=$(LUA_INCLUDE_DIR) $(PROJECT_EXCEPTION_INCLUDE_DIR)
+SYSTEM_INCLUDE_DIRS:=$(LUA_INCLUDE_DIR) $(INTEGRAL_EXCEPTION_INCLUDE_DIR)
 LIB_DIRS:=
 
 # '-isystem <dir>' supress warnings from included headers in <dir>. These headers are also excluded from dependency generation
-CXXFLAGS:=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS))
-LDFLAGS:=$(PROJECT_SHARED_LDFLAGS) $(addprefix -L, $(LIB_DIRS))
+CXXFLAGS:=$(INTEGRAL_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS))
+LDFLAGS:=$(INTEGRAL_SHARED_LDFLAGS) $(addprefix -L, $(LIB_DIRS))
 ARFLAGS:=rcs
 
 ################################################################################
 
-STATIC_LIB:=$(PROJECT_STATIC_LIB)
-SHARED_LIB:=$(PROJECT_SHARED_LIB)
+STATIC_LIB:=$(INTEGRAL_STATIC_LIB)
+SHARED_LIB:=$(INTEGRAL_SHARED_LIB)
 
 SRC_DIRS:=$(subst /.,,$(SRC_DIRS))
 SRCS:=$(filter-out $(FILTER_OUT), $(wildcard $(addsuffix /*.cpp, $(SRC_DIRS))))

@@ -1,18 +1,18 @@
-PROJECT_ROOT_DIR:=../../..
+INTEGRAL_ROOT_DIR:=../../..
 
-include $(PROJECT_ROOT_DIR)/common.mk
+include $(INTEGRAL_ROOT_DIR)/common.mk
 
 TARGET:=Regex
 SRC_DIRS:=. $(wildcard */.)
 FILTER_OUT:=
-INCLUDE_DIRS:=$(PROJECT_STATIC_LIB_INCLUDE_DIR)
-SYSTEM_INCLUDE_DIRS:=$(LUA_INCLUDE_DIR) $(PROJECT_EXCEPTION_INCLUDE_DIR)
+INCLUDE_DIRS:=$(INTEGRAL_STATIC_LIB_INCLUDE_DIR)
+SYSTEM_INCLUDE_DIRS:=$(LUA_INCLUDE_DIR) $(INTEGRAL_EXCEPTION_INCLUDE_DIR)
 LIB_DIRS:=
-LDLIBS:=$(PROJECT_STATIC_LIB_LDLIB)
+LDLIBS:=$(INTEGRAL_STATIC_LIB_LDLIB)
 
 # '-isystem <dir>' supress warnings from included headers in <dir>. These headers are also excluded from dependency generation
-CXXFLAGS:=$(PROJECT_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS))
-LDFLAGS:=$(PROJECT_SHARED_LDFLAGS) $(addprefix -L, $(LIB_DIRS))
+CXXFLAGS:=$(INTEGRAL_CXXFLAGS) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -isystem , $(SYSTEM_INCLUDE_DIRS))
+LDFLAGS:=$(INTEGRAL_SHARED_LDFLAGS) $(addprefix -L, $(LIB_DIRS))
 
 ################################################################################
 
@@ -26,10 +26,10 @@ DEPS:=$(addsuffix .d, $(basename $(SRCS)))
 .PHONY: all clean
 
 all:
-	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) static
+	cd $(INTEGRAL_ROOT_DIR)/$(INTEGRAL_LIB_DIR) && $(MAKE) static
 	$(MAKE) $(SHARED_LIB)
 
-$(SHARED_LIB): $(OBJS) $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR)/$(PROJECT_STATIC_LIB)
+$(SHARED_LIB): $(OBJS) $(INTEGRAL_ROOT_DIR)/$(INTEGRAL_LIB_DIR)/$(INTEGRAL_STATIC_LIB)
 	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS)
 
 clean:

@@ -1,6 +1,6 @@
-PROJECT_ROOT_DIR:=../..
+INTEGRAL_ROOT_DIR:=../..
 
-include $(PROJECT_ROOT_DIR)/common.mk
+include $(INTEGRAL_ROOT_DIR)/common.mk
 
 # http://stackoverflow.com/a/11206700
 
@@ -21,4 +21,4 @@ $(SUBDIRS_TARGETS):
 $(addsuffix all,$(SUBDIRS)): lib
 
 lib:
-	cd $(PROJECT_ROOT_DIR)/$(PROJECT_LIB_DIR) && $(MAKE) static
+	cd $(INTEGRAL_ROOT_DIR)/$(INTEGRAL_LIB_DIR) && $(MAKE) static
