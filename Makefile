@@ -1,3 +1,5 @@
+INTEGRAL_ROOT_DIR:=.
+
 include common.mk
 
 INSTALL_TOP:=/usr/local
