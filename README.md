@@ -1,6 +1,6 @@
 # integral
 
-`integral` is a C++ library for binding C++ code with Lua (Lua 5.1, Lua 5.2, Lua 5.3 or LuaJIT).
+`integral` is a C++ library for binding C++ code with Lua (Lua 5.1, Lua 5.2, Lua 5.3, lua 5.4 and LuaJIT).
 
 ![Lua logo](http://www.lua.org/images/powered-by-lua.gif)
 
