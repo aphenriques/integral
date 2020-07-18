@@ -3,7 +3,7 @@ INTEGRAL_ROOT_DIR:=.
 include common.mk
 
 INSTALL_TOP:=/usr/local
-INSTALL_INC:=$(INSTALL_TOP)/include/$(PROJECT)
+INSTALL_INC:=$(INSTALL_TOP)/include/$(INTEGRAL)
 INSTALL_LIB:=$(INSTALL_TOP)/lib
 
 .PHONY: all static static_release shared shared_release samples test install_exception uninstall_exception install_static install uninstall clean
