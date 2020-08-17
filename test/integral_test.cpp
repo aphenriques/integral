@@ -35,7 +35,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <vector>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 #include <integral/integral.hpp>
 #include <exception/Exception.hpp>
 
@@ -258,17 +258,17 @@ TEST_CASE("integral test") {
     SECTION("integral::detail::Reference conversion operator with incompatible types") {
         stateView["x"] = "string";
         REQUIRE_THROWS_AS([&stateView]() -> void {
-            int x = stateView["x"];
+            [[maybe_unused]] int x = stateView["x"];
         }(), integral::ReferenceException);
         REQUIRE_THROWS_AS([&stateView]() -> void {
-            Object x = stateView["x"];
+            [[maybe_unused]] Object x = stateView["x"];
         }(), integral::ReferenceException);
         stateView["x"] = Object("object");
         REQUIRE_THROWS_AS([&stateView]() -> void {
-            int x = stateView["x"];
+            [[maybe_unused]] int x = stateView["x"];
         }(), integral::ReferenceException);
         REQUIRE_THROWS_AS([&stateView]() -> void {
-            std::string x = stateView["x"];
+            [[maybe_unused]] std::string x = stateView["x"];
         }(), integral::ReferenceException);
     }
     SECTION("integral::setFunction and integral::setLuaFunction") {
