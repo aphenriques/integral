@@ -1,4 +1,5 @@
 ## TODO
+* add source:line informetion on lua/integral exception messages
 * intel compiler
 * coverity
 * compare performance with other binding libraries
