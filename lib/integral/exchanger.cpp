@@ -117,6 +117,17 @@ namespace integral {
                     throw ArgumentException::createTypeErrorException(luaState, index, "lua_CFuntion");
                 }
             }
+
+            std::string Exchanger<LuaFunctionWrapper>::getCurrentSourceAndLine(lua_State *luaState) {
+                lua_Debug debugInfo;
+                if (lua_getstack(luaState, 1, &debugInfo) != 0) {
+                    lua_getinfo(luaState, "S", &debugInfo);
+                    lua_getinfo(luaState, "l", &debugInfo);
+                    return std::string(debugInfo.short_src) + ':' + std::to_string(debugInfo.currentline);
+                } else {
+                    throw exception::LogicException(__FILE__, __LINE__, __func__, "level greater than the stack depth");
+                }
+            }
         }
     }
 }

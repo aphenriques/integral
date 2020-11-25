@@ -232,6 +232,8 @@ namespace integral {
 
             private:
                 static const char * const kMetatableName_;
+
+                static std::string getCurrentSourceAndLine(lua_State *luaState);
             };
 
             template<typename T>
@@ -836,9 +838,15 @@ namespace integral {
                                 throw exception::LogicException(__FILE__, __LINE__, __func__, "corrupted LuaFunctionWrapper");
                             }
                         } catch (const std::exception &exception) {
-                            lua_pushstring(lambdaLuaState, (std::string("[integral] ") + exception.what()).c_str());
+                            lua_pushstring(
+                                lambdaLuaState,
+                                ("[integral] " + getCurrentSourceAndLine(lambdaLuaState) + ' ' + exception.what()).c_str()
+                            );
                         } catch (...) {
-                            lua_pushstring(lambdaLuaState, "[integral] unknown exception thrown");
+                            lua_pushstring(
+                                lambdaLuaState,
+                                ("[integral] " + getCurrentSourceAndLine(lambdaLuaState) + " unknown exception thrown").c_str()
+                            );
                         }
                         // error return outside catch scope so that the exception destructor can be called
                         return lua_error(lambdaLuaState);
