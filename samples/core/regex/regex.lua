@@ -44,7 +44,7 @@ print("---")
 pattern = Regex.new("(.)")
 matches = pattern:search("42")
 print("matches:", matches)
--- maybe matches == nill. c++ std::regex implementation may be incomplete
+-- maybe matches == nil. c++ std::regex implementation may be incomplete
 if matches then
     print("matches:getSize():", matches:getSize())
     for i = 0, matches:getSize() - 1 do
@@ -54,5 +54,5 @@ end
 
 print("---")
 
--- should be nill
+-- should be nil
 print("matches:", pattern:match("42"))
