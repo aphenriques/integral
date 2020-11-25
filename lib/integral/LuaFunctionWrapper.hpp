@@ -33,7 +33,7 @@
 
 namespace integral {
     namespace detail {
-        // This class exists to make it possible to get exceptions thrown by luaFunction_ (see Exchanger<LuaFunctionWrapper>::push). For example, this is important to get exceptions thrown by exchanger::callConstructor when there are wrong parameters (exchanger::Exchange throws).
+        // This class exists to make it possible to get exceptions thrown by luaFunction_ (see Exchanger<LuaFunctionWrapper>::push). For example, this is important to get exceptions thrown by exchanger::callConstructor when there are wrong parameters (exchanger::Exchanger throws).
         // The function is managed by integral so that if an exception is thrown from it, it is translated to a Lua error
         // The first upvalue in the related lua_CFunction is always the userdata that holds LuaFunctionWrapper, so the remaining upvalues indexes are offset by 1.
         // Use getUpValueIndex or lua_upvalueindex(index + 1) to get an upvalue index.
