@@ -31,6 +31,7 @@
 #include <type_traits>
 #include <utility>
 #include <lua.hpp>
+#include "lua_compatibility.hpp"
 
 namespace integral {
     namespace detail {
@@ -59,7 +60,7 @@ namespace integral {
 
             template<typename T, typename ...A>
             inline void pushUserData(lua_State *luaState, A &&...arguments) {
-                new(lua_newuserdata(luaState, sizeof(T))) T(std::forward<A>(arguments)...);
+                new(lua_compatibility::newuserdata(luaState, sizeof(T))) T(std::forward<A>(arguments)...);
             }
 
             template<typename T>

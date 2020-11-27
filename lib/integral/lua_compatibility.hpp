@@ -128,6 +128,15 @@ namespace integral {
             }
 #endif
 
+#if LUA_VERSION_NUM < 504
+            inline void * newuserdata(lua_State *luaState, size_t size) {
+                return lua_newuserdata(luaState, size);
+            }
+#else
+            inline void * newuserdata(lua_State *luaState, size_t size) {
+                return lua_newuserdatauv(luaState, size, 1);
+            }
+#endif
         }
     }
 }
