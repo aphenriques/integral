@@ -85,8 +85,13 @@ namespace integral {
 
         lua_State * luaState_;
 
+#ifdef _MSC_VER
+        // throws StateException
+        static int atPanic(lua_State *luaState);
+#else
         // throws StateException
         [[noreturn]] static int atPanic(lua_State *luaState);
+#endif
     };
 
     using StateException = exception::ClassException<StateView, exception::RuntimeException>;
