@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2013, 2014, 2016, 2019, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2013, 2014, 2016, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -223,7 +223,7 @@ namespace integral {
 
             bool checkInheritanceTable(lua_State *luaState, const std::type_index &typeIndex) {
                 // stack: inheritanceTable
-                const std::size_t inheritanceTableLength = lua_compatibility::rawlen(luaState, -1);
+                const auto inheritanceTableLength = lua_compatibility::rawlen(luaState, -1);
                 for (std::size_t i = 1; i <= inheritanceTableLength; ++i) {
                     // stack: inheritanceTable
                     lua_compatibility::pushunsigned(luaState, i);
@@ -458,7 +458,7 @@ namespace integral {
                             }
                             // [-]
                             // stack: underlyingLightUserData | metatable | inheritanceTable
-                            for (std::size_t i = lua_compatibility::rawlen(luaState, -1); i >= 1; --i) {
+                            for (auto i = lua_compatibility::rawlen(luaState, -1); i >= 1; --i) {
                                 // stack: underlyingLightUserData | metatable | inheritanceTable
                                 lua_compatibility::pushunsigned(luaState, i);
                                 // stack: underlyingLightUserData | metatable | inheritanceTable | i
@@ -646,7 +646,7 @@ namespace integral {
                         // stack: inheritanceTable (?)
                         if (lua_istable(luaState, -1) != 0) {
                             // stack: inheritanceTable
-                            for (std::size_t i = lua_compatibility::rawlen(luaState, -1); i >= 1; --i) {
+                            for (auto i = lua_compatibility::rawlen(luaState, -1); i >= 1; --i) {
                                 // stack: inheritanceTable
                                 lua_compatibility::pushunsigned(luaState, i);
                                 // stack: inheritanceTable | i

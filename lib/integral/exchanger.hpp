@@ -406,7 +406,7 @@ namespace integral {
                     if (lua_istable(luaState, index) != 0) {
                         lua_pushvalue(luaState, index);
                         // stack: table
-                        const std::size_t tableSize = lua_compatibility::rawlen(luaState, -1);
+                        const auto tableSize = lua_compatibility::rawlen(luaState, -1);
                         std::vector<T> returnVector;
                         returnVector.reserve(tableSize);
                         for (std::size_t i = 1; i <= tableSize; ++i) {
@@ -469,7 +469,7 @@ namespace integral {
                     if (lua_istable(luaState, index) != 0) {
                         lua_pushvalue(luaState, index);
                         // stack: table
-                        const std::size_t tableSize = lua_compatibility::rawlen(luaState, -1);
+                        const auto tableSize = lua_compatibility::rawlen(luaState, -1);
                         if (tableSize == N) {
                             std::array<T, N> returnArray;
                             for (std::size_t i = 1; i <= tableSize; ++i) {
@@ -627,7 +627,7 @@ namespace integral {
             std::tuple<T...> Exchanger<std::tuple<T...>>::get(lua_State *luaState, int index, std::index_sequence<S...>) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     if (lua_istable(luaState, index) != 0) {
-                        const std::size_t tableSize = lua_compatibility::rawlen(luaState, index);
+                        const auto tableSize = lua_compatibility::rawlen(luaState, index);
                         constexpr std::size_t keTupleSize = sizeof...(T);
                         if (tableSize == keTupleSize) {
                             try {
