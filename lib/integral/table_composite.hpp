@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2017, 2019, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2017, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -47,10 +47,10 @@ namespace integral {
             class TableCompositeInterface {
             public:
                 template<typename K, typename V>
-                inline TableComposite<U, typename std::decay<K>::type, typename std::decay<V>::type> set(K &&key, V &&value) &&;
+                inline TableComposite<U, std::decay_t<K>, std::decay_t<V>> set(K &&key, V &&value) &&;
 
                 template<typename W, typename K, typename ...A>
-                inline TableComposite<U, typename std::decay<K>::type, Emplacer<W, typename std::decay<A>::type...>> emplace(K &&key, A &&...arguments) &&;
+                inline TableComposite<U, std::decay_t<K>, Emplacer<W, std::decay_t<A>...>> emplace(K &&key, A &&...arguments) &&;
 
                 template<typename K, typename F, typename ...E, std::size_t ...I>
                 inline decltype(auto) setFunction(K &&key, F &&function, DefaultArgument<E, I> &&...defaultArguments) &&;
@@ -61,9 +61,9 @@ namespace integral {
 
             template<typename C, typename K, typename V>
             class TableComposite : public TableCompositeInterface<TableComposite<C, K, V>> {
-                static_assert(std::is_reference<C>::value == false, "C cannot be a reference type");
-                static_assert(std::is_reference<K>::value == false, "K cannot be a reference type");
-                static_assert(std::is_reference<V>::value == false, "V cannot be a reference type");
+                static_assert(std::is_reference_v<C> == false, "C cannot be a reference type");
+                static_assert(std::is_reference_v<K> == false, "K cannot be a reference type");
+                static_assert(std::is_reference_v<V> == false, "V cannot be a reference type");
             public:
                 // non-copyable
                 TableComposite(const TableComposite &) = delete;
@@ -97,14 +97,14 @@ namespace integral {
             // TableCompositeInterface
             template<typename U>
             template<typename K, typename V>
-            inline TableComposite<U, typename std::decay<K>::type, typename std::decay<V>::type> TableCompositeInterface<U>::set(K &&key, V &&value) && {
-                return TableComposite<U, typename std::decay<K>::type, typename std::decay<V>::type>(std::move(*static_cast<U *>(this)), std::forward<K>(key), std::forward<V>(value));
+            inline TableComposite<U, std::decay_t<K>, std::decay_t<V>> TableCompositeInterface<U>::set(K &&key, V &&value) && {
+                return TableComposite<U, std::decay_t<K>, std::decay_t<V>>(std::move(*static_cast<U *>(this)), std::forward<K>(key), std::forward<V>(value));
             }
 
             template<typename U>
             template<typename W, typename K, typename ...A>
-            inline TableComposite<U, typename std::decay<K>::type, Emplacer<W, typename std::decay<A>::type...>> TableCompositeInterface<U>::emplace(K &&key, A &&...arguments) && {
-                return TableComposite<U, typename std::decay<K>::type, Emplacer<W, typename std::decay<A>::type...>>(std::move(*static_cast<U *>(this)), std::forward<K>(key), Emplacer<W, typename std::decay<A>::type...>(std::forward<A>(arguments)...));
+            inline TableComposite<U, std::decay_t<K>, Emplacer<W, std::decay_t<A>...>> TableCompositeInterface<U>::emplace(K &&key, A &&...arguments) && {
+                return TableComposite<U, std::decay_t<K>, Emplacer<W, std::decay_t<A>...>>(std::move(*static_cast<U *>(this)), std::forward<K>(key), Emplacer<W, std::decay_t<A>...>(std::forward<A>(arguments)...));
             }
 
             template<typename U>

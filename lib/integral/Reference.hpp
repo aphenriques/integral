@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2016, 2017, 2019, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2016, 2017, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -131,7 +131,7 @@ namespace integral::detail {
     template<typename K, typename C>
     template<typename V>
     inline Reference<K, C> & Reference<K, C>::set(V &&value) {
-        return emplace<typename std::decay<V>::type>(std::forward<V>(value));
+        return emplace<std::decay_t<V>>(std::forward<V>(value));
     }
 
     template<typename K, typename C>

@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2014, 2016, 2017, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2014, 2016, 2017, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,7 @@ namespace integral {
 
             template<typename ...T, std::size_t ...S>
             constexpr auto createArgumentTagPack(std::index_sequence<S...>) {
-                return MultipleInheritancePack<ArgumentTag<typename std::decay<T>::type, S + 1>...>();
+                return MultipleInheritancePack<ArgumentTag<std::decay_t<T>, S + 1>...>();
             }
 
             template<typename ...T, std::size_t ...I>
@@ -62,7 +62,7 @@ namespace integral {
 
             template<typename E, typename ...T, std::size_t ...I>
             inline void checkDefaultArgumentTypeAndIndex(const MultipleInheritancePack<ArgumentTag<T, I>...> &) {
-                static_assert(std::is_base_of<typename E::ArgumentTag, MultipleInheritancePack<ArgumentTag<T, I>...>>::value == true, "invalid default argument");
+                static_assert(std::is_base_of_v<typename E::ArgumentTag, MultipleInheritancePack<ArgumentTag<T, I>...>> == true, "invalid default argument");
             }
 
             template<typename ...A, typename ...T, std::size_t ...I>

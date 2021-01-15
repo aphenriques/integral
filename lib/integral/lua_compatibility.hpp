@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2014, 2015, 2016, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2014, 2015, 2016, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -51,8 +51,12 @@ namespace integral {
             inline size_t rawlen(lua_State *luaState, int index) {
                 return lua_objlen(luaState, index);
             }
-#else
+#elif LUA_VERSION_NUM == 502 || LUA_VERSION_NUM == 503
             inline size_t rawlen(lua_State *luaState, int index) {
+                return lua_rawlen(luaState, index);
+            }
+#else
+            inline lua_Unsigned rawlen(lua_State *luaState, int index) {
                 return lua_rawlen(luaState, index);
             }
 #endif

@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2016, 2017, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2016, 2017, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -42,13 +42,13 @@ namespace integral {
             };
 
             template <typename T>
-            class Serializer<T, typename std::enable_if<std::is_arithmetic<T>::value>::type> {
+            class Serializer<T, std::enable_if_t<std::is_arithmetic_v<T>>> {
             public:
                 static std::string getString(const T &value);
             };
 
             template <typename T>
-            class Serializer<T, typename std::enable_if<std::is_same<T, std::string>::value || std::is_same<T, const char *>::value>::type> {
+            class Serializer<T, std::enable_if_t<std::is_same_v<T, std::string> || std::is_same_v<T, const char *>>> {
             public:
                 static std::string getString(const T &value);
             };
@@ -66,14 +66,14 @@ namespace integral {
             }
 
             template<typename T>
-            std::string Serializer<T, typename std::enable_if<std::is_arithmetic<T>::value>::type>::getString(const T &value) {
+            std::string Serializer<T, std::enable_if_t<std::is_arithmetic_v<T>>>::getString(const T &value) {
                 std::ostringstream stringStream;
                 stringStream << std::boolalpha << value;
                 return stringStream.str();
             }
 
             template<typename T>
-            std::string Serializer<T, typename std::enable_if<std::is_same<T, std::string>::value || std::is_same<T, const char *>::value>::type>::getString(const T &value) {
+            std::string Serializer<T, std::enable_if_t<std::is_same_v<T, std::string> || std::is_same_v<T, const char *>>>::getString(const T &value) {
                 std::ostringstream stringStream;
                 stringStream << '"' << value << '"';
                 return stringStream.str();
@@ -81,7 +81,7 @@ namespace integral {
             
             template<typename T>
             inline std::string getString(T &&t) {
-                return Serializer<typename std::decay<T>::type>::getString(std::forward<T>(t));
+                return Serializer<std::decay_t<T>>::getString(std::forward<T>(t));
             }
         }
     }

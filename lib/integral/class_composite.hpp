@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2017, 2019, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2017, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -60,10 +60,10 @@ namespace integral {
             class ClassCompositeInterface {
             public:
                 template<typename K, typename V>
-                inline ClassMetatableComposite<T, U, typename std::decay<K>::type, typename std::decay<V>::type> set(K &&key, V &&value) &&;
+                inline ClassMetatableComposite<T, U, std::decay_t<K>, std::decay_t<V>> set(K &&key, V &&value) &&;
 
                 template<typename W, typename K, typename ...A>
-                inline ClassMetatableComposite<T, U, typename std::decay<K>::type, Emplacer<W, typename std::decay<A>::type...>> emplace(K &&key, A &&...arguments) &&;
+                inline ClassMetatableComposite<T, U, std::decay_t<K>, Emplacer<W, std::decay_t<A>...>> emplace(K &&key, A &&...arguments) &&;
 
                 template<typename K, typename F, typename ...E, std::size_t ...I>
                 inline decltype(auto) setFunction(K &&key, F &&function, DefaultArgument<E, I> &&...defaultArguments) &&;
@@ -92,9 +92,9 @@ namespace integral {
             // T: Class type
             template<typename T, typename C, typename K, typename V>
             class ClassMetatableComposite : public ClassCompositeInterface<T, ClassMetatableComposite<T, C, K, V>> {
-                static_assert(std::is_reference<C>::value == false, "C cannot be a reference type");
-                static_assert(std::is_reference<K>::value == false, "K cannot be a reference type");
-                static_assert(std::is_reference<V>::value == false, "V cannot be a reference type");
+                static_assert(std::is_reference_v<C> == false, "C cannot be a reference type");
+                static_assert(std::is_reference_v<K> == false, "K cannot be a reference type");
+                static_assert(std::is_reference_v<V> == false, "V cannot be a reference type");
             public:
                 // non-copyable
                 ClassMetatableComposite(const ClassMetatableComposite &) = delete;
@@ -117,7 +117,7 @@ namespace integral {
             // B: base class type
             template<typename T, typename B, typename C>
             class InheritanceComposite : public ClassCompositeInterface<T, InheritanceComposite<T, B, C>> {
-                static_assert(std::is_reference<C>::value == false, "C cannot be a reference type");
+                static_assert(std::is_reference_v<C> == false, "C cannot be a reference type");
             public:
                 // non-copyable
                 InheritanceComposite(const InheritanceComposite &) = delete;
@@ -137,7 +137,7 @@ namespace integral {
             // F: type function
             template<typename T, typename C, typename F>
             class SyntheticInheritanceComposite : public ClassCompositeInterface<T, SyntheticInheritanceComposite<T, C, F>> {
-                static_assert(std::is_reference<C>::value == false, "C cannot be a reference type");
+                static_assert(std::is_reference_v<C> == false, "C cannot be a reference type");
             public:
                 // non-copyable
                 SyntheticInheritanceComposite(const SyntheticInheritanceComposite &) = delete;
@@ -181,14 +181,14 @@ namespace integral {
             // ClassCompositeInterface
             template<typename T, typename U>
             template<typename K, typename V>
-            inline ClassMetatableComposite<T, U, typename std::decay<K>::type, typename std::decay<V>::type> ClassCompositeInterface<T, U>::set(K &&key, V &&value) && {
-                return ClassMetatableComposite<T, U, typename std::decay<K>::type, typename std::decay<V>::type>(std::move(*static_cast<U *>(this)), std::forward<K>(key), std::forward<V>(value));
+            inline ClassMetatableComposite<T, U, std::decay_t<K>, std::decay_t<V>> ClassCompositeInterface<T, U>::set(K &&key, V &&value) && {
+                return ClassMetatableComposite<T, U, std::decay_t<K>, std::decay_t<V>>(std::move(*static_cast<U *>(this)), std::forward<K>(key), std::forward<V>(value));
             }
 
             template<typename T, typename U>
             template<typename W, typename K, typename ...A>
-            inline ClassMetatableComposite<T, U, typename std::decay<K>::type, Emplacer<W, typename std::decay<A>::type...>> ClassCompositeInterface<T, U>::emplace(K &&key, A &&...arguments) && {
-                return ClassMetatableComposite<T, U, typename std::decay<K>::type, Emplacer<W, typename std::decay<A>::type...>>(std::move(*static_cast<U *>(this)), std::forward<K>(key), Emplacer<W, typename std::decay<A>::type...>(std::forward<A>(arguments)...));
+            inline ClassMetatableComposite<T, U, std::decay_t<K>, Emplacer<W, std::decay_t<A>...>> ClassCompositeInterface<T, U>::emplace(K &&key, A &&...arguments) && {
+                return ClassMetatableComposite<T, U, std::decay_t<K>, Emplacer<W, std::decay_t<A>...>>(std::move(*static_cast<U *>(this)), std::forward<K>(key), Emplacer<W, std::decay_t<A>...>(std::forward<A>(arguments)...));
             }
 
             template<typename T, typename U>
@@ -233,7 +233,7 @@ namespace integral {
                 using ConversionFunctionTraits = ConversionFunctionTraits<typename FunctionTraits<F>::Signature>;
                 using OriginalType = typename ConversionFunctionTraits::OriginalType;
                 // failing the following static_assert would NOT cause a bug. It exists to prevent an abstraction inconsistecy (it is a design choice)
-                static_assert(std::is_same<OriginalType, T>::value == true, "type function original type mismatch with metatable class type");
+                static_assert(std::is_same_v<OriginalType, T> == true, "type function original type mismatch with metatable class type");
                 return SyntheticInheritanceComposite<T, U, F>(std::move(*static_cast<U *>(this)), std::forward<F>(typeFunction));
             }
 

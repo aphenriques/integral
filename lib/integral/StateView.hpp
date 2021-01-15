@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2016, 2017, 2019, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2016, 2017, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -64,7 +64,7 @@ namespace integral {
 
         // "detail::Reference::get" and "detail::reference::operator V" (conversion operator) throw ReferenceException
         template<typename K>
-        inline detail::Reference<typename std::decay<K>::type, detail::GlobalReference> operator[](K &&key) const;
+        inline detail::Reference<std::decay_t<K>, detail::GlobalReference> operator[](K &&key) const;
 
         template<typename D, typename B>
         inline void defineTypeFunction() const;
@@ -103,8 +103,8 @@ namespace integral {
     }
 
     template<typename K>
-    inline detail::Reference<typename std::decay<K>::type, detail::GlobalReference> StateView::operator[](K &&key) const {
-        return detail::Reference<typename std::decay<K>::type, detail::GlobalReference>(std::forward<K>(key), detail::GlobalReference(luaState_));
+    inline detail::Reference<std::decay_t<K>, detail::GlobalReference> StateView::operator[](K &&key) const {
+        return detail::Reference<std::decay_t<K>, detail::GlobalReference>(std::forward<K>(key), detail::GlobalReference(luaState_));
     }
 
     template<typename D, typename B>

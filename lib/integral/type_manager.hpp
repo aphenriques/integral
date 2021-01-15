@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2013, 2014, 2016, 2017, 2019, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2013, 2014, 2016, 2017, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -296,7 +296,7 @@ namespace integral {
                 // Attention! The stored type_index is UserDataWrapper<T>
                 // This is useful when multiple integral versions are used.
                 // Maybe UserDataWrapper<T> is incompatible from different integral versions used together; this way, it will fail gracefully.
-                static_assert(std::is_same<typename std::decay<T>::type, std::string>::value == false, "cannot push std::string metatable. integral treats it as a primitive lua type");
+                static_assert(std::is_same_v<std::decay_t<T>, std::string> == false, "cannot push std::string metatable. integral treats it as a primitive lua type");
                 const std::type_index typeIndex = typeid(UserDataWrapper<T>);
                 const std::size_t typeHash = typeIndex.hash_code();
                 lua_pushstring(luaState, gkTypeManagerRegistryKey);
@@ -384,10 +384,10 @@ namespace integral {
             // metatable[gkTypeFunctionsKey] = typeFunctionTable
             template<typename D, typename B>
             void setTypeFunction(lua_State *luaState) {
-                static_assert(std::is_same<typename std::remove_cv<D>::type, D>::value == true, "D is cv qualified");
-                static_assert(std::is_same<typename std::remove_cv<B>::type, B>::value == true, "B is cv qualified");
-                static_assert(std::is_same<D, B>::value == false, "conversion to itself");
-                static_assert(std::is_base_of<B, D>::value == true, "D must be derived from B");
+                static_assert(std::is_same_v<std::remove_cv_t<D>, D> == true, "D is cv qualified");
+                static_assert(std::is_same_v<std::remove_cv_t<B>, B> == true, "B is cv qualified");
+                static_assert(std::is_same_v<D, B> == false, "conversion to itself");
+                static_assert(std::is_base_of_v<B, D> == true, "D must be derived from B");
                 std::type_index typeIndex = typeid(B);
                 // stack: metatable
                 pushTypeFunctionHashTable(luaState, typeIndex);
@@ -413,8 +413,8 @@ namespace integral {
                 using ConversionFunctionTraits = ConversionFunctionTraits<typename FunctionTraits<F>::Signature>;
                 using OriginalType = typename ConversionFunctionTraits::OriginalType;
                 using ConversionType = typename ConversionFunctionTraits::ConversionType;
-                static_assert(std::is_same<typename std::remove_cv<ConversionType>::type, ConversionType>::value == true, "ConversionType is cv qualified");
-                static_assert(std::is_same<typename std::remove_cv<OriginalType>::type, ConversionType>::value == false, "conversion to itself");
+                static_assert(std::is_same_v<std::remove_cv_t<ConversionType>, ConversionType> == true, "ConversionType is cv qualified");
+                static_assert(std::is_same_v<std::remove_cv_t<OriginalType>, ConversionType> == false, "conversion to itself");
                 std::type_index typeIndex = typeid(ConversionType);
                 // stack: metatable
                 pushTypeFunctionHashTable(luaState, typeIndex);
@@ -458,10 +458,10 @@ namespace integral {
             void defineTypeFunction(lua_State *luaState, F &&typeFunction) {
                 using ConversionFunctionTraits = ConversionFunctionTraits<typename FunctionTraits<F>::Signature>;
                 using OriginalType = typename ConversionFunctionTraits::OriginalType;
-                if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<typename std::remove_cv<OriginalType>::type>))) == true) {
+                if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<std::remove_cv_t<OriginalType>>))) == true) {
                     setTypeFunction(luaState, std::forward<F>(typeFunction));
                 } else {
-                    pushClassMetatable<typename std::remove_cv<OriginalType>::type>(luaState);
+                    pushClassMetatable<std::remove_cv_t<OriginalType>>(luaState);
                     setTypeFunction(luaState, std::forward<F>(typeFunction));
                     lua_pop(luaState, 1);
                 }
@@ -519,10 +519,10 @@ namespace integral {
 
             template<typename D, typename B>
             void setInheritance(lua_State *luaState) {
-                static_assert(std::is_same<typename std::remove_cv<D>::type, D>::value == true, "D is cv qualified");
-                static_assert(std::is_same<typename std::remove_cv<B>::type, B>::value == true, "B is cv qualified");
-                static_assert(std::is_same<D, B>::value == false, "inheritance to itself");
-                static_assert(std::is_base_of<B, D>::value == true, "D must be derived from B");
+                static_assert(std::is_same_v<std::remove_cv_t<D>, D> == true, "D is cv qualified");
+                static_assert(std::is_same_v<std::remove_cv_t<B>, B> == true, "B is cv qualified");
+                static_assert(std::is_same_v<D, B> == false, "inheritance to itself");
+                static_assert(std::is_base_of_v<B, D> == true, "D must be derived from B");
                 // stack: metatable
                 setInheritanceTable<B>(luaState);
                 setTypeFunction<D, B>(luaState);
@@ -535,8 +535,8 @@ namespace integral {
             void setInheritance(lua_State *luaState, F &&typeFunction) {
                 using ConversionFunctionTraits = ConversionFunctionTraits<typename FunctionTraits<F>::Signature>;
                 using ConversionType = typename ConversionFunctionTraits::ConversionType;
-                static_assert(std::is_same<typename std::remove_cv<typename ConversionFunctionTraits::OriginalType>::type, ConversionType>::value == false, "inheritance to itself");
-                static_assert(std::is_same<typename std::remove_cv<ConversionType>::type, ConversionType>::value == true, "ConversionType is cv qualified");
+                static_assert(std::is_same_v<std::remove_cv_t<typename ConversionFunctionTraits::OriginalType>, ConversionType> == false, "inheritance to itself");
+                static_assert(std::is_same_v<std::remove_cv_t<ConversionType>, ConversionType> == true, "ConversionType is cv qualified");
                 // stack: metatable
                 setInheritanceTable<ConversionType>(luaState);
                 setTypeFunction(luaState, std::forward<F>(typeFunction));
@@ -560,10 +560,10 @@ namespace integral {
             void defineInheritance(lua_State *luaState, F &&typeFunction) {
                 using ConversionFunctionTraits = ConversionFunctionTraits<typename FunctionTraits<F>::Signature>;
                 using OriginalType = typename ConversionFunctionTraits::OriginalType;
-                if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<typename std::remove_cv<OriginalType>::type>))) == true) {
+                if (lua_istable(luaState, -1) != 0 && checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<std::remove_cv_t<OriginalType>>))) == true) {
                     setInheritance(luaState, std::forward<F>(typeFunction));
                 } else {
-                    pushClassMetatable<typename std::remove_cv<OriginalType>::type>(luaState);
+                    pushClassMetatable<std::remove_cv_t<OriginalType>>(luaState);
                     setInheritance(luaState, std::forward<F>(typeFunction));
                     lua_pop(luaState, 1);
                 }

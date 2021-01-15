@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2019, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -56,7 +56,7 @@ namespace integral::detail {
         inline ReferenceBase(L &&key, D &&chainedReference);
 
         template<typename L>
-        inline T<typename std::decay<L>::type, T<K, C>> operator[](L &&key) &&;
+        inline T<std::decay_t<L>, T<K, C>> operator[](L &&key) &&;
 
         std::string getReferenceString() const;
 
@@ -83,7 +83,7 @@ namespace integral::detail {
 
     template<template<typename, typename> typename T, typename K, typename C>
     template<typename L>
-    inline T<typename std::decay<L>::type, T<K, C>> ReferenceBase<T<K, C>>::operator[](L &&key) && {
+    inline T<std::decay_t<L>, T<K, C>> ReferenceBase<T<K, C>>::operator[](L &&key) && {
         return {std::forward<L>(key), std::move(static_cast<T<K, C> &>(*this))};
     }
 

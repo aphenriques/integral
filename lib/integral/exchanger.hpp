@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2013, 2014, 2015, 2016, 2017, 2019, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -105,14 +105,14 @@ namespace integral {
             };
 
             template<typename T>
-            class Exchanger<T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value>::type> {
+            class Exchanger<T, std::enable_if_t<std::is_integral_v<T> && std::is_signed_v<T>>> {
             public:
                 static T get(lua_State *luaState, int index);
                 inline static void push(lua_State *luaState, T number);
             };
 
             template<typename T>
-            class Exchanger<T, typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value>::type> {
+            class Exchanger<T, std::enable_if_t<std::is_integral_v<T> && std::is_unsigned_v<T>>> {
             public:
                 static T get(lua_State *luaState, int index);
                 inline static void push(lua_State *luaState, T number);
@@ -126,7 +126,7 @@ namespace integral {
             };
 
             template<typename T>
-            class Exchanger< T, typename std::enable_if<std::is_floating_point<T>::value>::type> {
+            class Exchanger<T, std::enable_if_t<std::is_floating_point_v<T>>> {
             public:
                 static T get(lua_State *luaState, int index);
                 inline static void push(lua_State *luaState, T number);
@@ -189,7 +189,7 @@ namespace integral {
 
             template<typename D>
             class AutomaticInheritanceBase {
-                static_assert(std::is_class<D>::value, "typename D must be a class type");
+                static_assert(std::is_class_v<D>, "typename D must be a class type");
 
             public:
                 inline static D & get(lua_State *luaState, int index);
@@ -237,7 +237,7 @@ namespace integral {
             };
 
             template<typename T>
-            using ExchangerType = Exchanger<typename std::decay<T>::type>;
+            using ExchangerType = Exchanger<std::decay_t<T>>;
 
             template<typename T>
             inline decltype(auto) get(lua_State *luaState, int index);
@@ -321,7 +321,7 @@ namespace integral {
             }
 
             template<typename T>
-            T Exchanger<T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value>::type>::get(lua_State *luaState, int index) {
+            T Exchanger<T, std::enable_if_t<std::is_integral_v<T> && std::is_signed_v<T>>>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     int isNumber;
                     const lua_Integer integer = lua_compatibility::tointegerx(luaState, index, &isNumber);
@@ -341,12 +341,12 @@ namespace integral {
             }
 
             template<typename T>
-            inline void Exchanger<T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value>::type>::push(lua_State *luaState, T number) {
+            inline void Exchanger<T, std::enable_if_t<std::is_integral_v<T> && std::is_signed_v<T>>>::push(lua_State *luaState, T number) {
                 lua_pushinteger(luaState, static_cast<lua_Integer>(number));
             }
 
             template<typename T>
-            T Exchanger<T, typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value>::type>::get(lua_State *luaState, int index) {
+            T Exchanger<T, std::enable_if_t<std::is_integral_v<T> && std::is_unsigned_v<T>>>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     int isNumber;
                     // "auto" keyword for lua compatibility
@@ -367,7 +367,7 @@ namespace integral {
             }
 
             template<typename T>
-            inline void Exchanger<T, typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value>::type>::push(lua_State *luaState, T number) {
+            inline void Exchanger<T, std::enable_if_t<std::is_integral_v<T> && std::is_unsigned_v<T>>>::push(lua_State *luaState, T number) {
                 lua_compatibility::pushunsigned(luaState, number);
             }
 
@@ -376,7 +376,7 @@ namespace integral {
             }
 
             template<typename T>
-            T Exchanger< T, typename std::enable_if<std::is_floating_point<T>::value>::type>::get(lua_State *luaState, int index) {
+            T Exchanger<T, std::enable_if_t<std::is_floating_point_v<T>>>::get(lua_State *luaState, int index) {
                 if (lua_isuserdata(luaState, index) == 0) {
                     int isNumber;
                     const lua_Number number = lua_compatibility::tonumberx(luaState, index, &isNumber);
@@ -396,7 +396,7 @@ namespace integral {
             }
 
             template<typename T>
-            inline void Exchanger< T, typename std::enable_if<std::is_floating_point<T>::value>::type>::push(lua_State *luaState, T number) {
+            inline void Exchanger<T, std::enable_if_t<std::is_floating_point_v<T>>>::push(lua_State *luaState, T number) {
                 lua_pushnumber(luaState, static_cast<lua_Number>(number));
             }
 
@@ -748,8 +748,8 @@ namespace integral {
             template<typename F, typename ...A>
             inline void AutomaticInheritanceBase<D>::pushWithTypeFunction(lua_State *luaState, const F &typeFunction, A &&...arguments) {
                 using ConversionFunctionTraits = ConversionFunctionTraits<typename FunctionTraits<F>::Signature>;
-                using Derived = typename std::remove_cv<typename ConversionFunctionTraits::OriginalType>::type;
-                static_assert(std::is_same<Derived, D>::value == true, "invalid type function");
+                using Derived = std::remove_cv_t<typename ConversionFunctionTraits::OriginalType>;
+                static_assert(std::is_same_v<Derived, D> == true, "invalid type function");
                 pushGeneric(
                     luaState,
                     [&typeFunction] (lua_State *lambdaLuaState) {
@@ -865,8 +865,8 @@ namespace integral {
             template<typename T, typename ...A>
             void push(lua_State *luaState, A &&...arguments) {
                 // "const T &" is pushed as "T" (by value)
-                static_assert(std::is_reference<T>::value == false || std::is_const<typename std::remove_reference<T>::type>::value == true, "cannot push non-const reference");
-                if constexpr (std::is_same<typename std::decay<T>::type, LuaFunctionWrapper>::value == false) {
+                static_assert(std::is_reference_v<T> == false || std::is_const_v<std::remove_reference_t<T>> == true, "cannot push non-const reference");
+                if constexpr (std::is_same_v<std::decay_t<T>, LuaFunctionWrapper> == false) {
                     const int stackTopIndex = lua_gettop(luaState);
                     ExchangerType<T>::push(luaState, std::forward<A>(arguments)...);
                     // stack: ?...
@@ -884,7 +884,7 @@ namespace integral {
 
             template<typename A, typename ...B>
             void pushCopy(lua_State *luaState, A &&firstArgument, B &&...remainingArguments) {
-                push<typename std::decay<A>::type>(luaState, std::forward<A>(firstArgument));
+                push<std::decay_t<A>>(luaState, std::forward<A>(firstArgument));
                 pushCopy(luaState, std::forward<B>(remainingArguments)...);
             }
         }

@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2015, 2016, 2019, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2015, 2016, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@
 namespace integral {
     namespace detail {
         template<typename T>
-        class FunctorTraits : public FunctorTraits<decltype(&std::decay<T>::type::operator())> {};
+        class FunctorTraits : public FunctorTraits<decltype(&std::decay_t<T>::operator())> {};
 
         template<typename T, typename R, typename ...A>
         class FunctorTraits<R(T::*)(A...)> : public FunctionSignature<R(A...)> {};
