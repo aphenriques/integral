@@ -70,9 +70,9 @@
 
 # Tested environments
 
-* gcc version 8.3.0 (Ubuntu 8.3.0-6ubuntu1) on Ubuntu Linux; and
-* Apple clang version 11.0.3 (clang-1103.0.32.62) on MacOS.
-* Microsoft (R) C/C++ Optimizing Compiler Version 19.28.29336 for x86 (Visual Studio Community 2019 Version 16.8.4)
+* gcc version 8.3.0 (Ubuntu 8.3.0-6ubuntu1) on Ubuntu Linux;
+* Apple clang version 11.0.3 (clang-1103.0.32.62) on MacOS; and
+* Microsoft (R) C/C++ Optimizing Compiler Version 19.28.29336 for x86 (Visual Studio Community 2019 Version 16.8.4) on Windows.
 
 
 # Build
