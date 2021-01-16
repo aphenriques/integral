@@ -395,7 +395,7 @@ TEST_CASE("integral test") {
                                     integral::push<bool>(lambdaLuaState, object.flag_);
                                     return 2;
                                 })
-                                .emplace<Object>("sample", "#", 42u)
+                                .emplace<Object>("sample", std::string("#"), 42u)
                                 );
         REQUIRE_NOTHROW(stateView.doString("object = Object.new1('id')"));
         REQUIRE_NOTHROW(stateView.doString("assert(Object.new2(42):getId() == '42')"));
@@ -419,7 +419,7 @@ TEST_CASE("integral test") {
                                            integral::push<Object>(lambdaLuaState, 10u);
                                            return 1;
                                        })
-                                        .emplace<Object>("sample", "#", 42u)
+                                        .emplace<Object>("sample", std::string("#"), 42u)
                                        );
         REQUIRE_THROWS_AS(stateView.doString("Object.aux.new('string')"), integral::StateException);
         REQUIRE_NOTHROW(stateView.doString("assert(Object.aux.new2():getId() == '10')"));

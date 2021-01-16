@@ -406,7 +406,7 @@ namespace integral {
                     if (lua_istable(luaState, index) != 0) {
                         lua_pushvalue(luaState, index);
                         // stack: table
-                        const auto tableSize = lua_compatibility::rawlen(luaState, -1);
+                        const std::size_t tableSize = static_cast<std::size_t>(lua_compatibility::rawlen(luaState, -1));
                         std::vector<T> returnVector;
                         returnVector.reserve(tableSize);
                         for (std::size_t i = 1; i <= tableSize; ++i) {
@@ -446,7 +446,7 @@ namespace integral {
             void Exchanger<std::vector<T>>::push(lua_State *luaState, const std::vector<T> &vector) {
                 using SizeType = typename std::vector<T>::size_type;
                 const SizeType vectorSize = vector.size();
-                if (vectorSize <= std::numeric_limits<int>::max()) {
+                if (vectorSize <= static_cast<SizeType>(std::numeric_limits<int>::max())) {
                     lua_createtable(luaState, static_cast<int>(vectorSize), 0);
                     // stack: table
                     for (SizeType i = 0; i < vectorSize; ++i) {
@@ -512,7 +512,7 @@ namespace integral {
 
             template<typename T, std::size_t N>
             void Exchanger<std::array<T, N>>::push(lua_State *luaState, const std::array<T, N> &array) {
-                if (N <= std::numeric_limits<int>::max()) {
+                if (N <= static_cast<std::size_t>(std::numeric_limits<int>::max())) {
                     lua_createtable(luaState, static_cast<int>(N), 0);
                     // stack: table
                     for (std::size_t i = 0; i < N; ++i) {
@@ -572,7 +572,7 @@ namespace integral {
             void Exchanger<std::unordered_map<T, U>>::push(lua_State *luaState, const std::unordered_map<T, U> &unorderedMap) {
                 using SizeType = typename std::unordered_map<T, U>::size_type;
                 const SizeType unorderedMapSize = unorderedMap.size();
-                if (unorderedMapSize <= std::numeric_limits<int>::max()) {
+                if (unorderedMapSize <= static_cast<SizeType>(std::numeric_limits<int>::max())) {
                     lua_createtable(luaState, static_cast<int>(unorderedMapSize), 0);
                     // stack: table
                     for (const auto &keyValue : unorderedMap) {
@@ -676,7 +676,7 @@ namespace integral {
             template<std::size_t ...S>
             void Exchanger<std::tuple<T...>>::push(lua_State *luaState, const std::tuple<T...> &tuple, std::index_sequence<S...>) {
                 constexpr std::size_t keTupleSize = sizeof...(T);
-                if (keTupleSize <= std::numeric_limits<int>::max()) {
+                if (keTupleSize <= static_cast<std::size_t>(std::numeric_limits<int>::max())) {
                     lua_createtable(luaState, static_cast<int>(keTupleSize), 0);
                     // stack: table
                     generic::expandDummyTemplatePack((setElementInTable<S + 1, T>(luaState, std::get<S>(tuple), -1), 0)...);
@@ -689,7 +689,7 @@ namespace integral {
             template<std::size_t ...S>
             void Exchanger<std::tuple<T...>>::push(lua_State *luaState, T &&...t, std::index_sequence<S...>) {
                 constexpr std::size_t keTupleSize = sizeof...(T);
-                if (keTupleSize <= std::numeric_limits<int>::max()) {
+                if (keTupleSize <= static_cast<std::size_t>(std::numeric_limits<int>::max())) {
                     lua_createtable(luaState, static_cast<int>(keTupleSize), 0);
                     // stack: table
                     generic::expandDummyTemplatePack((setElementInTable<S + 1, T>(luaState, std::forward<T>(t), -1), 0)...);
