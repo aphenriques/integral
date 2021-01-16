@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2017, 2019, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2017, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -535,9 +535,12 @@ TEST_CASE("integral test") {
         REQUIRE_NOTHROW(stateView.doString("assert(g(nil) == 42)"));
         stateView.doString("x = nil");
         std::optional<Object> optionalX;
+// MSVC compiler has different behaviour which causes compilation error due to ambiguity
+#ifndef _MSC_VER
         // the following expression throws because of an obscure c++ behaviour
         // see https://stackoverflow.com/a/45865802
         REQUIRE_THROWS_AS(optionalX = stateView["x"], integral::ReferenceException);
+#endif
     }
     SECTION("function call") {
         stateView["Object"].set(integral::ClassMetatable<Object>()
