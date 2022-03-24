@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2017, 2019, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2017, 2019, 2020, 2022 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ public:
     const std::string greeting_;
     std::string name_;
 
-    Object(const std::string greeting, const std::string &name) : greeting_(greeting), name_(name) {}
+    Object(const std::string & greeting, std::string_view name) : greeting_(greeting), name_(name) {}
 
     // const reference values are pushed by value (copied) to the Lua state
     const std::string & getGreeting() const {
@@ -54,7 +54,7 @@ int main() {
         luaState["Object"] = integral::ClassMetatable<Object>()
                                  // invalid constructor register causes compilation error
                                  // .setConstructor<Object()>("invalid")
-                                 .setConstructor<Object(const std::string &, const std::string &)>("new")
+                                 .setConstructor<Object(const std::string &, std::string_view)>("new")
                                  .setFunction("getGreeting", &Object::getGreeting)
                                  .setGetter("getName", &Object::name_)
                                  .setSetter("setName", &Object::name_)

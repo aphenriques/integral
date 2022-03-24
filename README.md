@@ -209,7 +209,7 @@ public:
     const std::string greeting_;
     std::string name_;
 
-    Object(const std::string greeting, const std::string &name) : greeting_(greeting), name_(name) {}
+    Object(const std::string & greeting, std::string_view name) : greeting_(greeting), name_(name) {}
 
     // const reference values are pushed by value (copied) to the Lua state
     const std::string & getGreeting() const {
@@ -226,7 +226,7 @@ public:
         luaState["Object"] = integral::ClassMetatable<Object>()
                                  // invalid constructor register causes compilation error
                                  // .setConstructor<Object()>("invalid")
-                                 .setConstructor<Object(const std::string &, const std::string &)>("new")
+                                 .setConstructor<Object(const std::string &, std::string_view)>("new")
                                  .setFunction("getGreeting", &Object::getGreeting)
                                  .setGetter("getName", &Object::name_)
                                  .setSetter("setName", &Object::name_)
@@ -576,7 +576,7 @@ See [example](samples/abstraction/reference_wrapper_and_shared_ptr/reference_wra
 | integral types (`std::is_integral`)                              | number [integer subtype in Lua version >= 5.3] |
 | floating point types (`std::is_floating_point`)                  | number [float subtype in Lua version >= 5.3]   |
 | `bool`                                                           | boolean                                        |
-| `std::string`, `const char *`                                    | string                                         |
+| `std::string`, `std::string_view`, `const char *`                | string                                         |
 | `std::vector`, `std::array`, `std::unordered_map`, `std::tuple`  | table                                          |
 | `std::optional`                                                  | nil or converted value                         |
 | from: `integral::LuaFunctionWrapper`, `integral::FunctionWrapper`| to: function                                   |
@@ -637,7 +637,7 @@ and cloned with:
 
 MIT License
 
-Copyright (c) 2013-2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+Copyright (c) 2013-2022 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

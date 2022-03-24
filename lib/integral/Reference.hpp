@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2016, 2017, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2016, 2017, 2019, 2020, 2021, 2022 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -155,6 +155,15 @@ namespace integral::detail {
     template<typename K, typename C>
     template<typename V>
     decltype(auto) Reference<K, C>::get() const {
+        // https://www.lua.org/manual/5.4/manual.html#4.1.3
+        static_assert(
+            std::is_same_v<std::decay_t<V>, std::decay_t<const char *>> == false,
+            "storing a pointer to a string removed from the stack is unsafe"
+        );
+        static_assert(
+            std::is_same_v<std::decay_t<V>, std::decay_t<std::string_view>> == false,
+            "storing a pointer to a string removed from the stack is unsafe"
+        );
         push();
         // stack: ?
         try {

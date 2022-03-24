@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2013, 2014, 2016, 2019, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2013, 2014, 2016, 2019, 2020, 2022 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -47,26 +47,6 @@ namespace integral {
                     }
                 } else {
                     const char **userData = type_manager::getConvertibleType<const char *>(luaState, index);
-                    if (userData != nullptr) {
-                        return *userData;
-                    } else {
-                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
-                    }
-                }
-            }
-
-            std::string Exchanger<std::string>::get(lua_State *luaState, int index) {
-                if (lua_isuserdata(luaState, index) == 0) {
-                    std::size_t length;
-                    const char * const string = lua_tolstring(luaState, index, &length);
-                    if (string != nullptr) {
-                        // the returned std:string can contain null characters. The length of the string is length
-                        return std::string(string, length);
-                    } else {
-                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
-                    }
-                } else {
-                    const std::string *userData = type_manager::getConvertibleType<std::string>(luaState, index);
                     if (userData != nullptr) {
                         return *userData;
                     } else {

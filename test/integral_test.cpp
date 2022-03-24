@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2017, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2017, 2019, 2020, 2021, 2022 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -96,8 +96,8 @@ private:
     std::string id_;
 };
 
-Object makeObject(const std::string &id) {
-    return id;
+Object makeObject(std::string_view id) {
+    return std::string(id);
 }
 
 double getSum(double x, double y) {
@@ -126,6 +126,7 @@ TEST_CASE("integral test") {
         integral::push<double>(luaState.get(), 42.1);
         integral::push<const char *>(luaState.get(), "string1");
         integral::push<std::string>(luaState.get(), "string2");
+        integral::push<std::string_view>(luaState.get(), "string3");
         const std::string stringWithNullCharacter("string\0with null", 17);
         integral::push<std::string>(luaState.get(), stringWithNullCharacter);
         integral::push<bool>(luaState.get(), true);
@@ -133,31 +134,37 @@ TEST_CASE("integral test") {
         integral::push<Object>(luaState.get(), "object");
         integral::push<std::optional<Object>>(luaState.get(), Object("object"));
         integral::push<std::optional<Object>>(luaState.get(), std::nullopt);
-        REQUIRE(integral::get<int>(luaState.get(), -11) == -42);
+        REQUIRE(integral::get<int>(luaState.get(), -12) == -42);
         REQUIRE(integral::get<int>(luaState.get(), 1) == -42);
-        REQUIRE(integral::get<unsigned>(luaState.get(), -10) == 42u);
+        REQUIRE(integral::get<unsigned>(luaState.get(), -11) == 42u);
         REQUIRE(integral::get<unsigned>(luaState.get(), 2) == 42u);
-        REQUIRE(integral::get<double>(luaState.get(), -9) == 42.1);
+        REQUIRE(integral::get<double>(luaState.get(), -10) == 42.1);
         REQUIRE(integral::get<double>(luaState.get(), 3) == 42.1);
-        REQUIRE(std::strcmp(integral::get<const char *>(luaState.get(), -8), "string1") == 0);
+        REQUIRE(std::strcmp(integral::get<const char *>(luaState.get(), -9), "string1") == 0);
         REQUIRE(std::strcmp(integral::get<const char *>(luaState.get(), 4), "string1") == 0);
-        REQUIRE(integral::get<std::string>(luaState.get(), -8) == "string1");
-        REQUIRE(integral::get<std::string>(luaState.get(), -7) == "string2");
+        REQUIRE(integral::get<std::string>(luaState.get(), -9) == "string1");
+        REQUIRE(integral::get<std::string_view>(luaState.get(), -9) == "string1");
+        REQUIRE(integral::get<std::string>(luaState.get(), -8) == "string2");
         REQUIRE(integral::get<std::string>(luaState.get(), 5) == "string2");
-        REQUIRE(std::strcmp(integral::get<const char *>(luaState.get(), -7), "string2") == 0);
+        REQUIRE(integral::get<std::string_view>(luaState.get(), 5) == "string2");
+        REQUIRE(std::strcmp(integral::get<const char *>(luaState.get(), -8), "string2") == 0);
+        REQUIRE(integral::get<std::string>(luaState.get(), -7) == "string3");
+        REQUIRE(integral::get<std::string>(luaState.get(), 6) == "string3");
+        REQUIRE(integral::get<std::string_view>(luaState.get(), 6) == "string3");
+        REQUIRE(std::strcmp(integral::get<const char *>(luaState.get(), -7), "string3") == 0);
         REQUIRE(integral::get<std::string>(luaState.get(), -6) == stringWithNullCharacter);
-        REQUIRE(integral::get<std::string>(luaState.get(), 6) == stringWithNullCharacter);
+        REQUIRE(integral::get<std::string>(luaState.get(), 7) == stringWithNullCharacter);
         REQUIRE(integral::get<bool>(luaState.get(), -5) == true);
-        REQUIRE(integral::get<bool>(luaState.get(), 7) == true);
+        REQUIRE(integral::get<bool>(luaState.get(), 8) == true);
         REQUIRE(integral::get<bool>(luaState.get(), -4) == false);
-        REQUIRE(integral::get<bool>(luaState.get(), 8) == false);
+        REQUIRE(integral::get<bool>(luaState.get(), 9) == false);
         REQUIRE(integral::get<Object>(luaState.get(), -3).getId() == "object");
-        REQUIRE(integral::get<Object>(luaState.get(), 9).getId() == "object");
+        REQUIRE(integral::get<Object>(luaState.get(), 10).getId() == "object");
         REQUIRE(integral::get<std::optional<Object>>(luaState.get(), -2).value().getId() == "object");
-        REQUIRE(integral::get<std::optional<Object>>(luaState.get(), 10).value().getId() == "object");
+        REQUIRE(integral::get<std::optional<Object>>(luaState.get(), 11).value().getId() == "object");
         REQUIRE(integral::get<std::optional<Object>>(luaState.get(), -1) == std::nullopt);
-        REQUIRE(integral::get<std::optional<Object>>(luaState.get(), 11) == std::nullopt);
-        lua_pop(luaState.get(), 11);
+        REQUIRE(integral::get<std::optional<Object>>(luaState.get(), 12) == std::nullopt);
+        lua_pop(luaState.get(), 12);
     }
     SECTION("integral::get incompatible types") {
         integral::push<std::string>(luaState.get(), "string");
@@ -196,7 +203,7 @@ TEST_CASE("integral test") {
         stateView["x"].set(42.1);
         REQUIRE(stateView["x"].get<double>() == 42.1);
         stateView["x"].set("string1");
-        REQUIRE(std::strcmp(stateView["x"].get<const char *>(), "string1") == 0);
+        REQUIRE(stateView["x"].get<std::string>() == "string1");
         stateView["x"].set(std::string("string2"));
         REQUIRE(stateView["x"].get<std::string>() == "string2");
         const std::string stringWithNullCharacter("string\0with null", 17);
@@ -236,11 +243,16 @@ TEST_CASE("integral test") {
         double xDouble = stateView["x"];
         REQUIRE(xDouble == 42.1);
         stateView["x"] = "string1";
-        const char * xCString = stateView["x"];
-        REQUIRE(std::strcmp(xCString, "string1") == 0);
+        const std::string xString1 = stateView["x"];
+        REQUIRE(xString1 == "string1");
         stateView["x"] = std::string("string2");
-        std::string xString = stateView["x"];
-        REQUIRE(stateView["x"].get<std::string>() == "string2");
+        std::string xString2 = stateView["x"];
+        REQUIRE(stateView["x"].get<std::string>() == xString2);
+        stateView["x"] = std::string_view("string3");
+        std::string xString3 = stateView["x"];
+        // will not compile (by design)
+        //std::string_view xString3 = stateView["x"];
+        REQUIRE(stateView["x"].get<std::string>() == xString3);
         const std::string stringWithNullCharacter("string\0with null", 17);
         stateView["x"] = stringWithNullCharacter;
         std::string xStringWithNull = stateView["x"];
@@ -324,6 +336,7 @@ TEST_CASE("integral test") {
         REQUIRE_NOTHROW(stateView.doString("assert(lib.getMultiplicationFunction2(21)(2) == 42)"));
         REQUIRE_NOTHROW(stateView.doString("assert(lib.getMultiplicationFunction3(21)(2) == 42)"));
         REQUIRE_NOTHROW(stateView.doString("assert(lib.getMultiplicationFunction4(21)(2) == 42)"));
+        REQUIRE_NOTHROW(stateView.doString("assert(lib.getMultiplicationFunction5(21)(2) == 42)"));
     }
     SECTION("integral::get<integral::LuaFunctionWrapper>") {
         stateView["getSum1"].setFunction(

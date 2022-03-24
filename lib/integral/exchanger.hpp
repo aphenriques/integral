@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <typeinfo>
@@ -64,6 +65,9 @@ namespace integral {
             template<typename T, typename ...A>
             void pushObject(lua_State *luaState, A &&...arguments);
 
+            template<typename T>
+            T getString(lua_State *luaState, int index);
+
             template<typename T, typename Enable = void>
             class Exchanger {
             public:
@@ -85,6 +89,7 @@ namespace integral {
             class Exchanger<const char *> {
             public:
                 // If the value on the stack is a number, then lua_tostring also changes the actual value in the stack to a string. (This change confuses lua_next when lua_tolstring is applied to keys during a table traversal.)
+                // It is not safe to store a pointer to a string that was removed from the stack (https://www.lua.org/manual/5.4/manual.html#4.1.3)
                 static const char * get(lua_State *luaState, int index);
 
                 // for template argument, check http://stackoverflow.com/questions/16708307/is-it-possible-to-legally-overload-a-string-literal-and-const-char
@@ -97,10 +102,19 @@ namespace integral {
             };
 
             template<>
+            class Exchanger<std::string_view> {
+            public:
+                // If the value on the stack is a number, then lua_tolstring also changes the actual value in the stack to a string. (This change confuses lua_next when lua_tolstring is applied to keys during a table traversal.)
+                // It is not safe to store a pointer to a string that was removed from the stack (https://www.lua.org/manual/5.4/manual.html#4.1.3)
+                inline static std::string_view get(lua_State *luaState, int index);
+                inline static void push(lua_State *luaState, std::string_view stringView);
+            };
+
+            template<>
             class Exchanger<std::string> {
             public:
                 // If the value on the stack is a number, then lua_tolstring also changes the actual value in the stack to a string. (This change confuses lua_next when lua_tolstring is applied to keys during a table traversal.)
-                static std::string get(lua_State *luaState, int index);
+                inline static std::string get(lua_State *luaState, int index);
                 inline static void push(lua_State *luaState, const std::string &string);
             };
 
@@ -295,6 +309,27 @@ namespace integral {
                 // stack: userdata_with_metatable
             }
 
+            template<typename T>
+            T getString(lua_State *luaState, int index) {
+                if (lua_isuserdata(luaState, index) == 0) {
+                    std::size_t length;
+                    const char * const string = lua_tolstring(luaState, index, &length);
+                    if (string != nullptr) {
+                        // the returned std:string_view can contain null characters. The length of the string is length
+                        return T(string, length);
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
+                    }
+                } else {
+                    const T *userData = type_manager::getConvertibleType<T>(luaState, index);
+                    if (userData != nullptr) {
+                        return *userData;
+                    } else {
+                        throw ArgumentException::createTypeErrorException(luaState, index, lua_typename(luaState, LUA_TSTRING));
+                    }
+                }
+            }
+
             template<typename T, typename Enable>
             inline T & Exchanger<T, Enable>::get(lua_State *luaState, int index) {
                 return getObject<T>(luaState, index);
@@ -314,6 +349,18 @@ namespace integral {
             template<typename T, std::size_t N>
             inline void Exchanger<const char *>::push(lua_State *luaState, const T (&string)[N]) {
                 lua_pushlstring(luaState, string, N - 1);
+            }
+
+            inline std::string_view Exchanger<std::string_view>::get(lua_State *luaState, int index) {
+                return getString<std::string_view>(luaState, index);
+            }
+
+            inline void Exchanger<std::string_view>::push(lua_State *luaState, std::string_view stringView) {
+                lua_pushlstring(luaState, stringView.data(), stringView.length());
+            }
+
+            inline std::string Exchanger<std::string>::get(lua_State *luaState, int index) {
+                return getString<std::string>(luaState, index);
             }
 
             inline void Exchanger<std::string>::push(lua_State *luaState, const std::string &string) {

@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2017, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2017, 2020, 2022 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ int main() {
         luaState["d"] = "quarenta e dois";
         luaState.doString("print('lua: d = ' .. d)\n"
                           "t = {'x', {pi = 3.14}}");
-        std::cout << "cpp: t[1] = " << luaState["t"][1].get<const char *>() << '\n';
+        std::cout << "cpp: t[1] = " << luaState["t"][1].get<std::string>() << '\n';
         std::cout << "cpp: t[2].pi = " << luaState["t"][2]["pi"].get<double>() << '\n';
         luaState["t"]["key"] = "value";
         luaState.doString("print('lua: t.key = ' .. t.key)");
