@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2013, 2014, 2016, 2017, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2013, 2014, 2016, 2017, 2019, 2020, 2021, 2023 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -215,13 +215,13 @@ namespace integral {
 
             template<typename T>
             UserDataWrapper<T> * getUserDataWrapper(lua_State *luaState, int index) {
-                void * userData = lua_touserdata(luaState, index);
-                if (userData != nullptr) {
+                UserDataWrapper<T> *userDataWrapperPointer = basic::getAlignedObjectPointer<UserDataWrapper<T>>(luaState, index);
+                if (userDataWrapperPointer != nullptr) {
                     if (lua_getmetatable(luaState, index) != 0) {
                         //stack: metatable
                         if (checkClassMetatableType(luaState, std::type_index(typeid(UserDataWrapper<T>))) == true) {
                             lua_pop(luaState, 1);
-                            return static_cast<UserDataWrapper<T> *>(userData);
+                            return userDataWrapperPointer;
                         }
                         lua_pop(luaState, 1);
                     }
@@ -243,7 +243,7 @@ namespace integral {
                 lua_rawset(luaState, -3); // metatable.__index = metatable
                 // stack: typeHashBucket | type_index_udata* | rootMetatable*
                 basic::setLuaFunction(luaState, "__gc", [](lua_State *lambdaLuaState) -> int {
-                    static_cast<UserDataWrapper<T> *>(lua_touserdata(lambdaLuaState, 1))->~UserDataWrapper<T>();
+                    basic::getAlignedObjectPointer<UserDataWrapper<T>>(lambdaLuaState, 1)->~UserDataWrapper<T>();
                     return 0;
                 }, 0);
                 // stack: typeHashBucket | type_index_udata* | rootMetatable*
@@ -265,7 +265,14 @@ namespace integral {
                 // stack: rootMetatable
                 // Underlying type pointer conversion function
                 basic::setLuaFunction(luaState, gkUnderlyingTypeFunctionKey, [](lua_State *lambdaLuaState) -> int {
-                    lua_pushlightuserdata(lambdaLuaState, static_cast<void *>(static_cast<T *>(static_cast<UserDataWrapper<T> *>(lua_touserdata(lambdaLuaState, 1)))));
+                    lua_pushlightuserdata(
+                        lambdaLuaState,
+                        static_cast<void *>(
+                            static_cast<T *>(
+                                basic::getAlignedObjectPointer<UserDataWrapper<T>>(lambdaLuaState, 1)
+                            )
+                        )
+                    );
                     return 1;
                 }, 0);
                 // stack: rootMetatable
@@ -317,7 +324,7 @@ namespace integral {
                         lua_pushnil(luaState);
                         // stack: typeHashBucket | nil
                         for (int hasNext = lua_next(luaState, -2); hasNext != 0; lua_pop(luaState, 1), hasNext = lua_next(luaState, -2)) {
-                            std::type_index *storedTypeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -2, gkTypeIndexMetatableName));
+                            std::type_index *storedTypeIndex = basic::getAlignedObjectPointer<std::type_index>(luaState, -2, gkTypeIndexMetatableName);
                             // stack: typeHashBucket | type_index_udata (?) | rootMetatable (?)
                             if (storedTypeIndex != nullptr) {
                                 // stack: typeHashBucket | type_index_udata | rootMetatable (?)
@@ -396,6 +403,7 @@ namespace integral {
                 // stack: metatable | typeHashBucket | type_index_udata*
                 lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
                     if (lua_islightuserdata(lambdaLuaState, 1) != 0) {
+                        // Attention! light userdata does not require alignment ajustment with basic::getAlignedObjectPointer
                         lua_pushlightuserdata(lambdaLuaState, static_cast<void *>(static_cast<B *>(static_cast<D *>(lua_touserdata(lambdaLuaState, 1)))));
                         return 1;
                     } else {
@@ -415,22 +423,33 @@ namespace integral {
                 using ConversionType = typename ConversionFunctionTraits::ConversionType;
                 static_assert(std::is_same_v<std::remove_cv_t<ConversionType>, ConversionType> == true, "ConversionType is cv qualified");
                 static_assert(std::is_same_v<std::remove_cv_t<OriginalType>, ConversionType> == false, "conversion to itself");
+                using ConversionFunctionType = std::function<ConversionType *(OriginalType *)>;
                 std::type_index typeIndex = typeid(ConversionType);
                 // stack: metatable
                 pushTypeFunctionHashTable(luaState, typeIndex);
                 // stack: metatable | typeHashBucket
                 pushTypeIndexUserData(luaState, typeIndex);
                 // stack: metatable | typeHashBucket | type_index_udata*
-                basic::pushUserData<std::function<ConversionType *(OriginalType *)>>(luaState, std::forward<F>(typeFunction));
+                basic::pushAlignedObject<ConversionFunctionType>(luaState, std::forward<F>(typeFunction));
                 // stack: metatable | typeHashBucket | type_index_udata* | typeFunction_udata_no_metatable
-                basic::pushClassMetatable<std::function<ConversionType *(OriginalType *)>>(luaState);
+                basic::pushClassMetatable<ConversionFunctionType>(luaState);
                 // stack: metatable | typeHashBucket | type_index_udata* | typeFunction_udata_no_metatable | typeFunction_udata_metatable
                 lua_setmetatable(luaState, -2);
                 // stack: metatable | typeHashBucket | type_index_udata* | typeFunction_udata
                 lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
                     // no need for exception checking. Possible exceptions thrown by conversion function will be caught in [Lua]FunctionWrapperCaller. Type functions are only called by exchanger.
                     if (lua_islightuserdata(lambdaLuaState, 1) != 0) {
-                        lua_pushlightuserdata(lambdaLuaState, static_cast<void *>((*static_cast<std::function<ConversionType *(OriginalType *)> *>(lua_touserdata(lambdaLuaState, lua_upvalueindex(1))))(static_cast<OriginalType *>(lua_touserdata(lambdaLuaState, 1)))));
+                        const ConversionFunctionType &conversionFunctionReference = *basic::getAlignedObjectPointer<ConversionFunctionType>(
+                            lambdaLuaState,
+                            lua_upvalueindex(1)
+                        );
+                        // Attention! light userdata does not require alignment ajustment with basic::getAlignedObjectPointer
+                        lua_pushlightuserdata(
+                            lambdaLuaState,
+                            static_cast<void *>(
+                                conversionFunctionReference(static_cast<OriginalType *>(lua_touserdata(lambdaLuaState, 1)))
+                            )
+                        );
                         return 1;
                     } else {
                         throw UnexpectedStackException(lambdaLuaState, __FILE__, __LINE__, __func__, "custom conversion function expected underlying lightuserdata");
@@ -482,7 +501,10 @@ namespace integral {
                 lua_rawseti(luaState, -2, static_cast<lua_Integer>(UserDataWrapperBaseTable::kTypeIndexIndex));
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable*
                 lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
-                    lua_pushlightuserdata(lambdaLuaState, static_cast<UserDataWrapperBase *>(static_cast<UserDataWrapper<T> *>(lua_touserdata(lambdaLuaState, 1))));
+                    lua_pushlightuserdata(
+                        lambdaLuaState,
+                        static_cast<UserDataWrapperBase *>(basic::getAlignedObjectPointer<UserDataWrapper<T>>(lambdaLuaState, 1))
+                    );
                     return 1;
                 }, 0);
                 // stack: metatable | gkUserDataWrapperBaseTableKey | userDataWrapperBaseTable* | userDataWrapperBaseFunction*
@@ -500,6 +522,7 @@ namespace integral {
                     // stack: userdata | metatable
                     if (pushConvertibleOrInheritedType(luaState, -2, std::type_index(typeid(T)), false) == true) {
                         // stack: userdata | typeTLightUserData
+                        // Attention! light userdata does not require alignment ajustment with basic::getAlignedObjectPointer
                         T * lightUserData = static_cast<T *>(lua_touserdata(luaState, -1));
                         lua_pop(luaState, 2);
                         // stack:

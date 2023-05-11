@@ -35,7 +35,7 @@ endif
 
 ifeq ($(SANITIZED), y)
 ifneq ($(OPTIMIZED), y)
-SANITIZE_FLAGS:=-fsanitize=address -fno-omit-frame-pointer
+SANITIZE_FLAGS:=-fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined
 else
 $(error Cannot have SANITIZED=y and OPTIMIZED=y)
 endif

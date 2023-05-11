@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2013, 2014, 2016, 2019, 2020, 2022 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2013, 2014, 2016, 2019, 2020, 2022, 2023 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -78,7 +78,11 @@ namespace integral {
                 if (lua_iscfunction(luaState, index) != 0) {
                     if (lua_getupvalue(luaState, index, 1) != nullptr) {
                         // stack: upvalue
-                        const LuaFunctionWrapper *luaFunctionWrapperPointer = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(luaState, -1, kMetatableName_));
+                        const LuaFunctionWrapper *luaFunctionWrapperPointer = basic::getAlignedObjectPointer<LuaFunctionWrapper>(
+                            luaState,
+                            -1,
+                            kMetatableName_
+                        );
                         if (luaFunctionWrapperPointer != nullptr) {
                             LuaFunctionWrapper luaFunctionWrapper = *luaFunctionWrapperPointer;
                             lua_pop(luaState, 1);

@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2013, 2014, 2016, 2019, 2020, 2021 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2013, 2014, 2016, 2019, 2020, 2021, 2023 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -55,7 +55,7 @@ namespace integral {
                 //stack: metatable | type_index (?)
                 if (lua_isuserdata(luaState, -1) != 0) {
                     //stack: metatable | type_index (?)
-                    const std::type_index *userDataTypeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -1, gkTypeIndexMetatableName));
+                    const std::type_index *userDataTypeIndex = basic::getAlignedObjectPointer<std::type_index>(luaState, -1, gkTypeIndexMetatableName);
                     if (userDataTypeIndex != nullptr) {
                         //stack: metatable | type_index
                         lua_pop(luaState, 1);
@@ -105,7 +105,7 @@ namespace integral {
                         lua_pushnil(luaState);
                         for (int hasNext = lua_next(luaState, -2); hasNext != 0; lua_pop(luaState, 1), hasNext = lua_next(luaState, -2)) {
                             // stack: typeHashBucket | type_index_udata (?) | rootMetatable (?)
-                            std::type_index *storedTypeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -2, gkTypeIndexMetatableName));
+                            std::type_index *storedTypeIndex = basic::getAlignedObjectPointer<std::type_index>(luaState, -2, gkTypeIndexMetatableName);
                             if (storedTypeIndex != nullptr) {
                                 // stack: typeHashBucket | type_index_udata | rootMetatable (?)
                                 if (*storedTypeIndex == typeIndex) {
@@ -134,7 +134,7 @@ namespace integral {
             }
 
             void pushTypeIndexUserData(lua_State *luaState, const std::type_index &typeIndex) {
-                basic::pushUserData<std::type_index>(luaState, typeIndex);
+                basic::pushAlignedObject<std::type_index>(luaState, typeIndex);
                 basic::pushClassMetatable<std::type_index>(luaState, gkTypeIndexMetatableName);
                 lua_setmetatable(luaState, -2);
             }
@@ -185,7 +185,7 @@ namespace integral {
                         // stack: metatable | typeHashBucket | nil
                         for (int hasNext = lua_next(luaState, -2); hasNext != 0; lua_pop(luaState, 1), hasNext = lua_next(luaState, -2)) {
                             // stack: metatable | typeHashBucket | type_index_udata (?) | function (?)
-                            std::type_index *storedTypeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -2, gkTypeIndexMetatableName));
+                            std::type_index *storedTypeIndex = basic::getAlignedObjectPointer<std::type_index>(luaState, -2, gkTypeIndexMetatableName);
                             // stack: metatable | typeHashBucket | type_index_udata (?) | function (?)
                             if (storedTypeIndex != nullptr) {
                                 // stack: metatable | typeHashBucket | type_index_udata | function (?)
@@ -234,7 +234,7 @@ namespace integral {
                         // stack: inheritanceTable | baseTable
                         lua_rawgeti(luaState, -1, static_cast<lua_Integer>(InheritanceTable::kTypeIndexIndex));
                         // stack: inheritanceTable | baseTable | baseTypeIndex (?)
-                        const std::type_index *baseTypeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -1, gkTypeIndexMetatableName));
+                        const std::type_index *baseTypeIndex = basic::getAlignedObjectPointer<std::type_index>(luaState, -1, gkTypeIndexMetatableName);
                         // stack: inheritanceTable | baseTable | baseTypeIndex (?)
                         if (baseTypeIndex != nullptr) {
                             // stack: inheritanceTable | baseTable | baseTypeIndex
@@ -338,7 +338,7 @@ namespace integral {
                         // stack: [underlyingLight]UserData (?) | metatable | typeHashBucket | nil
                         for (int hasNext = lua_next(luaState, -2); hasNext != 0; lua_pop(luaState, 1), hasNext = lua_next(luaState, -2)) {
                             // stack: [underlyingLight]UserData (?) | metatable | typeHashBucket | type_index_udata (?) | function (?)
-                            std::type_index *storedTypeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -2, gkTypeIndexMetatableName));
+                            std::type_index *storedTypeIndex = basic::getAlignedObjectPointer<std::type_index>(luaState, -2, gkTypeIndexMetatableName);
                             if (storedTypeIndex != nullptr) {
                                 if (*storedTypeIndex == convertibleTypeIndex) {
                                     // stack: [underlyingLight]UserData (?) | metatable | typeHashBucket | type_index_udata | function (?)
@@ -472,7 +472,11 @@ namespace integral {
                                         // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable | baseMetatable
                                         lua_rawgeti(luaState, -2, static_cast<lua_Integer>(InheritanceTable::kTypeIndexIndex));
                                         // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable | baseMetatable | baseTypeIndex (?)
-                                        const std::type_index *baseTypeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -1, gkTypeIndexMetatableName));
+                                        const std::type_index *baseTypeIndex = basic::getAlignedObjectPointer<std::type_index>(
+                                            luaState,
+                                            -1,
+                                            gkTypeIndexMetatableName
+                                        );
                                         if (baseTypeIndex != nullptr) {
                                             // stack: underlyingLightUserData | metatable | inheritanceTable | baseTable | baseMetatable | baseTypeIndex
                                             lua_pop(luaState, 1);
@@ -549,7 +553,7 @@ namespace integral {
                         // stack: userdata (?) | metatable | userDataWrapperBaseTable
                         lua_rawgeti(luaState, -1, static_cast<lua_Integer>(UserDataWrapperBaseTable::kTypeIndexIndex));
                         // stack: userdata (?) | metatable | userDataWrapperBaseTable | userDataWrapperBaseTypeIndex (?)
-                        const std::type_index *typeIndex = static_cast<std::type_index *>(lua_compatibility::testudata(luaState, -1, gkTypeIndexMetatableName));
+                        const std::type_index *typeIndex = basic::getAlignedObjectPointer<std::type_index>(luaState, -1, gkTypeIndexMetatableName);
                         if (typeIndex != nullptr) {
                             // stack: userdata (?) | metatable | userDataWrapperBaseTable | userDataWrapperBaseTypeIndex
                             if (*typeIndex == std::type_index(typeid(UserDataWrapperBase))) {
@@ -568,6 +572,7 @@ namespace integral {
                                         // stack: userdata | metatable | userDataWrapperBaseTable | UserDataWrapperBaseLightUserData (?)
                                         if (lua_islightuserdata(luaState, -1) != 0) {
                                             // stack: userdata | metatable | userDataWrapperBaseTable | UserDataWrapperBaseLightUserData
+                                            // Attention! light userdata does not require alignment ajustment with basic::getAlignedObjectPointer
                                             UserDataWrapperBase *userDataWrapperBase = static_cast<UserDataWrapperBase *>(lua_touserdata(luaState, -1));
                                             lua_pop(luaState, 4);
                                             return userDataWrapperBase;

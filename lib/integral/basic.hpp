@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2013, 2014, 2016, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2013, 2014, 2016, 2020, 2023 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -40,8 +40,21 @@ namespace integral {
 
             inline void setLuaFunction(lua_State *luaState, const std::string &name, lua_CFunction function, int nUpValues);
 
+            template<typename T>
+            constexpr auto getMaximumSizeToAlign();
+
+            template<typename T>
+            T * getAlignedOffsetPointer(void *pointer);
+
+            // avoids constructor call on misaligned address (caught -fsanitize=undefined)
             template<typename T, typename ...A>
-            inline void pushUserData(lua_State *luaState, A &&...arguments);
+            inline void pushAlignedObject(lua_State *luaState, A &&...arguments);
+
+            template<typename T>
+            T * getAlignedObjectPointer(lua_State *luaState, int index);
+
+            template<typename T>
+            T * getAlignedObjectPointer(lua_State *luaState, int index, const char *metatableName);
 
             template<typename T>
             bool pushClassMetatable(lua_State *luaState, const char *name);
@@ -58,9 +71,51 @@ namespace integral {
                 setLuaFunction(luaState, name.c_str(), function, nUpValues);
             }
 
+            template<typename T>
+            constexpr auto getMaximumSizeToAlign() {
+                return sizeof(T) + alignof(T) - 1;
+            }
+
+            template<typename T>
+            T * getAlignedOffsetPointer(void *pointer) {
+                if constexpr (alignof(T) > 1) {
+                    // attention! the reinterpret_cast might not be portable
+                    const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(pointer);
+                    const std::uintptr_t offset = address % alignof(T);
+                    if (offset != 0) {
+                        return reinterpret_cast<T *>(address + alignof(T) - offset);
+                    }
+                }
+                return static_cast<T *>(pointer);
+            }
+
             template<typename T, typename ...A>
-            inline void pushUserData(lua_State *luaState, A &&...arguments) {
-                new(lua_compatibility::newuserdata(luaState, sizeof(T))) T(std::forward<A>(arguments)...);
+            inline void pushAlignedObject(lua_State *luaState, A &&...arguments) {
+                static_assert(std::is_pointer_v<T> == false, "unexpected pointer");
+                void * const userData = lua_compatibility::newuserdata(luaState, getMaximumSizeToAlign<T>());
+                new(getAlignedOffsetPointer<T>(userData)) T(std::forward<A>(arguments)...);
+            }
+
+            template<typename T>
+            T * getAlignedObjectPointer(lua_State *luaState, int index) {
+                static_assert(std::is_pointer_v<T> == false, "unexpected pointer");
+                void * const userData = lua_touserdata(luaState, index);
+                if (userData != nullptr) {
+                    return getAlignedOffsetPointer<T>(userData);
+                } else {
+                    return nullptr;
+                }
+            }
+
+            template<typename T>
+            T * getAlignedObjectPointer(lua_State *luaState, int index, const char *metatableName) {
+                static_assert(std::is_pointer_v<T> == false, "unexpected pointer");
+                void * const userData = lua_compatibility::testudata(luaState, index, metatableName);
+                if (userData != nullptr) {
+                    return getAlignedOffsetPointer<T>(userData);
+                } else {
+                    return nullptr;
+                }
             }
 
             template<typename T>
@@ -71,7 +126,7 @@ namespace integral {
                     lua_pushvalue(luaState, -2); // duplicates the metatable
                     lua_rawset(luaState, -3);
                     setLuaFunction(luaState, "__gc", [](lua_State *lambdaLuaState) -> int {
-                        static_cast<T *>(lua_touserdata(lambdaLuaState, 1))->~T();
+                        getAlignedObjectPointer<T>(lambdaLuaState, 1)->~T();
                         return 0;
                     }, 0);
                     return true;
@@ -92,7 +147,7 @@ namespace integral {
                 lua_pushvalue(luaState, -2); // duplicates the metatable
                 lua_rawset(luaState, -3);
                 setLuaFunction(luaState, "__gc", [](lua_State *lambdaLuaState) -> int {
-                    static_cast<T *>(lua_touserdata(lambdaLuaState, 1))->~T();
+                    getAlignedObjectPointer<T>(lambdaLuaState, 1)->~T();
                     return 0;
                 }, 0);
             }

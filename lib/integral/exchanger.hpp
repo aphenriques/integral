@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022, 2023 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -301,7 +301,7 @@ namespace integral {
 
             template<typename T, typename ...A>
             void pushObject(lua_State *luaState, A &&...arguments) {
-                basic::pushUserData<UserDataWrapper<T>>(luaState, std::forward<A>(arguments)...);
+                basic::pushAlignedObject<UserDataWrapper<T>>(luaState, std::forward<A>(arguments)...);
                 // stack: userdata_no_metatable
                 type_manager::pushClassMetatable<T>(luaState); // type_manager will automatically register unknown types
                 // stack: userdata_no_metatable | metatable
@@ -809,7 +809,7 @@ namespace integral {
             template<typename D>
             template<typename S, typename ...A>
             void AutomaticInheritanceBase<D>::pushGeneric(lua_State *luaState, const S &setInheritanceFunction, A &&...arguments) {
-                basic::pushUserData<UserDataWrapper<D>>(luaState, std::forward<A>(arguments)...);
+                basic::pushAlignedObject<UserDataWrapper<D>>(luaState, std::forward<A>(arguments)...);
                 // stack: userdata_no_metatable
                 type_manager::pushClassMetatable<D>(luaState); // type_manager will automatically register unknown types
                 // stack: userdata_no_metatable | metatable
@@ -866,7 +866,7 @@ namespace integral {
             void Exchanger<LuaFunctionWrapper>::push(lua_State *luaState, F &&luaFunction, int nUpValues) {
                 if (lua_gettop(luaState) >= nUpValues) {
                     // stack: upValues...
-                    basic::pushUserData<LuaFunctionWrapper>(luaState, std::forward<F>(luaFunction));
+                    basic::pushAlignedObject<LuaFunctionWrapper>(luaState, std::forward<F>(luaFunction));
                     // stack: upValues... | userdata
                     basic::pushClassMetatable<LuaFunctionWrapper>(luaState, kMetatableName_);
                     // stack: upValues... | userdata | metatable
@@ -878,7 +878,11 @@ namespace integral {
                     // stack: userdata | upValues...
                     lua_pushcclosure(luaState, [](lua_State *lambdaLuaState) -> int {
                         try {
-                            const LuaFunctionWrapper *luaFunctionWrapper = static_cast<LuaFunctionWrapper *>(lua_compatibility::testudata(lambdaLuaState, lua_upvalueindex(1), kMetatableName_));
+                            const LuaFunctionWrapper *luaFunctionWrapper = basic::getAlignedObjectPointer<LuaFunctionWrapper>(
+                                lambdaLuaState,
+                                lua_upvalueindex(1),
+                                kMetatableName_
+                            );
                             if (luaFunctionWrapper != nullptr) {
                                 return luaFunctionWrapper->getLuaFunction()(lambdaLuaState);
                             } else {
