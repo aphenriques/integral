@@ -627,12 +627,6 @@ and cloned with:
 `integral` was made by André Pereira Henriques [aphenriques (at) outlook (dot) com].
 
 
-# Donation
-
-* BTC: 1BdPza4JSYxKt4YAgPm579ZEqK2hHQNfij
-* ETH: 0xc8eD4EcCAd66BD928EB9B1696a05AeFf8DBA699e
-
-
 # License
 
 MIT License

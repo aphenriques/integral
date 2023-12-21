@@ -53,7 +53,8 @@ endif
 
 ifeq ($(shell uname -s), Darwin)
 SHARED_LIB_EXTENSION:=dylib
-INTEGRAL_DARWIN_SHARED_LDFLAGS:=-undefined dynamic_lookup
+# INTEGRAL_SHARED_LIB is defined later. That's why = is used instead of :=
+INTEGRAL_DARWIN_SHARED_LDFLAGS=-undefined dynamic_lookup -install_name '@rpath/$(INTEGRAL_SHARED_LIB)'
 ifdef WITH_LUAJIT
 INTEGRAL_DARWIN_LUAJIT_EXECUTABLE_LDFLAGS:=-pagezero_size 10000 -image_base 100000000
 endif
