@@ -4,7 +4,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2017, 2020 André Pereira Henriques (aphenriques (at) outlook (dot) com)
+// Copyright (c) 2017, 2020, 2024 André Pereira Henriques (aphenriques (at) outlook (dot) com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@ namespace integral {
 
             template<typename F, typename ...E, std::size_t ...I>
             inline ConstructorWrapper<F, detail::DefaultArgumentManager<DefaultArgument<E, I>...>> makeConstructorWrapper(DefaultArgument<E, I> &&...defaultArguments);
-            
+
             //--
 
             template<typename F, typename ...E, std::size_t ...I>

@@ -1,8 +1,17 @@
 ## TODO
+* compile_flags
+* c++2b
+  * updated exception
+  * nested namespaces
+  * SFINAE -> concepts
+  * static_assert -> concepts
+  * function traits -> standard library traits or concepts
+* update catch
 * intel compiler
 * coverity
 * compare performance with other binding libraries
 * frequent
+  * check FIXME
   * run test
   * build all samples
   * check inlines
